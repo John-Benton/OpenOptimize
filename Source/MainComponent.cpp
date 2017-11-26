@@ -130,11 +130,17 @@ public:
 						
 			
 			main_plot.current_composite_fft_bin_frequencies[col] = supervisor1->composite_fft_bin_frequencies[col];
-			main_plot.current_composite_system_spectrum_mag_db[col] = supervisor1->composite_system_spectrum_mag_db_comp[col];
 			main_plot.current_composite_xfer_function_mag_dB[col] = supervisor1->composite_xfer_function_mag_dB_avg[col];
 			main_plot.current_composite_xfer_function_phase_deg[col] = supervisor1->composite_xfer_function_phase_deg_avg[col];
 			main_plot.current_composite_coherence_value[col] = supervisor1->composite_coherence_value[col];
 					
+		}
+
+		for (int col = 0; col < spectrum_fft_bins; col++) {
+
+			main_plot.current_system_spectrum_mag_db[col] = supervisor1->system_spectrum_mag_dB[col];
+			main_plot.system_spectrum_bin_frequencies[col] = supervisor1->system_spectrum_fft_bin_frequencies[col];
+
 		}
 
 		supervisor1->plot_data_mtx_supervisor.unlock();
@@ -209,8 +215,14 @@ public:
 		supervisor1->delay_in_samples = main_settings_bar.main_delay_indicator.delay_in_samples;
 		supervisor1->mic_cal_path = main_settings_bar.main_controls.fixed_mic_cal_file_path;
 		supervisor1->system_curve_path = main_settings_bar.main_controls.fixed_system_curve_file_path;
-		supervisor1->update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
+		supervisor1->analyser_update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
 		supervisor1->smoothing_coefficient = main_settings_bar.main_controls.smoothing_slider_value;
+
+	}
+
+	void update_plot_parameters() {
+
+		main_plot.analyser_update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
 
 	}
 
@@ -238,6 +250,8 @@ public:
 		}
 
 		update_supervisor_parameters();
+
+		update_plot_parameters();
 				
 		update_current_plot_data();
 

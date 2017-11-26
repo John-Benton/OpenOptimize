@@ -71,10 +71,9 @@ public:
 	double current_composite_coherence_value[162] = { 0.0 };
 	double display_composite_coherence_value[162] = { 0.0 };
 	
-	double current_composite_system_spectrum_mag_db[162] = { 0.0 };
-	double display_composite_system_spectrum_mag_db[162] = { 0.0 };
-	
-	//double compostite_system_spectrum_mag_db_normalized[162] = { 0.0 };
+	double system_spectrum_bin_frequencies[spectrum_fft_bins] = { 0.0 };
+	double current_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
+	double display_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 
 	double saved_fft_bin_frequencies[162] = { 0.0 };
 	double saved_xfer_function_mag_dB_avg[162] = { 0.0 };
@@ -110,14 +109,14 @@ public:
 
 	int saved_traces_visible = 0;
 
-	int update_rate = 20;
-
 	bool repaint_active = false;
+
+	int analyser_update_rate = 1;
 
 	double magnitude_rate_of_change = 0.1;
 	double phase_rate_of_change = 0.1;
 	double coherence_rate_of_change = 0.1;
-	double spectrum_rate_of_change = 0.1;
+	double spectrum_rate_of_change = 0.05;
 
 	double magnitude_snap_range = 0.0;
 	double phase_snap_range = 0.0;
@@ -205,8 +204,6 @@ public:
 	{
 		
 		repaint_active = true;
-		
-		//normalize_spectrum();
 
 		calc_display_values();
 		
@@ -587,31 +584,23 @@ public:
 
 		if (spectrum_visible == 1) {
 
-			Path spectrum_trace;
-			Path spectrum_smoothed_trace;
-
-			spectrum_trace.startNewSubPath(
-
-				plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[0]),
-
-				plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_system_spectrum_mag_db[0]));
-
-
-			for (int x = 1; x < 162; x++) {
-
-				spectrum_trace.lineTo(
-
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[x]),
-
-					plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_system_spectrum_mag_db[x]));
-
-			}
-
-			spectrum_smoothed_trace = spectrum_trace.createPathWithRoundedCorners(trace_path_smoothing_radius);
-
 			g.setColour(Colours::magenta);
 
-			g.strokePath(spectrum_smoothed_trace, PathStrokeType(live_trace_thickness));
+			int start_x = 0;
+			int start_y = 0;
+			int end_x = 0;
+			int end_y = 0;
+
+			for (int x = 1; x < spectrum_fft_bins; x++) { //start at index 1, as fft bin zero just has DC offset
+
+				start_x = plot_actual_region_x + plot_actual_region_width*freq_to_x(system_spectrum_bin_frequencies[x]);
+				start_y = plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_system_spectrum_mag_db[x]);
+				end_x = plot_actual_region_x + plot_actual_region_width*freq_to_x(system_spectrum_bin_frequencies[x+1]);
+				end_y = plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_system_spectrum_mag_db[x+1]);
+
+				g.drawLine(start_x, start_y, end_x, end_y, live_trace_thickness);
+
+			}
 
 		};
 
@@ -907,16 +896,16 @@ private:
 		std::vector<double *> mag_arrays = {display_composite_xfer_function_mag_dB, current_composite_xfer_function_mag_dB};
 		std::vector<double *> phase_arrays = { display_composite_xfer_function_phase_deg, current_composite_xfer_function_phase_deg };
 		std::vector<double *> coherence_arrays = { display_composite_coherence_value, current_composite_coherence_value };
-		std::vector<double *> spectrum_arrays = { display_composite_system_spectrum_mag_db, current_composite_system_spectrum_mag_db };
+		std::vector<double *> spectrum_arrays = { display_system_spectrum_mag_db, current_system_spectrum_mag_db };
 
 		std::vector<std::vector<double *>> array_types = { mag_arrays ,phase_arrays, coherence_arrays, spectrum_arrays};
 
 		std::vector<double *> snap_ranges = { &magnitude_snap_range, &phase_snap_range, &coherence_snap_range, &spectrum_snap_range };
-		std::vector<double *> rates_of_change = { &magnitude_rate_of_change, &phase_rate_of_change, &coherence_rate_of_change, &spectrum_rate_of_change };
+		std::vector<double *> rates_of_change = { &magnitude_rate_of_change, &phase_rate_of_change, &coherence_rate_of_change, &spectrum_rate_of_change};
 
 		for (int x = 0; x < 162; x++) {
 
-			for (int type = 0; type < 4; type++) {
+			for (int type = 0; type < 3; type++) {
 										
 				if ((array_types[type][0][x] - array_types[type][1][x]) > *snap_ranges[type]) {
 
@@ -948,6 +937,36 @@ private:
 			
 		}
 
+		for (int x = 0; x < spectrum_fft_bins; x++) {
+
+				if ((display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) > *snap_ranges[3]) {
+
+					display_system_spectrum_mag_db[x] =
+
+						display_system_spectrum_mag_db[x] -
+
+						(abs(display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) * *rates_of_change[3]);
+
+				}
+
+				if ((display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) < -*snap_ranges[3]) {
+
+					display_system_spectrum_mag_db[x] =
+
+						display_system_spectrum_mag_db[x] +
+
+						(abs(display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x])* *rates_of_change[3]);
+
+				}
+
+				if (abs(display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) <= *snap_ranges[3]) {
+
+					display_system_spectrum_mag_db[x] = current_system_spectrum_mag_db[x];
+
+				}
+
+			}
+
 	}
 	
 	float freq_to_x(double freq) {
@@ -974,31 +993,9 @@ private:
 	}
 
 	float spectrum_mag_to_y(double spectrum_mag) {
-		double spectrum_mag_percentage_y = -(spectrum_mag * (0.01 / 0.96)); //0dB on amplitude trace is at 50% of plot component height. 6dB of height on amplitude trace is 10% of plot component height
+		double spectrum_mag_percentage_y = -(spectrum_mag * (0.01 / 0.96)); 
 		return spectrum_mag_percentage_y;
 	}
-
-	//void normalize_spectrum() {
-
-	//	double level_offset = 0;
-
-	//	double spectrum_mag_sum = 0;
-
-	//	for (int x = 0; x < 162; x++) {
-
-	//		spectrum_mag_sum = spectrum_mag_sum + current_composite_system_spectrum_mag_db[x];
-
-	//	}
-
-	//	level_offset = spectrum_mag_sum / 162.0;
-
-	//	for (int x = 0; x < 162; x++) {
-
-	//		compostite_system_spectrum_mag_db_normalized[x] = current_composite_system_spectrum_mag_db[x] - level_offset;
-
-	//	}
-	//	
-	//}
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (plots)
 };

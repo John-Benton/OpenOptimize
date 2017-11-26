@@ -50,8 +50,6 @@ public:
 
 	double meter_rate_of_change = 0.1;
 
-	int update_rate = 20;
-
 	bool repaint_active = false;
 
 	level_meters()

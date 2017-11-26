@@ -48,14 +48,9 @@ public:
 
 	std::vector<double> composite_fft_bin_frequencies;
 
-	std::vector<double> composite_system_spectrum_mag_linear_uncomp;
-	std::vector<double> composite_system_spectrum_mag_dB_uncomp;
-	std::vector<double> composite_system_spectrum_mag_db_comp;
-
-	std::vector<int> single_system_spectrum_freq_locations;
-	std::vector<double> single_system_spectrum_mag_linear_uncomp;
-	std::vector<double> single_system_spectrum_mag_dB_uncomp;
-	std::vector<double> single_system_spectrum_mag_db_comp;
+	std::vector<double> system_spectrum_fft_bin_frequencies;
+	std::vector<double> system_spectrum_mag_linear;
+	std::vector<double> system_spectrum_mag_dB;
 
 	std::vector<std::vector<double>> composite_xfer_function_complex;
 
@@ -124,17 +119,13 @@ public:
 
 	std::mutex plot_data_mtx_supervisor;
 
-	int update_rate = 1; //in Hz
+	int analyser_update_rate = 1; //in Hz
 
 	bool analysis_cycle_active = false;
 
 	bool analyser_run = false;
 
 	int smoothing_coefficient = 0;
-
-	double system_spectrum_compensation_coefficient = 0.0; //in dB per octave, to compensate for composite nature of spectrum
-
-	double system_spectrum_offset_dB = 36.0;
 
 	supervisor(): Thread("Supervisor_Thread",0)
 	
@@ -176,14 +167,10 @@ public:
 		composite_coherence_value.resize(162);
 
 		composite_fft_bin_frequencies.resize(162);
-
-		composite_system_spectrum_mag_linear_uncomp.resize(162);
-		composite_system_spectrum_mag_dB_uncomp.resize(162);
-		composite_system_spectrum_mag_db_comp.resize(162);
-
-		single_system_spectrum_mag_linear_uncomp.resize(162);
-		single_system_spectrum_mag_dB_uncomp.resize(162);
-		single_system_spectrum_mag_db_comp.resize(162);
+		
+		system_spectrum_fft_bin_frequencies.resize(spectrum_fft_bins);
+		system_spectrum_mag_linear.resize(spectrum_fft_bins);
+		system_spectrum_mag_dB.resize(spectrum_fft_bins);
 
 		interpolated_mic_cal_amplitudes.resize(162);
 
@@ -191,15 +178,13 @@ public:
 		
 		assemble_composite_fft_bin_frequencies();
 
-		find_single_system_spectrum_freq_locations();
-
 		buffer_ref_samples.resize(largest_fft_size + max_delay_samples);
 		buffer_system_samples.resize(largest_fft_size);
 
 		current_ref_samples.resize(largest_fft_size);
 		current_system_samples.resize(largest_fft_size);
 				
-		startTimerHz(update_rate);
+		startTimerHz(analyser_update_rate);
 		
 	};
 
@@ -325,7 +310,7 @@ public:
 
 		stopTimer();
 
-		startTimerHz(update_rate);
+		startTimerHz(analyser_update_rate);
 
 	}
 
@@ -476,24 +461,6 @@ private:
 
 	}
 
-	void find_single_system_spectrum_freq_locations() {
-
-		std::vector<double>::iterator location;
-
-		int index = 0;
-
-		for (int x = 0; x < 162; x++) {
-
-			location = std::find(fft_32k->fft_bin_frequencies.begin(), fft_32k->fft_bin_frequencies.end(), composite_fft_bin_frequencies[x]);
-
-			index = std::distance(fft_32k->fft_bin_frequencies.begin(), location);
-
-			single_system_spectrum_freq_locations.push_back(index);
-
-		}
-
-	}
-
 	void calibrate_xfer_function_mag() {
 
 		for (int x = 0; x < 162; x++) {
@@ -510,6 +477,24 @@ private:
 
 	}
 
+	void calc_system_spectrum() {
+
+		for (int col = 0; col < spectrum_fft_bins; col++) {
+
+			system_spectrum_fft_bin_frequencies[col] = fft_4k->fft_bin_frequencies[col];
+
+			system_spectrum_mag_linear[col] = 
+				
+				sqrt(pow(fft_4k->fftw_complex_out_system_vector[0][col], 2) +
+					
+					pow(fft_4k->fftw_complex_out_system_vector[1][col], 2));
+
+			system_spectrum_mag_dB[col] = 20 * log10(system_spectrum_mag_linear[col]);
+
+		}
+
+	}
+
 	void process_fft_data() {
 
 		complex_conjugate_system();
@@ -520,32 +505,6 @@ private:
 		calc_xfer_function();
 		calibrate_xfer_function_mag();
 		smooth_xfer_function_magnitude();
-
-	}
-
-	void calc_system_spectrum() {
-
-		for (int col = 0; col < 162; col++) {
-
-			composite_system_spectrum_mag_linear_uncomp[col] = 
-				
-				sqrt(pow(fft_32k->fftw_complex_out_system_vector[0][single_system_spectrum_freq_locations[col]], 2) +
-					
-					pow(fft_32k->fftw_complex_out_system_vector[0][single_system_spectrum_freq_locations[col]], 2));
-
-			composite_system_spectrum_mag_dB_uncomp[col] = 20 * log10(composite_system_spectrum_mag_linear_uncomp[col]);
-
-			composite_system_spectrum_mag_db_comp[col] =
-
-				composite_system_spectrum_mag_dB_uncomp[col] +
-
-				(system_spectrum_compensation_coefficient *
-
-				(log10((composite_fft_bin_frequencies[col]) / (composite_fft_bin_frequencies[0]))) / log10(2)) +
-
-				system_spectrum_offset_dB;
-
-		}
 
 	}
 	
@@ -752,8 +711,8 @@ private:
 
 	void smooth_system_spectrum() {
 
-		composite_data_smoother.configure(162, smoothing_coefficient * 2);
-		composite_data_smoother.process(composite_system_spectrum_mag_db_comp);
+		composite_data_smoother.configure(spectrum_fft_bins, smoothing_coefficient * 2);
+		composite_data_smoother.process(system_spectrum_mag_dB);
 
 	}
 
