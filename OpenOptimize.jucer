@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="u5zuN7" name="OpenOptimize" displaySplashScreen="1" reportAppUsage="1"
+              splashScreenColour="Dark" projectType="guiapp" version="1.0.0"
+              bundleIdentifier="com.yourcompany.OpenOptimize" includeBinaryInAppConfig="1"
+              cppLanguageStandard="latest" jucerVersion="5.2.0" companyCopyright="">
+  <MAINGROUP id="mutD4M" name="OpenOptimize">
+    <GROUP id="{5957BAE9-CD64-64FD-114D-DBA564426E06}" name="Source">
+      <FILE id="FIlv39" name="phase.h" compile="0" resource="0" file="Source/phase.h"/>
+      <FILE id="JANN6D" name="moving_average.h" compile="0" resource="0"
+            file="Source/moving_average.h"/>
+      <FILE id="Fdku1d" name="controls.h" compile="0" resource="0" file="Source/controls.h"/>
+      <FILE id="PMMlze" name="analysis_supervisor.h" compile="0" resource="0"
+            file="Source/analysis_supervisor.h"/>
+      <FILE id="ITHSRS" name="delay_indicator.h" compile="0" resource="0"
+            file="Source/delay_indicator.h"/>
+      <FILE id="gchpZr" name="spl_meter.h" compile="0" resource="0" file="Source/spl_meter.h"/>
+      <FILE id="fhxN03" name="constants.h" compile="0" resource="0" file="Source/constants.h"/>
+      <FILE id="Kppajj" name="fft.h" compile="0" resource="0" file="Source/fft.h"/>
+      <FILE id="KaeU0E" name="level_meters.h" compile="0" resource="0" file="Source/level_meters.h"/>
+      <FILE id="XwQM1F" name="plots.h" compile="0" resource="0" file="Source/plots.h"/>
+      <FILE id="CxDqmD" name="settings_bar.h" compile="0" resource="0" file="Source/settings_bar.h"/>
+      <FILE id="Lvrdnd" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="oEivLN" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <VS2017 targetFolder="Builds/VisualStudio2017" externalLibraries="..\..\fftw\libfftw3-3.lib"
+            extraLinkerFlags="">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="OpenOptimize" warningsAreErrors="0"
+                       headerPath="..\..\fftw\&#10;..\..\Source\" libraryPath="..\..\fftw\"
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="OpenOptimize" headerPath="..\..\fftw\&#10;..\..\Source\"
+                       libraryPath="..\..\fftw\" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="C:/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2017>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>
