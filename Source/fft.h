@@ -87,7 +87,7 @@ public:
 
 	};
 
-	void run_fft_analysis(std::deque<double> &ref_samples_in, std::deque<double> &system_samples_in) {
+	void run_fft_analysis(std::vector<double> &ref_samples_in, std::vector<double> &system_samples_in) {
 
 		std::copy(ref_samples_in.begin(), ref_samples_in.begin() + local_fft_size, local_ref_samples.begin());
 		std::copy(system_samples_in.begin(), system_samples_in.begin() + local_fft_size, local_system_samples.begin());

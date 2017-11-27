@@ -177,11 +177,11 @@ public:
 
 	void update_meters() {
 
-		main_settings_bar.main_spl_meter.raw_input_level = supervisor1->average_of_current_system_samples;
+		main_settings_bar.main_spl_meter.raw_input_level = supervisor1->peak_of_current_system_samples;
 
-		main_level_meters.raw_ref_input_level = supervisor1->average_of_current_ref_samples;
+		main_level_meters.raw_ref_input_level = supervisor1->peak_of_current_ref_samples;
 
-		main_level_meters.raw_system_input_level = supervisor1->average_of_current_system_samples;
+		main_level_meters.raw_system_input_level = supervisor1->peak_of_current_system_samples;
 
 	}
 
@@ -220,12 +220,6 @@ public:
 
 	}
 
-	void update_plot_parameters() {
-
-		main_plot.analyser_update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
-
-	}
-
 	void repaint_ui() {
 
 		main_settings_bar.main_spl_meter.try_repaint();
@@ -250,8 +244,6 @@ public:
 		}
 
 		update_supervisor_parameters();
-
-		update_plot_parameters();
 				
 		update_current_plot_data();
 

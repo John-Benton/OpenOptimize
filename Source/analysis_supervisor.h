@@ -80,8 +80,8 @@ public:
 	std::deque<double> buffer_ref_samples;
 	std::deque<double> buffer_system_samples;
 
-	std::deque<double> current_ref_samples;
-	std::deque<double> current_system_samples;
+	std::vector<double> current_ref_samples;
+	std::vector<double> current_system_samples;
 
 	/*---------------------------------------------------*/
 
@@ -109,9 +109,9 @@ public:
 
 	/*---------------------------------------------------*/
 
-	double average_of_current_ref_samples = 0.0;
+	double peak_of_current_ref_samples = 0.0;
 
-	double average_of_current_system_samples = 0.0;
+	double peak_of_current_system_samples = 0.0;
 
 	/*---------------------------------------------------*/
 
@@ -978,26 +978,9 @@ private:
 
 	void run_calcs_for_SPL_and_meters() {
 
-		double sum_of_ref_samples = 0.0;
+		peak_of_current_ref_samples = *std::max_element(current_ref_samples.begin(), current_ref_samples.end());
 
-		for (int x = 0; x < current_ref_samples.size(); x++) {
-
-			sum_of_ref_samples = sum_of_ref_samples + abs(current_ref_samples[x]);
-
-		}
-
-		average_of_current_ref_samples = sum_of_ref_samples / current_ref_samples.size();
-		
-
-		double sum_of_system_samples = 0.0;
-		
-		for (int x = 0; x < current_system_samples.size(); x++) {
-
-			sum_of_system_samples = sum_of_system_samples + abs(current_system_samples[x]);
-
-		}
-
-		average_of_current_system_samples = sum_of_system_samples / current_system_samples.size();
+		peak_of_current_system_samples = *std::max_element(current_system_samples.begin(), current_system_samples.end());
 
 	}
 

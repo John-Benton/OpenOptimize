@@ -35,6 +35,10 @@ public:
 	Rectangle<int> bottom_label_clip_region;
 	Rectangle<int> bottom_slider_region;
 
+	//Rectangle<int> load_indicator_region;
+	//Rectangle<int> ui_load_label_outline;
+	//Rectangle<int> analyser_load_label_outline;
+
 	std::vector<int> grid_frequencies{20, 30, 40, 50, 60, 70, 80, 90, 
 										100, 200, 300, 400, 500, 600, 700, 800, 900,
 										1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
@@ -111,8 +115,6 @@ public:
 
 	bool repaint_active = false;
 
-	int analyser_update_rate = 1;
-
 	double magnitude_rate_of_change = 0.1;
 	double phase_rate_of_change = 0.1;
 	double coherence_rate_of_change = 0.1;
@@ -122,6 +124,14 @@ public:
 	double phase_snap_range = 0.0;
 	double coherence_snap_range = 0.0;
 	double spectrum_snap_range = 0.0;
+
+	//int ui_idle_time = 100; //in ms
+
+	//int analyser_idle_time = 100; //in ms
+
+	//String ui_idle_time_string;
+
+	//String analyser_idle_time_string;
 	
     plots()
     {
@@ -205,13 +215,29 @@ public:
 		
 		repaint_active = true;
 
-		calc_display_values();
-		
 		Colour very_dark_grey(20, 20, 20);
 		g.fillAll(very_dark_grey);
-		
-		g.setColour(Colours::white);
 
+		g.setColour(Colours::white);
+		
+		
+		/*g.drawRect(ui_load_label_outline, 1);
+		g.drawRect(analyser_load_label_outline, 1);
+
+		g.setFont(ui_load_label_outline.getHeight()*0.8);
+		
+		ui_idle_time_string = "UI Idle: ";
+		ui_idle_time_string += String(ui_idle_time);
+		ui_idle_time_string += " ms";
+		g.drawFittedText(ui_idle_time_string, ui_load_label_outline, Justification::centred, 1, 0);
+
+		analyser_idle_time_string = "FFT Idle: ";
+		analyser_idle_time_string += String(analyser_idle_time);
+		analyser_idle_time_string += " ms";
+		g.drawFittedText(analyser_idle_time_string, analyser_load_label_outline, Justification::centred, 1, 0);*/
+		
+		calc_display_values();
+		
 		//g.drawRect(top_title_region, 1);
 		//g.drawRect(top_slider_region, 1);
 		//g.drawRect(left_slider_region, 1);
@@ -722,6 +748,10 @@ public:
 		
 		bottom_label_clip_region = bottom_label_region.expanded(bottom_label_region.getHeight()*axis_label_scale*0.85, 0);
 		left_label_clip_region = left_label_region.expanded(0, bottom_label_region.getHeight()*axis_label_scale*0.5);
+
+		/*load_indicator_region.setBounds(0, plot_outline.getHeight()*0.95, plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.05);
+		ui_load_label_outline = load_indicator_region.removeFromTop(load_indicator_region.getHeight()*0.5);
+		analyser_load_label_outline = load_indicator_region;*/
 
 		horizontal_zoom_slider.setBounds(bottom_slider_region);
 		horizontal_center_slider.setBounds(top_slider_region);
