@@ -24,7 +24,7 @@ public:
 
 	int buffer_ready = 0;
 
-	int update_rate = 20; //In Hz
+	int update_rate = 30; //In Hz
 	
 	MainContentComponent()
     {
@@ -51,24 +51,33 @@ public:
     //==============================================================================
 	void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override
 	{
+
+		this->deviceManager.setCurrentAudioDeviceType("DirectSound", true);
+		
+		this->deviceManager.getAudioDeviceSetup(audio_device_setup);
+
+		audio_device_setup.sampleRate = 48000;
+
+		//audio_device_setup.bufferSize = 480;
+
+		this->deviceManager.setAudioDeviceSetup(audio_device_setup, true);
+
 	}
 
-	void getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill) override
+	void getNextAudioBlock(const AudioSourceChannelInfo& audio_device_buffer) override
 	{
-		const float* ref_in_buffer = bufferToFill.buffer->getReadPointer(0);
-		const float* system_in_buffer = bufferToFill.buffer->getReadPointer(1);
+		const float* ref_in_buffer = audio_device_buffer.buffer->getReadPointer(0);
+		const float* system_in_buffer = audio_device_buffer.buffer->getReadPointer(1);
 		double ref_sample_value = 0;
 		double system_sample_value = 0;
+		
+		if (audio_device_setup.inputChannels.toInteger() != 3) {} //there must be exactly two input channels (JUCE thinks there are 3 on Focusrite 2i2) for this audio callback to run correctly
 
-		this->deviceManager.getAudioDeviceSetup(audio_device_config);
-
-		if (audio_device_config.inputChannels.toInteger() != 3) {} //there must be exactly two input channels (JUCE thinks there are 3 on Focusrite 2i2) for this audio callback to run correctly
-
-		if (audio_device_config.inputChannels.toInteger() == 3) {
+		if (audio_device_setup.inputChannels.toInteger() == 3) {
 
 			supervisor1->audio_buffer_mtx_supervisor.lock();
 
-			for (int sample = 0; sample < bufferToFill.numSamples; ++sample) {
+			for (int sample = 0; sample < audio_device_buffer.numSamples; ++sample) {
 
 				ref_sample_value = ref_in_buffer[sample];
 				system_sample_value = system_in_buffer[sample];
@@ -126,7 +135,7 @@ public:
 
 		supervisor1->plot_data_mtx_supervisor.lock();
 		
-		for (int col = 0; col < 162; col++) {
+		for (int col = 0; col < composite_fft_bins; col++) {
 						
 			
 			main_plot.current_composite_fft_bin_frequencies[col] = supervisor1->composite_fft_bin_frequencies[col];
@@ -149,7 +158,7 @@ public:
 
 	void update_captured_plot_data() {
 
-		for (int col = 0; col < 162; col++) {
+		for (int col = 0; col < composite_fft_bins; col++) {
 
 			main_plot.saved_fft_bin_frequencies[col] = main_settings_bar.main_controls.saved_fft_bin_frequencies[col];
 			main_plot.saved_xfer_function_mag_dB_avg[col] = main_settings_bar.main_controls.saved_xfer_function_mag_dB_avg_cal[col];
@@ -164,7 +173,7 @@ public:
 
 	void update_saved_trace_arrays(){
 
-		for (int col = 0; col < 162; col++) {
+		for (int col = 0; col < composite_fft_bins; col++) {
 
 			main_settings_bar.main_controls.newest_fft_bin_frequencies[col] = main_plot.current_composite_fft_bin_frequencies[col];
 			main_settings_bar.main_controls.newest_xfer_function_mag_dB_avg_cal[col] = main_plot.current_composite_xfer_function_mag_dB[col];
@@ -268,7 +277,7 @@ private:
 
 	level_meters main_level_meters;
 
-	AudioDeviceManager::AudioDeviceSetup audio_device_config;
+	AudioDeviceManager::AudioDeviceSetup audio_device_setup;
 	
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
@@ -278,5 +287,4 @@ private:
 		
 };
 
-// (This function is called by the app startup code to create our main component)
 Component* createMainContentComponent()     { return new MainContentComponent(); }

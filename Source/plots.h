@@ -64,25 +64,25 @@ public:
 
 	double horizontal_center_span = 0.0;
 
-	double current_composite_fft_bin_frequencies[162] = { 0.0 };
+	double current_composite_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
 
-	double current_composite_xfer_function_mag_dB[162] = { 0.0 };
-	double display_composite_xfer_function_mag_dB[162] = { 0.0 };
+	double current_composite_xfer_function_mag_dB[composite_fft_bins] = { 0.0 };
+	double display_composite_xfer_function_mag_dB[composite_fft_bins] = { 0.0 };
 
-	double current_composite_xfer_function_phase_deg[162] = { 0.0 };
-	double display_composite_xfer_function_phase_deg[162] = { 0.0 };
+	double current_composite_xfer_function_phase_deg[composite_fft_bins] = { 0.0 };
+	double display_composite_xfer_function_phase_deg[composite_fft_bins] = { 0.0 };
 
-	double current_composite_coherence_value[162] = { 0.0 };
-	double display_composite_coherence_value[162] = { 0.0 };
+	double current_composite_coherence_value[composite_fft_bins] = { 0.0 };
+	double display_composite_coherence_value[composite_fft_bins] = { 0.0 };
 	
 	double system_spectrum_bin_frequencies[spectrum_fft_bins] = { 0.0 };
 	double current_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 	double display_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 
-	double saved_fft_bin_frequencies[162] = { 0.0 };
-	double saved_xfer_function_mag_dB_avg[162] = { 0.0 };
-	double saved_xfer_function_phase_deg_avg[162] = { 0.0 };
-	double saved_coherence_value[162] = { 0.0 };
+	double saved_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
+	double saved_xfer_function_mag_dB_avg[composite_fft_bins] = { 0.0 };
+	double saved_xfer_function_phase_deg_avg[composite_fft_bins] = { 0.0 };
+	double saved_coherence_value[composite_fft_bins] = { 0.0 };
 
 	float grid_line_thickness = 0.25;
 
@@ -124,14 +124,6 @@ public:
 	double phase_snap_range = 0.0;
 	double coherence_snap_range = 0.0;
 	double spectrum_snap_range = 0.0;
-
-	//int ui_idle_time = 100; //in ms
-
-	//int analyser_idle_time = 100; //in ms
-
-	//String ui_idle_time_string;
-
-	//String analyser_idle_time_string;
 	
     plots()
     {
@@ -219,22 +211,6 @@ public:
 		g.fillAll(very_dark_grey);
 
 		g.setColour(Colours::white);
-		
-		
-		/*g.drawRect(ui_load_label_outline, 1);
-		g.drawRect(analyser_load_label_outline, 1);
-
-		g.setFont(ui_load_label_outline.getHeight()*0.8);
-		
-		ui_idle_time_string = "UI Idle: ";
-		ui_idle_time_string += String(ui_idle_time);
-		ui_idle_time_string += " ms";
-		g.drawFittedText(ui_idle_time_string, ui_load_label_outline, Justification::centred, 1, 0);
-
-		analyser_idle_time_string = "FFT Idle: ";
-		analyser_idle_time_string += String(analyser_idle_time);
-		analyser_idle_time_string += " ms";
-		g.drawFittedText(analyser_idle_time_string, analyser_load_label_outline, Justification::centred, 1, 0);*/
 		
 		calc_display_values();
 		
@@ -531,7 +507,7 @@ public:
 				plot_actual_region_y + plot_actual_region_height*amp_to_y(display_composite_xfer_function_mag_dB[0]));
 
 
-			for (int x = 1; x < 162; x++) {
+			for (int x = 1; x < composite_fft_bins; x++) {
 
 				mag_trace.lineTo(
 
@@ -561,7 +537,7 @@ public:
 				plot_actual_region_y + plot_actual_region_height*phase_to_y(display_composite_xfer_function_phase_deg[0]));
 
 
-			for (int x = 1; x < 162; x++) {
+			for (int x = 1; x < composite_fft_bins; x++) {
 
 				phase_trace.lineTo(
 
@@ -590,7 +566,7 @@ public:
 
 				plot_actual_region_y + plot_actual_region_height*(1.0-display_composite_coherence_value[0]));
 
-			for (int x = 1; x < 162; x++) {
+			for (int x = 1; x < composite_fft_bins; x++) {
 
 				coh_trace.lineTo(
 
@@ -644,7 +620,7 @@ public:
 					plot_actual_region_y + plot_actual_region_height*amp_to_y(saved_xfer_function_mag_dB_avg[0]));
 
 
-				for (int x = 1; x < 162; x++) {
+				for (int x = 1; x < composite_fft_bins; x++) {
 
 					mag_trace.lineTo(
 
@@ -674,7 +650,7 @@ public:
 					plot_actual_region_y + plot_actual_region_height*phase_to_y(saved_xfer_function_phase_deg_avg[0]));
 
 
-				for (int x = 1; x < 162; x++) {
+				for (int x = 1; x < composite_fft_bins; x++) {
 
 					phase_trace.lineTo(
 
@@ -703,7 +679,7 @@ public:
 
 					plot_actual_region_y + plot_actual_region_height*(1.0 - saved_coherence_value[0]));
 
-				for (int x = 1; x < 162; x++) {
+				for (int x = 1; x < composite_fft_bins; x++) {
 
 					coh_trace.lineTo(
 
@@ -933,7 +909,7 @@ private:
 		std::vector<double *> snap_ranges = { &magnitude_snap_range, &phase_snap_range, &coherence_snap_range, &spectrum_snap_range };
 		std::vector<double *> rates_of_change = { &magnitude_rate_of_change, &phase_rate_of_change, &coherence_rate_of_change, &spectrum_rate_of_change};
 
-		for (int x = 0; x < 162; x++) {
+		for (int x = 0; x < composite_fft_bins; x++) {
 
 			for (int type = 0; type < 3; type++) {
 										

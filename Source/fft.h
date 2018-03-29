@@ -31,7 +31,6 @@ public:
 	const int local_fft_size;
 	int local_fft_bins;
 
-	std::vector<double> fft_bin_frequencies;
 	std::vector<double> hann_window_weights;
 
 	/*---------------------------------------------------*/
@@ -60,7 +59,6 @@ public:
 
 		/*---------------------------------------------------*/ //set sizes of vectors
 
-		fft_bin_frequencies.resize(local_fft_bins);
 		hann_window_weights.resize(local_fft_size);
 		local_ref_samples.resize(local_fft_size);
 		local_system_samples.resize(local_fft_size);
@@ -70,7 +68,6 @@ public:
 
 		/*---------------------------------------------------*/
 
-		generate_fft_bin_frequency_array();
 		generate_hann_window_weights_array();
 
 		/*---------------------------------------------------*/
@@ -103,14 +100,6 @@ public:
 	}
 
 private:
-
-	void generate_fft_bin_frequency_array() {
-
-		for (int col = 0; col < local_fft_bins; col++) {
-			fft_bin_frequencies[col] = (col*1.0)*((sample_rate*1.0) / (local_fft_size*1.0));
-		}
-
-	}
 
 	void generate_hann_window_weights_array() {
 
