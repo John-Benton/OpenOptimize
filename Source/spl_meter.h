@@ -34,12 +34,16 @@ public:
 
 	double display_spl = 0.0;
 
-	double dBFS_offset = 120;
+	const double dBFS_offset = 120;
 
-	double meter_rate_of_change = 0.08;
+	const double meter_snap_range = 0.1;
 
-	double meter_snap_range = 0.1;
-	
+	const double spl_meter_fast_rate_of_change = 0.05;
+
+	const double spl_meter_slow_rate_of_change = 0.25;
+
+	double spl_meter_rate_of_change;
+		
 	Rectangle<int> spl_meter_remaining_outline;
 	Rectangle<int> spl_meter_display_area;
 	Rectangle<int> spl_meter_display_black_area;
@@ -53,36 +57,40 @@ public:
 
 	spl_meter()
     {
-		//addAndMakeVisible(z_weight_button);
-		//addAndMakeVisible(c_weight_button);
-		//addAndMakeVisible(a_weight_button);
-		//addAndMakeVisible(cal_spl_button);
+		/*addAndMakeVisible(z_weight_button);
+		addAndMakeVisible(c_weight_button);
+		addAndMakeVisible(a_weight_button);
+		addAndMakeVisible(cal_spl_button);*/
+		
 		addAndMakeVisible(slow_time_button);
 		addAndMakeVisible(fast_time_button);
 		
-		z_weight_button.setButtonText("Z Weighting");
+		/*z_weight_button.setButtonText("Z Weighting");
 		c_weight_button.setButtonText("C Weighting");
 		a_weight_button.setButtonText("A Weighting");
-		cal_spl_button.setButtonText("Calibrate");
+		cal_spl_button.setButtonText("Calibrate");*/
+		
 		slow_time_button.setButtonText("Slower");
 		fast_time_button.setButtonText("Faster");
 
-		z_weight_button.addListener(this);
+		/*z_weight_button.addListener(this);
 		c_weight_button.addListener(this);
 		a_weight_button.addListener(this);
-		cal_spl_button.addListener(this);
+		cal_spl_button.addListener(this);*/
+		
 		slow_time_button.addListener(this);
 		fast_time_button.addListener(this);
 
-		z_weight_button.setColour(z_weight_button.buttonOnColourId, Colours::green);
+		/*z_weight_button.setColour(z_weight_button.buttonOnColourId, Colours::green);
 		c_weight_button.setColour(c_weight_button.buttonOnColourId, Colours::blue);
 		a_weight_button.setColour(a_weight_button.buttonOnColourId, Colours::red);
-		slow_time_button.setColour(a_weight_button.buttonOnColourId, Colours::darkgrey);
-		fast_time_button.setColour(a_weight_button.buttonOnColourId, Colours::darkgrey);
+		cal_spl_button.setColour(cal_spl_button.buttonColourId, Colour(66, 162, 200));*/
+		
+		slow_time_button.setColour(a_weight_button.buttonColourId, Colours::transparentBlack);
+		slow_time_button.setColour(a_weight_button.buttonOnColourId, Colours::darkred);
 
-		cal_spl_button.setColour(cal_spl_button.buttonColourId, Colour(66, 162, 200));
-
-		z_weight_button.setToggleState(1, dontSendNotification);
+		fast_time_button.setColour(a_weight_button.buttonColourId, Colours::transparentBlack);
+		fast_time_button.setColour(a_weight_button.buttonOnColourId, Colours::darkgreen);
 
 		fast_time_button.setToggleState(1, dontSendNotification);
 
@@ -102,6 +110,18 @@ public:
     {
 		
 		repaint_active = true;
+
+		if (fast_time_button.getToggleState() == true) {
+
+			spl_meter_rate_of_change = 0.05;
+
+		}
+
+		else {
+
+			spl_meter_rate_of_change = 0.25;
+
+		}
 		
 		calc_unweighted_spl();
 
@@ -229,14 +249,14 @@ public:
 
 		if (button == &slow_time_button)
 		{
-			meter_rate_of_change = 0.01;
+			spl_meter_rate_of_change = 0.01;
 			slow_time_button.setToggleState(1, dontSendNotification);
 			fast_time_button.setToggleState(0, dontSendNotification);
 		}
 
 		if (button == &fast_time_button)
 		{
-			meter_rate_of_change = 0.08;
+			spl_meter_rate_of_change = 0.08;
 			slow_time_button.setToggleState(0, dontSendNotification);
 			fast_time_button.setToggleState(1, dontSendNotification);
 		}
@@ -259,13 +279,13 @@ public:
 		
 		if ((display_spl - weighted_spl) > meter_snap_range) {
 
-			display_spl = display_spl - (abs(display_spl - weighted_spl)*meter_rate_of_change);
+			display_spl = display_spl - (abs(display_spl - weighted_spl)*spl_meter_rate_of_change);
 
 		}
 
 		if ((display_spl - weighted_spl) < -meter_snap_range) {
 
-			display_spl = display_spl + (abs(display_spl - weighted_spl)*meter_rate_of_change);
+			display_spl = display_spl + (abs(display_spl - weighted_spl)*spl_meter_rate_of_change);
 
 		}
 

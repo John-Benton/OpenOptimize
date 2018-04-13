@@ -157,6 +157,41 @@ public:
 		spectrum_visible_button.setButtonText("S");
 		spectrum_active_button.setButtonText("S");
 
+		magnitude_visible_button.setColour(magnitude_visible_button.buttonColourId, Colours::transparentBlack);
+		magnitude_visible_button.setColour(magnitude_visible_button.buttonOnColourId, Colours::darkgreen);
+		
+		
+		magnitude_active_button.setColour(magnitude_active_button.buttonColourId, Colours::transparentBlack);
+		magnitude_active_button.setColour(magnitude_active_button.buttonOnColourId, Colours::darkgreen);
+
+		
+		phase_visible_button.setColour(phase_visible_button.buttonColourId, Colours::transparentBlack);
+		phase_visible_button.setColour(phase_visible_button.buttonOnColourId, Colours::darkred);
+				
+		
+		phase_active_button.setColour(phase_active_button.buttonColourId, Colours::transparentBlack);
+		phase_active_button.setColour(phase_active_button.buttonOnColourId, Colours::darkred);
+
+		
+		coherence_visible_button.setColour(coherence_visible_button.buttonColourId, Colours::transparentBlack);
+		coherence_visible_button.setColour(coherence_visible_button.buttonOnColourId, Colours::darkblue);
+		
+		
+		coherence_active_button.setColour(coherence_active_button.buttonColourId, Colours::transparentBlack);
+		coherence_active_button.setColour(coherence_active_button.buttonOnColourId, Colours::darkblue);
+
+		
+		spectrum_visible_button.setColour(spectrum_visible_button.buttonColourId, Colours::transparentBlack);
+		spectrum_visible_button.setColour(spectrum_visible_button.buttonOnColourId, Colours::darkmagenta);
+		
+		
+		spectrum_active_button.setColour(spectrum_active_button.buttonColourId, Colours::transparentBlack);
+		spectrum_active_button.setColour(spectrum_active_button.buttonOnColourId, Colours::darkmagenta);
+
+		
+		magnitude_active_button.setToggleState(1, dontSendNotification);
+		magnitude_visible_button.setToggleState(1, dontSendNotification);
+
 		horizontal_zoom_slider.setRange(1, 10);
 		horizontal_center_slider.setRange(-1, 1);
 		
@@ -207,6 +242,38 @@ public:
 		
 		repaint_active = true;
 
+		magnitude_visible = magnitude_visible_button.getToggleState();
+
+		phase_visible = phase_visible_button.getToggleState();
+
+		coherence_visible = coherence_visible_button.getToggleState();
+
+		spectrum_visible = spectrum_visible_button.getToggleState();
+
+		if (magnitude_active_button.getToggleState() == true) {
+
+			active_grid_mode = 0;
+
+		}
+
+		else if (phase_active_button.getToggleState() == true) {
+
+			active_grid_mode = 1;
+
+		}
+
+		else if (coherence_active_button.getToggleState() == true) {
+
+			active_grid_mode = 2;
+
+		}
+
+		else {
+
+			active_grid_mode = 3;
+
+		}
+		
 		Colour very_dark_grey(20, 20, 20);
 		g.fillAll(very_dark_grey);
 
@@ -790,78 +857,86 @@ public:
 
 		if (button == &magnitude_visible_button)
 		{
-			if (magnitude_visible == 1) {
-				magnitude_visible = 0;
-				repaint();
-			}
+			
+			magnitude_visible_button.setToggleState(!magnitude_visible_button.getToggleState(), dontSendNotification);
 
-			else {
-				magnitude_visible = 1;
-				repaint();
-			}
+			repaint();
+
 		}
 
 		if (button == &phase_visible_button)
 		{
-			if (phase_visible == 1) {
-				phase_visible = 0;
-				repaint();
-			}
 
-			else {
-				phase_visible = 1;
-				repaint();
-			}
+			phase_visible_button.setToggleState(!phase_visible_button.getToggleState(), dontSendNotification);
+
+			repaint();
+
 		}
 
 		if (button == &coherence_visible_button)
 		{
-			if (coherence_visible == 1) {
-				coherence_visible = 0;
-				repaint();
-			}
 
-			else {
-				coherence_visible = 1;
-				repaint();
-			}
+			coherence_visible_button.setToggleState(!coherence_visible_button.getToggleState(), dontSendNotification);
+
+			repaint();
+
 		}
 
 		if (button == &spectrum_visible_button)
 		{
-			if (spectrum_visible == 1) {
-				spectrum_visible = 0;
-				repaint();
-			}
 
-			else {
-				spectrum_visible = 1;
-				repaint();
-			}
+			spectrum_visible_button.setToggleState(!spectrum_visible_button.getToggleState(), dontSendNotification);
+
+			repaint();
+
 		}
 
 		if (button == &magnitude_active_button)
 		{
-			active_grid_mode = 0;
+
+			magnitude_active_button.setToggleState(1, dontSendNotification);
+			phase_active_button.setToggleState(0, dontSendNotification);
+			coherence_active_button.setToggleState(0, dontSendNotification);
+			spectrum_active_button.setToggleState(0, dontSendNotification);
+
 			repaint();
+
 		}
 
 		if (button == &phase_active_button)
 		{
-			active_grid_mode = 1;
+
+			magnitude_active_button.setToggleState(0, dontSendNotification);
+			phase_active_button.setToggleState(1, dontSendNotification);
+			coherence_active_button.setToggleState(0, dontSendNotification);
+			spectrum_active_button.setToggleState(0, dontSendNotification);
+
 			repaint();
+
 		}
 
 		if (button == &coherence_active_button)
 		{
-			active_grid_mode = 2;
+
+			magnitude_active_button.setToggleState(0, dontSendNotification);
+			phase_active_button.setToggleState(0, dontSendNotification);
+			coherence_active_button.setToggleState(1, dontSendNotification);
+			spectrum_active_button.setToggleState(0, dontSendNotification);
+
 			repaint();
+
 		}
 
 		if (button == &spectrum_active_button)
 		{
-			active_grid_mode = 3;
+
+			magnitude_active_button.setToggleState(0, dontSendNotification);
+			phase_active_button.setToggleState(0, dontSendNotification);
+			coherence_active_button.setToggleState(0, dontSendNotification);
+			spectrum_active_button.setToggleState(1, dontSendNotification);
+
 			repaint();
+
 		}
 
 }

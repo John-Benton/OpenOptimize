@@ -51,6 +51,8 @@ public:
 		//addAndMakeVisible(launch_delay_finder);
 
 		reset_to_0.setButtonText("Reset to 0");
+		reset_to_0.setColour(reset_to_0.buttonColourId, Colours::transparentBlack);
+
 		//launch_delay_finder.setButtonText("Delay Finder");
 
 		increase_1000.addListener(this);

@@ -28,19 +28,39 @@ public:
 	Rectangle<int> right_column;
 
 	Rectangle<int> left_column_row_1;
+	Rectangle<int> left_column_row_1_active;
 	Rectangle<int> left_column_row_2;
+	Rectangle<int> left_column_row_2_active;
+	Rectangle<int> left_column_row_2_active_left;
+	Rectangle<int> left_column_row_2_active_right;
 	Rectangle<int> left_column_row_3;
+	Rectangle<int> left_column_row_3_active;
+	Rectangle<int> left_column_row_3_active_left;
+	Rectangle<int> left_column_row_3_active_right;
 	Rectangle<int> left_column_row_4;
+	Rectangle<int> left_column_row_4_active;
 
 	Rectangle<int> center_column_row_1;
+	Rectangle<int> center_column_row_1_active;
 	Rectangle<int> center_column_row_2;
+	Rectangle<int> center_column_row_2_active;
 	Rectangle<int> center_column_row_3;
+	Rectangle<int> center_column_row_3_active;
 	Rectangle<int> center_column_row_4;
+	Rectangle<int> center_column_row_4_active;
 
 	Rectangle<int> right_column_row_1;
+	Rectangle<int> right_column_row_1_active;
 	Rectangle<int> right_column_row_2;
+	Rectangle<int> right_column_row_2_active;
+	Rectangle<int> right_column_row_2_active_far_left;
+	Rectangle<int> right_column_row_2_active_middle;
+	Rectangle<int> right_column_row_2_active_far_right;
 	Rectangle<int> right_column_row_3;
-	Rectangle<int> right_column_row_4;
+	Rectangle<int> right_column_row_3_active;
+	Rectangle<int> right_column_row_3_active_left;
+	Rectangle<int> right_column_row_3_active_right;
+	Rectangle<int> right_column_row_4_active;
 		
 	int analysis_status = 0; //0 is stopped, 1 is running
 
@@ -93,6 +113,10 @@ public:
 	double saved_coherence_value[162] = { 0 };
 
 	int open_audio_io_config_window = 0;
+
+	float active_horizontal_padding_factor = 0.025;
+
+	float active_vertical_padding_factor = 0.1;
 		
     controls()
     {
@@ -101,21 +125,24 @@ public:
 		analysis_onoff_button.setButtonText("Analyser Run");
 		analysis_onoff_button.setClickingTogglesState(true);
 		analysis_onoff_button.addListener(this);
+		analysis_onoff_button.setColour(analysis_onoff_button.buttonColourId, Colours::transparentBlack);
 		analysis_onoff_button.setColour(analysis_onoff_button.buttonOnColourId, Colour(160,79,0));
 
 		addAndMakeVisible(mic_cal_filename_label);
 		mic_cal_filename_label.setColour(Label::backgroundColourId, Colours::black);
 		
-		addAndMakeVisible(choose_mic_cal);
-		choose_mic_cal.setButtonText("Mic Cal");
-		choose_mic_cal.addListener(this);
+		addAndMakeVisible(choose_mic_cal_button);
+		choose_mic_cal_button.setButtonText("Mic Cal");
+		choose_mic_cal_button.addListener(this);
+		choose_mic_cal_button.setColour(choose_mic_cal_button.buttonColourId, Colours::transparentBlack);
 
 		addAndMakeVisible(system_curve_filename_label);
 		system_curve_filename_label.setColour(Label::backgroundColourId, Colours::black);
 
-		addAndMakeVisible(choose_system_curve);
-		choose_system_curve.setButtonText("System Curve");
-		choose_system_curve.addListener(this);
+		addAndMakeVisible(choose_system_curve_button);
+		choose_system_curve_button.setButtonText("System Curve");
+		choose_system_curve_button.addListener(this);
+		choose_system_curve_button.setColour(choose_system_curve_button.buttonColourId, Colours::transparentBlack);
 
 		addAndMakeVisible(refresh_rate_slider);
 		refresh_rate_slider.setRange(1, 20, 1);
@@ -128,15 +155,18 @@ public:
 		addAndMakeVisible(capture_traces_button);
 		capture_traces_button.setButtonText("Capture");
 		capture_traces_button.addListener(this);
+		capture_traces_button.setColour(capture_traces_button.buttonColourId, Colours::transparentBlack);
 
 		addAndMakeVisible(load_saved_traces_button);
 		load_saved_traces_button.setButtonText("Load");
 		load_saved_traces_button.addListener(this);
+		load_saved_traces_button.setColour(load_saved_traces_button.buttonColourId, Colours::transparentBlack);
 
 		addAndMakeVisible(saved_traces_visible_onoff_button);
 		saved_traces_visible_onoff_button.setButtonText("Visible");
 		saved_traces_visible_onoff_button.setClickingTogglesState(true);
 		saved_traces_visible_onoff_button.addListener(this);
+		saved_traces_visible_onoff_button.setColour(saved_traces_visible_onoff_button.buttonColourId, Colours::transparentBlack);
 		saved_traces_visible_onoff_button.setColour(saved_traces_visible_onoff_button.buttonOnColourId, Colour(160, 79, 0));
 		
 		addAndMakeVisible(saved_traces_filename_label);
@@ -145,6 +175,7 @@ public:
 		addAndMakeVisible(config_audio_io_button);
 		config_audio_io_button.setButtonText("Audio I/O Setup");
 		config_audio_io_button.addListener(this);
+		config_audio_io_button.setColour(config_audio_io_button.buttonColourId, Colours::transparentBlack);
 		
     }
 
@@ -226,50 +257,86 @@ public:
 		int controls_width = controls_outline.getWidth();
 		int controls_height = controls_outline.getHeight();
 
+		//
 		
 		left_column = controls_outline.removeFromLeft(controls_width * (1.0/3.0));
-		left_column_row_1 = left_column.removeFromTop(controls_height * 0.25);
-		left_column_row_2 = left_column.removeFromTop(controls_height * 0.25);
-		left_column_row_3 = left_column.removeFromTop(controls_height * 0.25);
-		left_column_row_4 = left_column.removeFromTop(controls_height * 0.25);
 
+		left_column_row_1 = left_column.removeFromTop(controls_height * 0.25);
+		int active_horizontal_padding_pixels = left_column_row_1.getWidth()*active_horizontal_padding_factor;
+		int active_vertical_padding_pixels = left_column_row_1.getHeight()*active_vertical_padding_factor;
+		left_column_row_1_active = left_column_row_1.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+		
+		left_column_row_2 = left_column.removeFromTop(controls_height * 0.25);
+		left_column_row_2_active = left_column_row_2.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+		left_column_row_2_active_left = left_column_row_2_active.removeFromLeft(left_column_row_2_active.getWidth() * 0.6);
+		left_column_row_2_active_right = left_column_row_2_active;
+		
+		left_column_row_3 = left_column.removeFromTop(controls_height * 0.25);
+		left_column_row_3_active = left_column_row_3.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+		left_column_row_3_active_left = left_column_row_3_active.removeFromLeft(left_column_row_3_active.getWidth() * 0.6);
+		left_column_row_3_active_right = left_column_row_3_active;
+
+		left_column_row_4 = left_column.removeFromTop(controls_height * 0.25);
+		left_column_row_4_active = left_column_row_4.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
+		//
 
 		center_column = controls_outline.removeFromLeft(controls_width * (1.0 / 3.0));
-		center_column_row_1 = center_column.removeFromTop(controls_height * 0.25);
-		center_column_row_2 = center_column.removeFromTop(controls_height * 0.25);
-		center_column_row_3 = center_column.removeFromTop(controls_height * 0.25);
-		center_column_row_4 = center_column.removeFromTop(controls_height * 0.25);
 
+		center_column_row_1 = center_column.removeFromTop(controls_height * 0.25);
+		center_column_row_1_active = center_column_row_1.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
+		center_column_row_2 = center_column.removeFromTop(controls_height * 0.25);
+		center_column_row_2_active = center_column_row_2.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
+		center_column_row_3 = center_column.removeFromTop(controls_height * 0.25);
+		center_column_row_3_active = center_column_row_3.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
+		center_column_row_4 = center_column.removeFromTop(controls_height * 0.25);
+		center_column_row_4_active = center_column_row_4.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
+		//
 
 		right_column = controls_outline.removeFromLeft(controls_width * (1.0 / 3.0));
+
 		right_column_row_1 = right_column.removeFromTop(controls_height * 0.25);
+		right_column_row_1_active = right_column_row_1.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
 		right_column_row_2 = right_column.removeFromTop(controls_height * 0.25);
+		right_column_row_2_active = right_column_row_2.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+		int right_column_row_2_active_width = right_column_row_2_active.getWidth();
+		right_column_row_2_active_far_left = right_column_row_2_active.removeFromLeft(right_column_row_2_active_width * 0.33);
+		right_column_row_2_active_middle = right_column_row_2_active.removeFromLeft(right_column_row_2_active_width * 0.33);
+		right_column_row_2_active_far_right = right_column_row_2_active;
+
 		right_column_row_3 = right_column.removeFromTop(controls_height * 0.25);
-		right_column_row_4 = right_column.removeFromTop(controls_height * 0.25);
+		right_column_row_3_active = right_column_row_3.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+		
+		//
 
-		analysis_onoff_button.setBounds(left_column_row_1.getX(), left_column_row_1.getY(), left_column_row_1.getWidth(), left_column_row_1.getHeight());
+		analysis_onoff_button.setBounds(left_column_row_1_active);
+		
+		mic_cal_filename_label.setBounds(left_column_row_2_active_left);
 
-		mic_cal_filename_label.setBounds(left_column_row_2.getX(), left_column_row_2.getY(), left_column_row_2.getWidth()*0.60, left_column_row_2.getHeight());
+		choose_mic_cal_button.setBounds(left_column_row_2_active_right);
 
-		choose_mic_cal.setBounds(left_column_row_2.getX() + left_column_row_2.getWidth()*0.60, left_column_row_2.getY(), left_column_row_2.getWidth()*0.40, left_column_row_2.getHeight());
+		system_curve_filename_label.setBounds(left_column_row_3_active_left);
 
-		system_curve_filename_label.setBounds(left_column_row_3.getX(), left_column_row_3.getY(), left_column_row_3.getWidth()*0.60, left_column_row_3.getHeight());
+		choose_system_curve_button.setBounds(left_column_row_3_active_right);
+		
+		config_audio_io_button.setBounds(left_column_row_4_active);
+		
+		refresh_rate_slider.setBounds(center_column_row_2_active);
 
-		choose_system_curve.setBounds(left_column_row_3.getX() + left_column_row_3.getWidth()*0.60, left_column_row_3.getY(), left_column_row_3.getWidth()*0.40, left_column_row_3.getHeight());
+		smoothing_slider.setBounds(center_column_row_4_active);
 
-		refresh_rate_slider.setBounds(center_column_row_2.getX(), center_column_row_2.getY(), center_column_row_2.getWidth(), center_column_row_2.getHeight());
+		capture_traces_button.setBounds(right_column_row_2_active_far_left);
 
-		smoothing_slider.setBounds(center_column_row_4.getX(), center_column_row_4.getY(), center_column_row_4.getWidth(), center_column_row_4.getHeight());
+		load_saved_traces_button.setBounds(right_column_row_2_active_middle);
 
-		capture_traces_button.setBounds(right_column_row_2.getX(), right_column_row_2.getY(), right_column_row_2.getWidth()*0.33, right_column_row_2.getHeight());
+		saved_traces_visible_onoff_button.setBounds(right_column_row_2_active_far_right);
 
-		load_saved_traces_button.setBounds(right_column_row_2.getX() + right_column_row_2.getWidth()*0.33, right_column_row_2.getY(), right_column_row_2.getWidth()*0.33, right_column_row_2.getHeight());
-
-		saved_traces_visible_onoff_button.setBounds(right_column_row_2.getX() + right_column_row_2.getWidth()*0.66, right_column_row_2.getY(), right_column_row_2.getWidth()*0.33, right_column_row_2.getHeight());
-
-		saved_traces_filename_label.setBounds(right_column_row_3.getX(), right_column_row_3.getY(), right_column_row_3.getWidth(), right_column_row_3.getHeight());
-
-		config_audio_io_button.setBounds(left_column_row_4.getX(), left_column_row_4.getY(), left_column_row_4.getWidth(), left_column_row_4.getHeight());
+		saved_traces_filename_label.setBounds(right_column_row_3_active);
     
 	}
 
@@ -279,7 +346,7 @@ public:
 
 		saved_traces_visible = saved_traces_visible_onoff_button.getToggleState();
 		
-		if (button == &choose_mic_cal)
+		if (button == &choose_mic_cal_button)
 	
 		{
 			
@@ -303,7 +370,7 @@ public:
 			
 		}
 
-		if (button == &choose_system_curve)
+		if (button == &choose_system_curve_button)
 
 		{
 
@@ -465,7 +532,7 @@ private:
 
 	TextButton analysis_onoff_button;
 
-	TextButton choose_mic_cal;
+	TextButton choose_mic_cal_button;
 
 	Label mic_cal_filename_label;
 
@@ -473,7 +540,7 @@ private:
 
 	Slider smoothing_slider;
 
-	TextButton choose_system_curve;
+	TextButton choose_system_curve_button;
 
 	Label system_curve_filename_label;
 
