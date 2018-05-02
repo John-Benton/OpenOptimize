@@ -13,11 +13,13 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <string>
 #include <fstream>
+#include <vector>
+#include "constants.h"
 
 //==============================================================================
 /*
 */
-class controls    : public Component, public Button::Listener, public Slider::Listener
+class controls    : public constants, public Component, public Button::Listener, public Slider::Listener
 {
 public:
 
@@ -102,16 +104,26 @@ public:
 
 	int smoothing_slider_value = 0;
 
-	double newest_fft_bin_frequencies[162] = { 0 };
-	double newest_xfer_function_mag_dB_avg_cal[162] = { 0 };
-	double newest_xfer_function_phase_deg_avg[162] = { 0 };
-	double newest_coherence_value[162] = { 0 };
+	//double composite_fft_bin_frequencies_for_save[162] = { 0 };
+	//double composite_xfer_function_mag_dB_avg_cal_for_save[162] = { 0 };
+	//double composite_xfer_function_phase_deg_avg_for_save[162] = { 0 };
+	//double composite_coherence_value_for_save[162] = { 0 };
 
-	double saved_fft_bin_frequencies[162] = { 0 };
-	double saved_xfer_function_mag_dB_avg_cal[162] = { 0 };
-	double saved_xfer_function_phase_deg_avg[162] = { 0 };
-	double saved_coherence_value[162] = { 0 };
+	//double loaded_composite_fft_bin_frequencies[162] = { 0 };
+	//double loaded_composite_xfer_function_mag_dB_avg_cal[162] = { 0 };
+	//double loaded_composite_xfer_function_phase_deg_avg[162] = { 0 };
+	//double loaded_composite_coherence_value[162] = { 0 };
 
+	std::vector<double> composite_fft_bin_frequencies_for_save;
+	std::vector<double> composite_xfer_function_mag_dB_avg_cal_for_save;
+	std::vector<double> composite_xfer_function_phase_deg_avg_for_save;
+	std::vector<double> composite_coherence_value_for_save;
+
+	std::vector<double> loaded_composite_fft_bin_frequencies;
+	std::vector<double> loaded_composite_xfer_function_mag_dB_avg_cal;
+	std::vector<double> loaded_composite_xfer_function_phase_deg_avg;
+	std::vector<double> loaded_composite_coherence_value;
+	
 	int open_audio_io_config_window = 0;
 
 	float active_horizontal_padding_factor = 0.025;
@@ -176,6 +188,16 @@ public:
 		config_audio_io_button.setButtonText("Audio I/O Setup");
 		config_audio_io_button.addListener(this);
 		config_audio_io_button.setColour(config_audio_io_button.buttonColourId, Colours::transparentBlack);
+
+		composite_fft_bin_frequencies_for_save.resize(composite_fft_bins);
+		composite_xfer_function_mag_dB_avg_cal_for_save.resize(composite_fft_bins);
+		composite_xfer_function_phase_deg_avg_for_save.resize(composite_fft_bins);
+		composite_coherence_value_for_save.resize(composite_fft_bins);
+
+		loaded_composite_fft_bin_frequencies.resize(composite_fft_bins);
+		loaded_composite_xfer_function_mag_dB_avg_cal.resize(composite_fft_bins);
+		loaded_composite_xfer_function_phase_deg_avg.resize(composite_fft_bins);
+		loaded_composite_coherence_value.resize(composite_fft_bins);
 		
     }
 
@@ -448,23 +470,23 @@ public:
 
 		save_traces.open(fixed_saved_traces_save_path);
 
-		for (int x = 0; x < 162; x++) {
+		for (int x = 0; x < composite_fft_bins; x++) {
 
-			save_traces << newest_fft_bin_frequencies[x] << "," << newest_xfer_function_mag_dB_avg_cal[x] << "," << newest_xfer_function_phase_deg_avg[x] << "," << newest_coherence_value[x] << std::endl;
+			save_traces << composite_fft_bin_frequencies_for_save[x] << "," << composite_xfer_function_mag_dB_avg_cal_for_save[x] << "," << composite_xfer_function_phase_deg_avg_for_save[x] << "," << composite_coherence_value_for_save[x] << std::endl;
 
 		}
 
 		save_traces.close();
 
-		for (int x = 0; x < 162; x++) {
+		for (int x = 0; x < composite_fft_bins; x++) {
 
-			saved_fft_bin_frequencies[x] = newest_fft_bin_frequencies[x];
+			loaded_composite_fft_bin_frequencies[x] = composite_fft_bin_frequencies_for_save[x];
 
-			saved_xfer_function_mag_dB_avg_cal[x] = newest_xfer_function_mag_dB_avg_cal[x];
+			loaded_composite_xfer_function_mag_dB_avg_cal[x] = composite_xfer_function_mag_dB_avg_cal_for_save[x];
 
-			saved_xfer_function_phase_deg_avg[x] = newest_xfer_function_phase_deg_avg[x];
+			loaded_composite_xfer_function_phase_deg_avg[x] = composite_xfer_function_phase_deg_avg_for_save[x];
 
-			saved_coherence_value[x] = newest_coherence_value[x];
+			loaded_composite_coherence_value[x] = composite_coherence_value_for_save[x];
 
 		}
 
@@ -507,19 +529,19 @@ public:
 
 			std::getline(load_traces, frequency_string, ',');
 
-			saved_fft_bin_frequencies[x] = stod(frequency_string);
+			loaded_composite_fft_bin_frequencies[x] = stod(frequency_string);
 
 			std::getline(load_traces, amplitude_string, ',');
 
-			saved_xfer_function_mag_dB_avg_cal[x] = stod(amplitude_string);
+			loaded_composite_xfer_function_mag_dB_avg_cal[x] = stod(amplitude_string);
 
 			std::getline(load_traces, phase_string, ',');
 
-			saved_xfer_function_phase_deg_avg[x] = stod(phase_string);
+			loaded_composite_xfer_function_phase_deg_avg[x] = stod(phase_string);
 
 			std::getline(load_traces, coherence_string);
 
-			saved_coherence_value[x] = stod(coherence_string);
+			loaded_composite_coherence_value[x] = stod(coherence_string);
 
 		}
 

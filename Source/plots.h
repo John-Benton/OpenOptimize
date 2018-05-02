@@ -79,10 +79,10 @@ public:
 	double current_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 	double display_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 
-	double saved_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
-	double saved_xfer_function_mag_dB_avg[composite_fft_bins] = { 0.0 };
-	double saved_xfer_function_phase_deg_avg[composite_fft_bins] = { 0.0 };
-	double saved_coherence_value[composite_fft_bins] = { 0.0 };
+	double loaded_composite_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
+	double loaded_composite_xfer_function_mag_dB_avg_cal[composite_fft_bins] = { 0.0 };
+	double loaded_composite_xfer_function_phase_deg_avg[composite_fft_bins] = { 0.0 };
+	double loaded_composite_coherence_value[composite_fft_bins] = { 0.0 };
 
 	float grid_line_thickness = 0.25;
 
@@ -682,18 +682,18 @@ public:
 
 				mag_trace.startNewSubPath(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(saved_fft_bin_frequencies[0]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[0]),
 
-					plot_actual_region_y + plot_actual_region_height*amp_to_y(saved_xfer_function_mag_dB_avg[0]));
+					plot_actual_region_y + plot_actual_region_height*amp_to_y(loaded_composite_xfer_function_mag_dB_avg_cal[0]));
 
 
 				for (int x = 1; x < composite_fft_bins; x++) {
 
 					mag_trace.lineTo(
 
-						plot_actual_region_x + plot_actual_region_width*freq_to_x(saved_fft_bin_frequencies[x]),
+						plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[x]),
 
-						plot_actual_region_y + plot_actual_region_height*amp_to_y(saved_xfer_function_mag_dB_avg[x]));
+						plot_actual_region_y + plot_actual_region_height*amp_to_y(loaded_composite_xfer_function_mag_dB_avg_cal[x]));
 
 				}
 
@@ -712,18 +712,18 @@ public:
 
 				phase_trace.startNewSubPath(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(saved_fft_bin_frequencies[0]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[0]),
 
-					plot_actual_region_y + plot_actual_region_height*phase_to_y(saved_xfer_function_phase_deg_avg[0]));
+					plot_actual_region_y + plot_actual_region_height*phase_to_y(loaded_composite_xfer_function_phase_deg_avg[0]));
 
 
 				for (int x = 1; x < composite_fft_bins; x++) {
 
 					phase_trace.lineTo(
 
-						plot_actual_region_x + plot_actual_region_width*freq_to_x(saved_fft_bin_frequencies[x]),
+						plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[x]),
 
-						plot_actual_region_y + plot_actual_region_height*phase_to_y(saved_xfer_function_phase_deg_avg[x]));
+						plot_actual_region_y + plot_actual_region_height*phase_to_y(loaded_composite_xfer_function_phase_deg_avg[x]));
 
 				}
 
@@ -742,17 +742,17 @@ public:
 
 				coh_trace.startNewSubPath(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(saved_fft_bin_frequencies[0]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[0]),
 
-					plot_actual_region_y + plot_actual_region_height*(1.0 - saved_coherence_value[0]));
+					plot_actual_region_y + plot_actual_region_height*(1.0 - loaded_composite_coherence_value[0]));
 
 				for (int x = 1; x < composite_fft_bins; x++) {
 
 					coh_trace.lineTo(
 
-						plot_actual_region_x + plot_actual_region_width*freq_to_x(saved_fft_bin_frequencies[x]),
+						plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[x]),
 
-						plot_actual_region_y + plot_actual_region_height*(1.0 - saved_coherence_value[x]));
+						plot_actual_region_y + plot_actual_region_height*(1.0 - loaded_composite_coherence_value[x]));
 
 				}
 

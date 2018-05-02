@@ -156,14 +156,14 @@ public:
 
 	}
 
-	void update_captured_plot_data() {
+	void update_loaded_plot_data() {
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 
-			main_plot.saved_fft_bin_frequencies[col] = main_settings_bar.main_controls.saved_fft_bin_frequencies[col];
-			main_plot.saved_xfer_function_mag_dB_avg[col] = main_settings_bar.main_controls.saved_xfer_function_mag_dB_avg_cal[col];
-			main_plot.saved_xfer_function_phase_deg_avg[col] = main_settings_bar.main_controls.saved_xfer_function_phase_deg_avg[col];
-			main_plot.saved_coherence_value[col] = main_settings_bar.main_controls.saved_coherence_value[col];
+			main_plot.loaded_composite_fft_bin_frequencies[col] = main_settings_bar.main_controls.loaded_composite_fft_bin_frequencies[col];
+			main_plot.loaded_composite_xfer_function_mag_dB_avg_cal[col] = main_settings_bar.main_controls.loaded_composite_xfer_function_mag_dB_avg_cal[col];
+			main_plot.loaded_composite_xfer_function_phase_deg_avg[col] = main_settings_bar.main_controls.loaded_composite_xfer_function_phase_deg_avg[col];
+			main_plot.loaded_composite_coherence_value[col] = main_settings_bar.main_controls.loaded_composite_coherence_value[col];
 
 			main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
 
@@ -171,14 +171,14 @@ public:
 
 	}
 
-	void update_saved_trace_arrays(){
+	void update_controls_trace_arrays_for_saving(){
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 
-			main_settings_bar.main_controls.newest_fft_bin_frequencies[col] = main_plot.current_composite_fft_bin_frequencies[col];
-			main_settings_bar.main_controls.newest_xfer_function_mag_dB_avg_cal[col] = main_plot.current_composite_xfer_function_mag_dB[col];
-			main_settings_bar.main_controls.newest_xfer_function_phase_deg_avg[col] = main_plot.current_composite_xfer_function_phase_deg[col];
-			main_settings_bar.main_controls.newest_coherence_value[col] = main_plot.current_composite_coherence_value[col];
+			main_settings_bar.main_controls.composite_fft_bin_frequencies_for_save[col] = main_plot.current_composite_fft_bin_frequencies[col];
+			main_settings_bar.main_controls.composite_xfer_function_mag_dB_avg_cal_for_save[col] = main_plot.current_composite_xfer_function_mag_dB[col];
+			main_settings_bar.main_controls.composite_xfer_function_phase_deg_avg_for_save[col] = main_plot.current_composite_xfer_function_phase_deg[col];
+			main_settings_bar.main_controls.composite_coherence_value_for_save[col] = main_plot.current_composite_coherence_value[col];
 
 		}
 
@@ -256,9 +256,9 @@ public:
 				
 		update_current_plot_data();
 
-		update_captured_plot_data();
+		update_loaded_plot_data();
 			
-		update_saved_trace_arrays();
+		update_controls_trace_arrays_for_saving();
 		
 		update_meters();
 
