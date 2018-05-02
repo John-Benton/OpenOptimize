@@ -56,6 +56,7 @@ public:
 
 	std::vector<double> composite_xfer_function_mag_dB_uncal;
 	std::vector<double> composite_xfer_function_mag_dB_cal;
+
 	std::vector<double> composite_xfer_function_phase_deg;
 
 	std::vector<std::vector<double>> composite_ref_autospectrum_history;
@@ -479,17 +480,17 @@ private:
 
 	}
 
-	void calibrate_xfer_function_mag() {
+	void apply_mic_and_system_curves(std::vector<double> & source_vector, std::vector<double> & destination_vector) {
 
 		for (int x = 0; x < composite_fft_bins; x++) {
 
-			composite_xfer_function_mag_dB_cal[x] =
+			destination_vector[x] =
 
-				composite_xfer_function_mag_dB_uncal[x] -
+			source_vector[x] -
 
-				interpolated_mic_cal_amplitudes[x] -
+			interpolated_mic_cal_amplitudes[x] -
 
-				interpolated_system_curve_amplitudes[x];
+			interpolated_system_curve_amplitudes[x];
 
 		}
 
@@ -521,7 +522,7 @@ private:
 		calc_system_autospectrum();
 		calc_cross_spectrum();
 		calc_xfer_function();
-		calibrate_xfer_function_mag();
+		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
 		smooth_xfer_function_magnitude();
 
 	}
