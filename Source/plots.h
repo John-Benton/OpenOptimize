@@ -79,6 +79,12 @@ public:
 	double current_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 	double display_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
 
+	double current_composite_ref_spectrum_mag_dB[spectrum_fft_bins] = { 0.0 };
+	double display_composite_ref_spectrum_mag_dB[spectrum_fft_bins] = { 0.0 };
+
+	//std::vector<double> current_composite_ref_spectrum_mag_dB;
+	//std::vector<double> display_composite_ref_spectrum_mag_dB;
+
 	double loaded_composite_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
 	double loaded_composite_xfer_function_mag_dB_avg_cal[composite_fft_bins] = { 0.0 };
 	double loaded_composite_xfer_function_phase_deg_avg[composite_fft_bins] = { 0.0 };
@@ -127,6 +133,9 @@ public:
 	
     plots()
     {
+		//current_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+		//display_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+		
 		addAndMakeVisible(horizontal_zoom_slider);
 		addAndMakeVisible(horizontal_center_slider);
 		
@@ -239,7 +248,9 @@ public:
 
     void paint (Graphics& g) override
 	{
-		
+
+		calc_display_values();
+				
 		repaint_active = true;
 
 		magnitude_visible = magnitude_visible_button.getToggleState();
@@ -278,8 +289,6 @@ public:
 		g.fillAll(very_dark_grey);
 
 		g.setColour(Colours::white);
-		
-		calc_display_values();
 		
 		//g.drawRect(top_title_region, 1);
 		//g.drawRect(top_slider_region, 1);
@@ -977,7 +986,7 @@ private:
 		std::vector<double *> mag_arrays = {display_composite_xfer_function_mag_dB, current_composite_xfer_function_mag_dB};
 		std::vector<double *> phase_arrays = { display_composite_xfer_function_phase_deg, current_composite_xfer_function_phase_deg };
 		std::vector<double *> coherence_arrays = { display_composite_coherence_value, current_composite_coherence_value };
-		std::vector<double *> spectrum_arrays = { display_system_spectrum_mag_db, current_system_spectrum_mag_db };
+		std::vector<double *> spectrum_arrays = {display_composite_ref_spectrum_mag_dB, current_composite_ref_spectrum_mag_dB};
 
 		std::vector<std::vector<double *>> array_types = { mag_arrays ,phase_arrays, coherence_arrays, spectrum_arrays};
 

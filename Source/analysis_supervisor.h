@@ -52,6 +52,8 @@ public:
 	std::vector<double> system_spectrum_mag_linear;
 	std::vector<double> system_spectrum_mag_dB;
 
+	std::vector<double> composite_ref_spectrum_mag_dB;
+
 	std::vector<std::vector<double>> composite_xfer_function_complex;
 
 	std::vector<double> composite_xfer_function_mag_dB_uncal;
@@ -173,6 +175,8 @@ public:
 		system_spectrum_mag_linear.resize(spectrum_fft_bins);
 		system_spectrum_mag_dB.resize(spectrum_fft_bins);
 
+		composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+
 		interpolated_mic_cal_amplitudes.resize(composite_fft_bins);
 
 		interpolated_system_curve_amplitudes.resize(composite_fft_bins);
@@ -255,14 +259,14 @@ public:
 
 		plot_data_mtx_supervisor.lock();
 
-//		calc_system_spectrum();
-
-		smooth_system_spectrum();
-
 		update_averages();
 
 		calculate_coherence();
 
+		calc_ref_spectrum();
+
+		smooth_ref_spectrum();
+		
 		plot_data_mtx_supervisor.unlock();
 			
 		run_calcs_for_SPL_and_meters();
@@ -713,6 +717,15 @@ private:
 		}
 	}
 
+	void calc_ref_spectrum() {
+
+		for (int col = 0; col < composite_fft_bins; col++) {
+
+			composite_ref_spectrum_mag_dB[col] = 20 * log10(composite_ref_autospectrum_avg[col]);
+
+		}
+	}
+
 	void smooth_xfer_function_complex_for_phase() {
 
 		composite_data_smoother.configure(composite_fft_bins, smoothing_coefficient*2);
@@ -728,10 +741,10 @@ private:
 
 	}
 
-	void smooth_system_spectrum() {
+	void smooth_ref_spectrum() {
 
-		composite_data_smoother.configure(spectrum_fft_bins, smoothing_coefficient * 2);
-		composite_data_smoother.process(system_spectrum_mag_dB);
+		composite_data_smoother.configure(composite_fft_bins, smoothing_coefficient * 2);
+		composite_data_smoother.process(composite_ref_spectrum_mag_dB);
 
 	}
 

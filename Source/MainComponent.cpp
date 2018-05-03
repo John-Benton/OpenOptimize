@@ -142,13 +142,7 @@ public:
 			main_plot.current_composite_xfer_function_mag_dB[col] = supervisor1->composite_xfer_function_mag_dB_avg[col];
 			main_plot.current_composite_xfer_function_phase_deg[col] = supervisor1->composite_xfer_function_phase_deg_avg[col];
 			main_plot.current_composite_coherence_value[col] = supervisor1->composite_coherence_value[col];
-					
-		}
-
-		for (int col = 0; col < spectrum_fft_bins; col++) {
-
-			main_plot.current_system_spectrum_mag_db[col] = supervisor1->system_spectrum_mag_dB[col];
-			main_plot.system_spectrum_bin_frequencies[col] = supervisor1->system_spectrum_fft_bin_frequencies[col];
+			main_plot.current_composite_ref_spectrum_mag_dB[col] = supervisor1->composite_ref_spectrum_mag_dB[col];
 
 		}
 
