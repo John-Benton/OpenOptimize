@@ -64,31 +64,28 @@ public:
 
 	double horizontal_center_span = 0.0;
 
-	double current_composite_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
+	std::vector<double>current_composite_fft_bin_frequencies;
 
-	double current_composite_xfer_function_mag_dB[composite_fft_bins] = { 0.0 };
-	double display_composite_xfer_function_mag_dB[composite_fft_bins] = { 0.0 };
+	std::vector<double>current_composite_xfer_function_mag_dB;
+	std::vector<double>display_composite_xfer_function_mag_dB;
 
-	double current_composite_xfer_function_phase_deg[composite_fft_bins] = { 0.0 };
-	double display_composite_xfer_function_phase_deg[composite_fft_bins] = { 0.0 };
+	std::vector<double> current_composite_xfer_function_phase_deg;
+	std::vector<double> display_composite_xfer_function_phase_deg;
 
-	double current_composite_coherence_value[composite_fft_bins] = { 0.0 };
-	double display_composite_coherence_value[composite_fft_bins] = { 0.0 };
-	
-	double system_spectrum_bin_frequencies[spectrum_fft_bins] = { 0.0 };
-	double current_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
-	double display_system_spectrum_mag_db[spectrum_fft_bins] = { 0.0 };
+	std::vector<double> current_composite_coherence_value;
+	std::vector<double> display_composite_coherence_value;
 
-	double current_composite_ref_spectrum_mag_dB[spectrum_fft_bins] = { 0.0 };
-	double display_composite_ref_spectrum_mag_dB[spectrum_fft_bins] = { 0.0 };
+	std::vector<double> system_spectrum_bin_frequencies;
+	std::vector<double> current_system_spectrum_mag_db;
+	std::vector<double> display_system_spectrum_mag_db;
 
-	//std::vector<double> current_composite_ref_spectrum_mag_dB;
-	//std::vector<double> display_composite_ref_spectrum_mag_dB;
+	std::vector<double> current_composite_ref_spectrum_mag_dB;
+	std::vector<double> display_composite_ref_spectrum_mag_dB;
 
-	double loaded_composite_fft_bin_frequencies[composite_fft_bins] = { 0.0 };
-	double loaded_composite_xfer_function_mag_dB_avg_cal[composite_fft_bins] = { 0.0 };
-	double loaded_composite_xfer_function_phase_deg_avg[composite_fft_bins] = { 0.0 };
-	double loaded_composite_coherence_value[composite_fft_bins] = { 0.0 };
+	std::vector<double> loaded_composite_fft_bin_frequencies;
+	std::vector<double> loaded_composite_xfer_function_mag_dB_avg_cal;
+	std::vector<double> loaded_composite_xfer_function_phase_deg_avg;
+	std::vector<double> loaded_composite_coherence_value;
 
 	float grid_line_thickness = 0.25;
 
@@ -133,8 +130,28 @@ public:
 	
     plots()
     {
-		//current_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
-		//display_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+		current_composite_fft_bin_frequencies.resize(composite_fft_bins);
+
+		current_composite_xfer_function_mag_dB.resize(composite_fft_bins);
+		display_composite_xfer_function_mag_dB.resize(composite_fft_bins);
+
+		current_composite_xfer_function_phase_deg.resize(composite_fft_bins);
+		display_composite_xfer_function_phase_deg.resize(composite_fft_bins);
+
+		current_composite_coherence_value.resize(composite_fft_bins);
+		display_composite_coherence_value.resize(composite_fft_bins);
+
+		system_spectrum_bin_frequencies.resize(composite_fft_bins);
+		current_system_spectrum_mag_db.resize(composite_fft_bins);
+		display_system_spectrum_mag_db.resize(composite_fft_bins);
+
+		current_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+		display_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+
+		loaded_composite_fft_bin_frequencies.resize(composite_fft_bins);
+		loaded_composite_xfer_function_mag_dB_avg_cal.resize(composite_fft_bins);
+		loaded_composite_xfer_function_phase_deg_avg.resize(composite_fft_bins);
+		loaded_composite_coherence_value.resize(composite_fft_bins);
 		
 		addAndMakeVisible(horizontal_zoom_slider);
 		addAndMakeVisible(horizontal_center_slider);
@@ -249,7 +266,13 @@ public:
     void paint (Graphics& g) override
 	{
 
-		calc_display_values();
+		calc_display_values(display_composite_xfer_function_mag_dB, current_composite_xfer_function_mag_dB, 0);
+
+		calc_display_values(display_composite_xfer_function_phase_deg, current_composite_xfer_function_phase_deg, 1);
+
+		calc_display_values(display_composite_coherence_value, current_composite_coherence_value, 2);
+
+		calc_display_values(display_composite_ref_spectrum_mag_dB, current_composite_ref_spectrum_mag_dB, 3);
 				
 		repaint_active = true;
 
@@ -662,23 +685,31 @@ public:
 
 		if (spectrum_visible == 1) {
 
-			g.setColour(Colours::magenta);
+			Path spectrum_trace;
+			Path spectrum_smoothed_trace;
 
-			int start_x = 0;
-			int start_y = 0;
-			int end_x = 0;
-			int end_y = 0;
+			spectrum_trace.startNewSubPath(
 
-			for (int x = 1; x < spectrum_fft_bins; x++) { //start at index 1, as fft bin zero just has DC offset
+				plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[0]),
 
-				start_x = plot_actual_region_x + plot_actual_region_width*freq_to_x(system_spectrum_bin_frequencies[x]);
-				start_y = plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_system_spectrum_mag_db[x]);
-				end_x = plot_actual_region_x + plot_actual_region_width*freq_to_x(system_spectrum_bin_frequencies[x+1]);
-				end_y = plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_system_spectrum_mag_db[x+1]);
+				plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_ref_spectrum_mag_dB[0]));
 
-				g.drawLine(start_x, start_y, end_x, end_y, live_trace_thickness);
+
+			for (int x = 1; x < composite_fft_bins; x++) {
+
+				spectrum_trace.lineTo(
+
+					plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[x]),
+
+					plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_ref_spectrum_mag_dB[x]));
 
 			}
+
+			spectrum_smoothed_trace = spectrum_trace.createPathWithRoundedCorners(trace_path_smoothing_radius);
+
+			g.setColour(Colours::magenta);
+
+			g.strokePath(spectrum_smoothed_trace, PathStrokeType(live_trace_thickness));
 
 		};
 
@@ -981,81 +1012,73 @@ private:
 	TextButton spectrum_visible_button;
 	TextButton spectrum_active_button;
 
-	void calc_display_values() {
+	void calc_display_values(std::vector<double> &display_value_vector, std::vector<double> &current_value_vector, int plot_type) {
 
-		std::vector<double *> mag_arrays = {display_composite_xfer_function_mag_dB, current_composite_xfer_function_mag_dB};
-		std::vector<double *> phase_arrays = { display_composite_xfer_function_phase_deg, current_composite_xfer_function_phase_deg };
-		std::vector<double *> coherence_arrays = { display_composite_coherence_value, current_composite_coherence_value };
-		std::vector<double *> spectrum_arrays = {display_composite_ref_spectrum_mag_dB, current_composite_ref_spectrum_mag_dB};
+		float snap_range = 0.0;
 
-		std::vector<std::vector<double *>> array_types = { mag_arrays ,phase_arrays, coherence_arrays, spectrum_arrays};
+		float rate_of_change = 0.0;
+		
+		if (plot_type == 0) {
 
-		std::vector<double *> snap_ranges = { &magnitude_snap_range, &phase_snap_range, &coherence_snap_range, &spectrum_snap_range };
-		std::vector<double *> rates_of_change = { &magnitude_rate_of_change, &phase_rate_of_change, &coherence_rate_of_change, &spectrum_rate_of_change};
+			snap_range = magnitude_snap_range;
+
+			rate_of_change = magnitude_rate_of_change;
+
+		}
+
+		if (plot_type == 1) {
+
+			snap_range = phase_snap_range;
+
+			rate_of_change = phase_rate_of_change;
+
+		}
+
+		if (plot_type == 2) {
+
+			snap_range = coherence_snap_range;
+
+			rate_of_change = coherence_rate_of_change;
+
+		}
+
+		if (plot_type == 3) {
+
+			snap_range = spectrum_snap_range;
+
+			rate_of_change = spectrum_rate_of_change;
+
+		}
 
 		for (int x = 0; x < composite_fft_bins; x++) {
 
-			for (int type = 0; type < 3; type++) {
-										
-				if ((array_types[type][0][x] - array_types[type][1][x]) > *snap_ranges[type]) {
+			if ((display_value_vector[x] - current_value_vector[x]) > snap_range) {
 
-					array_types[type][0][x] =
+				display_value_vector[x] =
 
-						array_types[type][0][x] -
+					display_value_vector[x] -
 
-						(abs(array_types[type][0][x] - array_types[type][1][x]) * *rates_of_change[type]);
+					(abs(display_value_vector[x] - current_value_vector[x]) * rate_of_change);
 
-				}
+			}
 
-				if ((array_types[type][0][x] - array_types[type][1][x]) < -*snap_ranges[type]) {
+			if ((display_value_vector[x] - current_value_vector[x]) < -snap_range) {
 
-					array_types[type][0][x] =
+				display_value_vector[x] =
 
-						array_types[type][0][x] +
+					display_value_vector[x] +
 
-						(abs(array_types[type][0][x] - array_types[type][1][x])* *rates_of_change[type]);
+					(abs(display_value_vector[x] - current_value_vector[x])* rate_of_change);
 
-				}
+			}
 
-				if (abs(array_types[type][0][x] - array_types[type][1][x]) <= *snap_ranges[type]) {
+			if (abs(display_value_vector[x] - current_value_vector[x]) <= snap_range) {
 
-					array_types[type][0][x] = array_types[type][1][x];
-
-				}
+				display_value_vector[x] = current_value_vector[x];
 
 			}
 			
 		}
-
-		for (int x = 0; x < spectrum_fft_bins; x++) {
-
-				if ((display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) > *snap_ranges[3]) {
-
-					display_system_spectrum_mag_db[x] =
-
-						display_system_spectrum_mag_db[x] -
-
-						(abs(display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) * *rates_of_change[3]);
-
-				}
-
-				if ((display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) < -*snap_ranges[3]) {
-
-					display_system_spectrum_mag_db[x] =
-
-						display_system_spectrum_mag_db[x] +
-
-						(abs(display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x])* *rates_of_change[3]);
-
-				}
-
-				if (abs(display_system_spectrum_mag_db[x] - current_system_spectrum_mag_db[x]) <= *snap_ranges[3]) {
-
-					display_system_spectrum_mag_db[x] = current_system_spectrum_mag_db[x];
-
-				}
-
-			}
 
 	}
 	
