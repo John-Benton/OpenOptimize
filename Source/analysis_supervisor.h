@@ -48,10 +48,6 @@ public:
 
 	std::vector<int> composite_fft_bin_frequencies;
 
-	std::vector<double> system_spectrum_fft_bin_frequencies;
-	std::vector<double> system_spectrum_mag_linear;
-	std::vector<double> system_spectrum_mag_dB;
-
 	std::vector<double> composite_ref_spectrum_mag_dB;
 
 	std::vector<std::vector<double>> composite_xfer_function_complex;
@@ -130,6 +126,12 @@ public:
 
 	int smoothing_coefficient = 0;
 
+	float spectrum_offset_db = 12.0;
+
+	float spectrum_scaling_coefficient = 0.5;
+
+	float spectrum_slope_db_octave = -4.5;
+
 	supervisor(): Thread("Supervisor_Thread",0)
 	
 	{
@@ -170,10 +172,6 @@ public:
 		composite_coherence_value.resize(composite_fft_bins);
 
 		composite_fft_bin_frequencies.resize(composite_fft_bins);
-		
-		system_spectrum_fft_bin_frequencies.resize(spectrum_fft_bins);
-		system_spectrum_mag_linear.resize(spectrum_fft_bins);
-		system_spectrum_mag_dB.resize(spectrum_fft_bins);
 
 		composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
 
@@ -719,11 +717,22 @@ private:
 
 	void calc_ref_spectrum() {
 
+		int lowest_composite_frequency = composite_fft_bin_frequencies[0];
+
+		float octaves_distance = 0.0;
+
 		for (int col = 0; col < composite_fft_bins; col++) {
 
 			composite_ref_spectrum_mag_dB[col] = 20 * log10(composite_ref_autospectrum_avg[col]);
 
+			composite_ref_spectrum_mag_dB[col] = (composite_ref_spectrum_mag_dB[col])*(spectrum_scaling_coefficient)+spectrum_offset_db;
+
+			octaves_distance = log(composite_fft_bin_frequencies[col] / lowest_composite_frequency);
+
+			composite_ref_spectrum_mag_dB[col] = (composite_ref_spectrum_mag_dB[col]) + (octaves_distance)*(spectrum_slope_db_octave);
+			
 		}
+		
 	}
 
 	void smooth_xfer_function_complex_for_phase() {
