@@ -161,7 +161,7 @@ public:
 		refresh_rate_slider.addListener(this);
 
 		addAndMakeVisible(smoothing_slider);
-		smoothing_slider.setRange(0, 5, 1);
+		smoothing_slider.setRange(0, 4, 1);
 		smoothing_slider.addListener(this);
 
 		addAndMakeVisible(capture_traces_button);

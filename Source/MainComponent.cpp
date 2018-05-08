@@ -219,7 +219,7 @@ public:
 		supervisor1->mic_cal_path = main_settings_bar.main_controls.fixed_mic_cal_file_path;
 		supervisor1->system_curve_path = main_settings_bar.main_controls.fixed_system_curve_file_path;
 		supervisor1->analyser_update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
-		supervisor1->smoothing_coefficient = main_settings_bar.main_controls.smoothing_slider_value;
+		supervisor1->smoothing_passes = main_settings_bar.main_controls.smoothing_slider_value;
 
 	}
 

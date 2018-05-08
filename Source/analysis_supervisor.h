@@ -124,7 +124,9 @@ public:
 
 	bool analyser_run = false;
 
-	int smoothing_coefficient = 0;
+	int smoothing_average_size = 3;
+
+	int smoothing_passes = 0;
 
 	float spectrum_offset_db = 12.0;
 
@@ -263,7 +265,7 @@ public:
 
 		calc_ref_spectrum();
 
-		smooth_ref_spectrum();
+		smooth_spectrum_data();
 		
 		plot_data_mtx_supervisor.unlock();
 			
@@ -525,7 +527,7 @@ private:
 		calc_cross_spectrum();
 		calc_xfer_function();
 		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
-		smooth_xfer_function_magnitude();
+		smooth_xfer_function_data();
 
 	}
 	
@@ -606,7 +608,7 @@ private:
 			composite_xfer_function_mag_dB_uncal[col] = 20 * log10(xfer_function_magnitude_linear);
 		}
 
-		smooth_xfer_function_complex_for_phase();
+		smooth_xfer_function_data();
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 
@@ -735,25 +737,42 @@ private:
 		
 	}
 
-	void smooth_xfer_function_complex_for_phase() {
+	void smooth_xfer_function_data() {
 
-		composite_data_smoother.configure(composite_fft_bins, smoothing_coefficient*2);
-		composite_data_smoother.process(composite_xfer_function_complex[0]);
-		composite_data_smoother.process(composite_xfer_function_complex[1]);
+		if (smoothing_passes > 0) {
+
+			composite_data_smoother.configure(composite_fft_bins, smoothing_average_size);
+			
+			for (int x = 0; x < smoothing_passes; x++) {
+							
+				composite_data_smoother.process(composite_xfer_function_complex[0]);
+				composite_data_smoother.process(composite_xfer_function_complex[1]);
+
+				composite_data_smoother.process(composite_xfer_function_mag_dB_cal);
+
+			}
+
+		}
+
+		else {};
 
 	}
 
-	void smooth_xfer_function_magnitude() {
+	void smooth_spectrum_data() {
 
-		composite_data_smoother.configure(composite_fft_bins, smoothing_coefficient * 2);
-		composite_data_smoother.process(composite_xfer_function_mag_dB_cal);
+		if (smoothing_passes > 0) {
 
-	}
+			composite_data_smoother.configure(composite_fft_bins, smoothing_average_size);
 
-	void smooth_ref_spectrum() {
+			for (int x = 0; x < smoothing_passes; x++) {
 
-		composite_data_smoother.configure(composite_fft_bins, smoothing_coefficient * 2);
-		composite_data_smoother.process(composite_ref_spectrum_mag_dB);
+				composite_data_smoother.process(composite_ref_spectrum_mag_dB);
+
+			}
+
+		}
+
+		else {};
 
 	}
 
