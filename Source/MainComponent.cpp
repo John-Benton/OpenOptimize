@@ -192,23 +192,23 @@ public:
 		
 		OptionalScopedPointer<Component> audio_io_config_window_content_ptr{ &audio_device_selector_component, 0 };
 
-		audio_io_config_window_launch_options.dialogTitle = "Audio I/O Configuration";
+		audio_io_config_window.dialogTitle = "Audio I/O Configuration";
 
-		audio_io_config_window_launch_options.dialogBackgroundColour = Colours::darkgrey;
+		audio_io_config_window.dialogBackgroundColour = Colours::darkgrey;
 
-		audio_io_config_window_launch_options.content = audio_io_config_window_content_ptr;
+		audio_io_config_window.content = audio_io_config_window_content_ptr;
 
-		audio_io_config_window_launch_options.componentToCentreAround = NULL;
+		audio_io_config_window.componentToCentreAround = NULL;
 
-		audio_io_config_window_launch_options.escapeKeyTriggersCloseButton = true;
+		audio_io_config_window.escapeKeyTriggersCloseButton = true;
 
-		audio_io_config_window_launch_options.useNativeTitleBar = true;
+		audio_io_config_window.useNativeTitleBar = true;
 
-		audio_io_config_window_launch_options.useBottomRightCornerResizer = false;
+		audio_io_config_window.useBottomRightCornerResizer = false;
 
 		audio_device_selector_component.setSize(640, 480);
 
-		audio_io_config_window_launch_options.launchAsync();
+		audio_io_config_window.launchAsync();
 
 	}
 
@@ -275,7 +275,7 @@ private:
 	
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
-	DialogWindow::LaunchOptions audio_io_config_window_launch_options;
+	DialogWindow::LaunchOptions audio_io_config_window;
 				
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 		

@@ -48,12 +48,9 @@ public:
 		addAndMakeVisible(increase_1);
 		addAndMakeVisible(decrease_1);
 		addAndMakeVisible(reset_to_0);
-		//addAndMakeVisible(launch_delay_finder);
 
 		reset_to_0.setButtonText("Reset to 0");
 		reset_to_0.setColour(reset_to_0.buttonColourId, Colours::transparentBlack);
-
-		//launch_delay_finder.setButtonText("Delay Finder");
 
 		increase_1000.addListener(this);
 		decrease_1000.addListener(this);
@@ -64,7 +61,7 @@ public:
 		increase_1.addListener(this);
 		decrease_1.addListener(this);
 		reset_to_0.addListener(this);
-		//launch_delay_finder.addListener(this);
+
     }
 
     ~delay_indicator()
@@ -164,12 +161,6 @@ public:
 			delay_indicator_controls_division2.getY() + delay_indicator_controls_division2.getHeight()*0.35,
 			delay_indicator_controls_division2.getWidth() *0.5,
 			delay_indicator_controls_division2.getHeight() *1.0);
-
-		/*launch_delay_finder.setBounds(
-			delay_indicator_controls_division4.getX() + delay_indicator_controls_division4.getWidth()*0.4,
-			delay_indicator_controls_division4.getY() + delay_indicator_controls_division4.getHeight()*0.35,
-			delay_indicator_controls_division4.getWidth() *0.5,
-			delay_indicator_controls_division4.getHeight() *1.0);*/
 		
 		increase_1000.setBounds(
 			delay_indicator_controls_division2.getX() + delay_indicator_controls_division2.getWidth()*0.2,
@@ -315,7 +306,6 @@ private:
 	ArrowButton increase_1{ "increase_1", 0.75, Colours::white };
 	ArrowButton decrease_1{ "decrease_1", 0.25, Colours::white };
 	TextButton reset_to_0;
-	/*TextButton launch_delay_finder;*/
 		
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (delay_indicator)
 };

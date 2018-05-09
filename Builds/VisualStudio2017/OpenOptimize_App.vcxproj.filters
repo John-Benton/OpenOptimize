@@ -2145,6 +2145,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\spl_cal.h">
+      <Filter>OpenOptimize\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\phase.h">
       <Filter>OpenOptimize\Source</Filter>
     </ClInclude>

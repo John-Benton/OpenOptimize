@@ -11,11 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include <string>
-#include <deque>
-#include <numeric>
-#include <fstream>
-#include <vector>
+#include "spl_cal.h"
 
 //==============================================================================
 /*
@@ -28,13 +24,15 @@ public:
 	
 	double raw_input_level = 0.0;
 
-	double unweighted_spl = 0.0;
+	double raw_spl_dB = 0.0;
 
-	double weighted_spl = 0.0;
+	double calibrated_spl_dB = 0.0;
 
-	double display_spl = 0.0;
+	double display_spl_dB = 0.0;
 
 	const double dBFS_offset = 120;
+
+	double spl_calibration_offset = 0.0;
 
 	const double meter_snap_range = 0.1;
 
@@ -43,54 +41,77 @@ public:
 	const double spl_meter_slow_rate_of_change = 0.25;
 
 	double spl_meter_rate_of_change;
-		
-	Rectangle<int> spl_meter_remaining_outline;
-	Rectangle<int> spl_meter_display_area;
-	Rectangle<int> spl_meter_display_black_area;
-	Rectangle<int> spl_meter_controls_area;
-	Rectangle<int> spl_meter_controls_division1;
-	Rectangle<int> spl_meter_controls_division2;
-	Rectangle<int> spl_meter_controls_division3;
-	Rectangle<int> spl_meter_controls_division4;
+
+	Rectangle<int> component_bounds;
+	Rectangle<int> left_column_row_1;
+	Rectangle<int> left_column_row_1_active;
+	Rectangle<int> right_column_row_1;
+	Rectangle<int> right_column_row_1_active;
+	Rectangle<int> right_column_row_2;
+	Rectangle<int> right_column_row_2_active;
+	Rectangle<int> right_column_row_3;
+	Rectangle<int> right_column_row_3_active;
+	Rectangle<int> right_column_row_4;
+	Rectangle<int> right_column_row_4_active;
 
 	bool repaint_active = false;
+
+	int horizontal_padding_pixels = 5;
+
+	int vertical_padding_pixels = 5;
 
 	spl_meter()
     {
 		/*addAndMakeVisible(z_weight_button);
 		addAndMakeVisible(c_weight_button);
-		addAndMakeVisible(a_weight_button);
-		addAndMakeVisible(cal_spl_button);*/
+		addAndMakeVisible(a_weight_button);*/
+
+		addAndMakeVisible(cal_spl_button);
 		
 		addAndMakeVisible(slow_time_button);
 		addAndMakeVisible(fast_time_button);
+
+		addAndMakeVisible(spl_meter_label);
+
+		addAndMakeVisible(spl_meter_display_area);
 		
 		/*z_weight_button.setButtonText("Z Weighting");
 		c_weight_button.setButtonText("C Weighting");
-		a_weight_button.setButtonText("A Weighting");
-		cal_spl_button.setButtonText("Calibrate");*/
+		a_weight_button.setButtonText("A Weighting");*/
+		
+		cal_spl_button.setButtonText("Calibrate");
 		
 		slow_time_button.setButtonText("Slower");
 		fast_time_button.setButtonText("Faster");
 
+		spl_meter_label.setText("SPL", dontSendNotification);
+
+		spl_meter_display_area.setJustificationType(Justification::centred);
+		spl_meter_label.setJustificationType(Justification::centred);
+
+		spl_meter_display_area.setColour(Label::backgroundColourId, Colours::black);
+				
 		/*z_weight_button.addListener(this);
 		c_weight_button.addListener(this);
-		a_weight_button.addListener(this);
-		cal_spl_button.addListener(this);*/
+		a_weight_button.addListener(this);*/
+
+		cal_spl_button.addListener(this);
 		
 		slow_time_button.addListener(this);
 		fast_time_button.addListener(this);
 
 		/*z_weight_button.setColour(z_weight_button.buttonOnColourId, Colours::green);
 		c_weight_button.setColour(c_weight_button.buttonOnColourId, Colours::blue);
-		a_weight_button.setColour(a_weight_button.buttonOnColourId, Colours::red);
-		cal_spl_button.setColour(cal_spl_button.buttonColourId, Colour(66, 162, 200));*/
-		
-		slow_time_button.setColour(a_weight_button.buttonColourId, Colours::transparentBlack);
-		slow_time_button.setColour(a_weight_button.buttonOnColourId, Colours::darkred);
+		a_weight_button.setColour(a_weight_button.buttonOnColourId, Colours::red);*/
 
-		fast_time_button.setColour(a_weight_button.buttonColourId, Colours::transparentBlack);
-		fast_time_button.setColour(a_weight_button.buttonOnColourId, Colours::darkgreen);
+		cal_spl_button.setColour(cal_spl_button.buttonColourId, Colours::transparentBlack);
+		cal_spl_button.setColour(cal_spl_button.buttonOnColourId, Colours::darkblue);
+		
+		slow_time_button.setColour(slow_time_button.buttonColourId, Colours::transparentBlack);
+		slow_time_button.setColour(slow_time_button.buttonOnColourId, Colours::darkred);
+
+		fast_time_button.setColour(fast_time_button.buttonColourId, Colours::transparentBlack);
+		fast_time_button.setColour(fast_time_button.buttonOnColourId, Colours::darkgreen);
 
 		fast_time_button.setToggleState(1, dontSendNotification);
 
@@ -98,9 +119,9 @@ public:
 
     ~spl_meter()
     {
-		z_weight_button.removeListener(this);
+		/*z_weight_button.removeListener(this);
 		c_weight_button.removeListener(this);
-		a_weight_button.removeListener(this);
+		a_weight_button.removeListener(this);*/
 		cal_spl_button.removeListener(this);
 		slow_time_button.removeListener(this);
 		fast_time_button.removeListener(this);
@@ -123,41 +144,35 @@ public:
 
 		}
 		
-		calc_unweighted_spl();
+		calc_uncalibrated_spl();
 
-		calc_weighted_spl();
+		calc_calibrated_spl();
 		
 		update_display_spl();
-				
-		g.setColour(Colours::black);
-		
-		g.fillRect(spl_meter_display_black_area);
 
-		g.setColour(Colours::white);
+		spl_display_value_string = String(display_spl_dB);
 
-		g.setFont(spl_meter_controls_division1.getHeight()*0.75);
-
-		g.drawFittedText("SPL",
-			spl_meter_controls_division1.getX(),
-			spl_meter_controls_division1.getY(),
-			spl_meter_controls_division1.getWidth(),
-			spl_meter_controls_division1.getHeight(),
-			Justification::centred, 0, 1.0f);
-
-		std::string display_spl_str = std::to_string(display_spl);
-
-		std::string display_spl_str_short;
-
-		if (weighted_spl < 100.0) {
-			display_spl_str_short = display_spl_str.substr(0, 4);
+		if (display_spl_dB < 100.0) {
+			spl_display_value_string = spl_display_value_string.substring(0, 4);
 		}
 
-		if (weighted_spl >= 100.0) {
-			display_spl_str_short = display_spl_str.substr(0, 3);
+		if (display_spl_dB >= 100.0) {
+			spl_display_value_string = spl_display_value_string.substring(0, 3);
 		}
 
-		g.setFont(spl_meter_display_black_area.getHeight()*0.60);
-		g.drawFittedText(display_spl_str_short, spl_meter_display_black_area, Justification::centred, 0, 1.0f);
+		spl_meter_display_area.setText(spl_display_value_string, dontSendNotification);
+
+		if (spl_calibration_offset != 0.0) {
+
+			cal_spl_button.setToggleState(1, dontSendNotification);
+
+		}
+
+		else {
+
+			cal_spl_button.setToggleState(0, dontSendNotification);
+
+		}
 
 		repaint_active = false;
 
@@ -165,65 +180,40 @@ public:
 
     void resized() override
     {
+				
+		component_bounds = getLocalBounds();
+
+		int component_height = component_bounds.getHeight();
+		int component_width = component_bounds.getWidth();
+
+		left_column_row_1 = component_bounds.removeFromLeft(component_width*0.75);
+				
+		right_column_row_1 = component_bounds.removeFromTop(component_height*0.25);
+		right_column_row_2 = component_bounds.removeFromTop(component_height*0.25);
+		right_column_row_3 = component_bounds.removeFromTop(component_height*0.25);
+		right_column_row_4 = component_bounds;
+
+		left_column_row_1_active = left_column_row_1.reduced(horizontal_padding_pixels, vertical_padding_pixels);
+		right_column_row_1_active = right_column_row_1.reduced(horizontal_padding_pixels, vertical_padding_pixels);
+		right_column_row_2_active = right_column_row_2.reduced(horizontal_padding_pixels, vertical_padding_pixels);
+		right_column_row_3_active = right_column_row_3.reduced(horizontal_padding_pixels, vertical_padding_pixels);
+		right_column_row_4_active = right_column_row_4.reduced(horizontal_padding_pixels, vertical_padding_pixels);
+
+		spl_meter_display_area.setBounds(left_column_row_1_active);
 		
-		spl_meter_remaining_outline = getLocalBounds();
-		spl_meter_display_area = spl_meter_remaining_outline.removeFromLeft(getWidth()*0.50);
-		spl_meter_display_black_area = spl_meter_display_area;
-		spl_meter_display_black_area.reduce((spl_meter_display_area.getWidth()*0.05), (spl_meter_display_area.getHeight()*0.1));
+		spl_meter_label.setBounds(right_column_row_1_active);
+		cal_spl_button.setBounds(right_column_row_2_active);
+		slow_time_button.setBounds(right_column_row_3_active);
+		fast_time_button.setBounds(right_column_row_4_active);
 
-		spl_meter_controls_area = spl_meter_remaining_outline;
-		spl_meter_controls_division1 = spl_meter_controls_area.removeFromTop(getHeight()*0.2);
-		spl_meter_controls_area.removeFromTop(getHeight()*0.05);
-		spl_meter_controls_division2 = spl_meter_controls_area.removeFromTop(getHeight()*0.175);
-		spl_meter_controls_area.removeFromTop(getHeight()*0.05);
-		spl_meter_controls_division3 = spl_meter_controls_area.removeFromTop(getHeight()*0.175);
-		spl_meter_controls_area.removeFromTop(getHeight()*0.05);
-		spl_meter_controls_division4 = spl_meter_controls_area.removeFromTop(getHeight()*0.175);
+		spl_meter_display_area.setFont(spl_meter_display_area.getHeight()*0.75);
+		spl_meter_label.setFont(spl_meter_label.getHeight());
 		
-		int w = getWidth();
-		int h = getHeight();
-
-		z_weight_button.setBounds(
-			spl_meter_controls_division2.getX(),
-			spl_meter_controls_division2.getY(),
-			spl_meter_controls_division2.getWidth()*0.45,
-			spl_meter_controls_division2.getHeight());
-
-		c_weight_button.setBounds(
-			spl_meter_controls_division3.getX(),
-			spl_meter_controls_division3.getY(),
-			spl_meter_controls_division3.getWidth()*0.45,
-			spl_meter_controls_division3.getHeight());
-
-		a_weight_button.setBounds(
-			spl_meter_controls_division4.getX(),
-			spl_meter_controls_division4.getY(),
-			spl_meter_controls_division4.getWidth()*0.45,
-			spl_meter_controls_division4.getHeight());
-
-		cal_spl_button.setBounds(
-			spl_meter_controls_division2.getX() + spl_meter_controls_division2.getWidth()*0.55,
-			spl_meter_controls_division2.getY(),
-			spl_meter_controls_division2.getWidth()*0.45,
-			spl_meter_controls_division2.getHeight());
-
-		slow_time_button.setBounds(
-			spl_meter_controls_division3.getX() + spl_meter_controls_division3.getWidth()*0.55,
-			spl_meter_controls_division3.getY(),
-			spl_meter_controls_division3.getWidth()*0.45,
-			spl_meter_controls_division3.getHeight());
-
-		fast_time_button.setBounds(
-			spl_meter_controls_division4.getX() + spl_meter_controls_division4.getWidth()*0.55,
-			spl_meter_controls_division4.getY(),
-			spl_meter_controls_division4.getWidth()*0.45,
-			spl_meter_controls_division4.getHeight());
-
     }
 
 	void buttonClicked(Button* button) override {
 
-		if (button == &z_weight_button)
+		/*if (button == &z_weight_button)
 		{
 			spl_meter_weighting = 0;
 			z_weight_button.setToggleState(1, dontSendNotification);
@@ -245,6 +235,11 @@ public:
 			z_weight_button.setToggleState(0, dontSendNotification);
 			c_weight_button.setToggleState(0, dontSendNotification);
 			a_weight_button.setToggleState(1, dontSendNotification);
+		}*/
+
+		if (button == &cal_spl_button)
+		{
+			open_spl_cal_window();
 		}
 
 		if (button == &slow_time_button)
@@ -263,35 +258,35 @@ public:
 
 	}
 
-	void calc_unweighted_spl() {
+	void calc_uncalibrated_spl() {
 
-		unweighted_spl = Decibels::gainToDecibels(raw_input_level, -96.0) + dBFS_offset;
+		raw_spl_dB = Decibels::gainToDecibels(raw_input_level, -96.0) + dBFS_offset;
 
 	}
 
-	void calc_weighted_spl() {
+	void calc_calibrated_spl() {
 
-		weighted_spl = unweighted_spl;
+		calibrated_spl_dB = raw_spl_dB + spl_calibration_offset;
 
 	}
 
 	void update_display_spl() {
 		
-		if ((display_spl - weighted_spl) > meter_snap_range) {
+		if ((display_spl_dB - calibrated_spl_dB) > meter_snap_range) {
 
-			display_spl = display_spl - (abs(display_spl - weighted_spl)*spl_meter_rate_of_change);
-
-		}
-
-		if ((display_spl - weighted_spl) < -meter_snap_range) {
-
-			display_spl = display_spl + (abs(display_spl - weighted_spl)*spl_meter_rate_of_change);
+			display_spl_dB = display_spl_dB - (abs(display_spl_dB - calibrated_spl_dB)*spl_meter_rate_of_change);
 
 		}
 
-		if (abs(display_spl - weighted_spl) <= meter_snap_range) {
+		if ((display_spl_dB - calibrated_spl_dB) < -meter_snap_range) {
 
-			display_spl = weighted_spl;
+			display_spl_dB = display_spl_dB + (abs(display_spl_dB - calibrated_spl_dB)*spl_meter_rate_of_change);
+
+		}
+
+		if (abs(display_spl_dB - calibrated_spl_dB) <= meter_snap_range) {
+
+			display_spl_dB = calibrated_spl_dB;
 
 		}
 	
@@ -309,13 +304,45 @@ public:
 		
 	}
 
+	void open_spl_cal_window() {
+
+		spl_calibration_component.set_offset_locations(&spl_calibration_offset, &raw_spl_dB);
+
+		OptionalScopedPointer<Component> spl_calibration_component_ptr{ &spl_calibration_component, 0 };
+
+		spl_calibration_window.dialogTitle = "SPL Calibration";
+
+		spl_calibration_window.dialogBackgroundColour = Colours::darkgrey;
+
+		spl_calibration_window.content = spl_calibration_component_ptr;
+
+		spl_calibration_window.componentToCentreAround = NULL;
+
+		spl_calibration_window.escapeKeyTriggersCloseButton = true;
+
+		spl_calibration_window.useNativeTitleBar = true;
+
+		spl_calibration_window.useBottomRightCornerResizer = false;
+
+		spl_calibration_component.setSize(640, 480);
+
+		spl_calibration_window.launchAsync();
+		
+	}
+
 private:
 
-	TextButton z_weight_button;
+	/*TextButton z_weight_button;
 	TextButton c_weight_button;
-	TextButton a_weight_button;
+	TextButton a_weight_button;*/
 	TextButton cal_spl_button;
 	TextButton slow_time_button;
 	TextButton fast_time_button;
+	DialogWindow::LaunchOptions spl_calibration_window;
+	spl_cal spl_calibration_component;
+	Label spl_meter_display_area;
+	Label spl_meter_label;
+	String spl_display_value_string;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (spl_meter)
+
 };
