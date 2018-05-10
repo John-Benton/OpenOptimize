@@ -82,6 +82,11 @@ public:
 	std::vector<double> current_ref_samples;
 	std::vector<double> current_system_samples;
 
+	std::vector<double> current_system_samples_squared;
+	double current_system_samples_squared_sum;
+	double current_system_samples_squared_mean;
+	double current_system_samples_RMS;
+
 	/*---------------------------------------------------*/
 
 	const int fft_bins = (largest_fft_size / 2) + 1;
@@ -187,6 +192,8 @@ public:
 		current_ref_samples.resize(largest_fft_size);
 		current_system_samples.resize(largest_fft_size);
 
+		current_system_samples_squared.resize(largest_fft_size);
+
 		assemble_composite_fft_bin_frequencies();
 				
 		startTimerHz(analyser_update_rate);
@@ -206,7 +213,7 @@ public:
 		delete fft_128;
 		delete fft_64;
 
-		stopThread(1000);
+		stopThread(5000);
 
 	};
 
@@ -1041,6 +1048,20 @@ private:
 		peak_of_current_ref_samples = *std::max_element(current_ref_samples.begin(), current_ref_samples.end());
 
 		peak_of_current_system_samples = *std::max_element(current_system_samples.begin(), current_system_samples.end());
+
+		current_system_samples_squared = current_system_samples;
+
+		for (int x = 0; x < current_ref_samples.size(); x++) {
+
+			current_system_samples_squared[x] = pow(current_system_samples_squared[x], 2);
+
+		}
+
+		current_system_samples_squared_sum = std::accumulate(current_system_samples_squared.begin(), current_system_samples_squared.end(), 0.0);
+
+		current_system_samples_squared_mean = current_system_samples_squared_sum / current_ref_samples.size();
+
+		current_system_samples_RMS = pow(current_system_samples_squared_mean, 0.5);
 
 	}
 

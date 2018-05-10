@@ -180,7 +180,7 @@ public:
 
 	void update_meters() {
 
-		main_settings_bar.main_spl_meter.raw_input_level = supervisor1->peak_of_current_system_samples;
+		main_settings_bar.main_spl_meter.raw_input_level = supervisor1->current_system_samples_RMS;
 
 		main_level_meters.raw_ref_input_level = supervisor1->peak_of_current_ref_samples;
 
