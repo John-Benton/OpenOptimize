@@ -24,6 +24,12 @@ public:
 
 	Rectangle<int> plot_outline;
 	Rectangle<int> top_title_region;
+	Rectangle<int> mod_region; //mod = mouse over display
+	Rectangle<int> frequency_mod_bounds;
+	Rectangle<int> magnitude_mod_bounds;
+	Rectangle<int> phase_mod_bounds;
+	Rectangle<int> coherence_mod_bounds;
+	Rectangle<int> spectrum_mod_bounds;
 	Rectangle<int> top_slider_region;
 	Rectangle<int> left_slider_region;
 	Rectangle<int> left_label_region;
@@ -34,11 +40,7 @@ public:
 	Rectangle<int> bottom_label_region;
 	Rectangle<int> bottom_label_clip_region;
 	Rectangle<int> bottom_slider_region;
-
-	//Rectangle<int> load_indicator_region;
-	//Rectangle<int> ui_load_label_outline;
-	//Rectangle<int> analyser_load_label_outline;
-
+	
 	std::vector<int> grid_frequencies{20, 30, 40, 50, 60, 70, 80, 90, 
 										100, 200, 300, 400, 500, 600, 700, 800, 900,
 										1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
@@ -74,10 +76,6 @@ public:
 
 	std::vector<double> current_composite_coherence_value;
 	std::vector<double> display_composite_coherence_value;
-
-	std::vector<double> system_spectrum_bin_frequencies;
-	std::vector<double> current_system_spectrum_mag_db;
-	std::vector<double> display_system_spectrum_mag_db;
 
 	std::vector<double> current_composite_ref_spectrum_mag_dB;
 	std::vector<double> display_composite_ref_spectrum_mag_dB;
@@ -127,6 +125,24 @@ public:
 	double phase_snap_range = 0.0;
 	double coherence_snap_range = 0.0;
 	double spectrum_snap_range = 0.0;
+
+	int mod_region_width = 0;
+
+	int mod_crosshair_thickness = 1.0;
+
+	bool mod_line_visible = false;
+
+	int frequency_mod_value = 0;
+	double magnitude_mod_value = 0.0;
+	double phase_mod_value = 0.0;
+	double coherence_mod_value = 0.0;
+	double spectrum_mod_value = 0.0;
+
+	String frequency_mod_value_string;
+	String magnitude_mod_value_string;
+	String phase_mod_value_string;
+	String coherence_mod_value_string;
+	String spectrum_mod_value_string;
 	
     plots()
     {
@@ -140,10 +156,6 @@ public:
 
 		current_composite_coherence_value.resize(composite_fft_bins);
 		display_composite_coherence_value.resize(composite_fft_bins);
-
-		system_spectrum_bin_frequencies.resize(composite_fft_bins);
-		current_system_spectrum_mag_db.resize(composite_fft_bins);
-		display_system_spectrum_mag_db.resize(composite_fft_bins);
 
 		current_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
 		display_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
@@ -170,6 +182,24 @@ public:
 
 		addAndMakeVisible(spectrum_visible_button);
 		addAndMakeVisible(spectrum_active_button);
+
+		addAndMakeVisible(frequency_mod);
+		addAndMakeVisible(magnitude_mod);
+		addAndMakeVisible(phase_mod);
+		addAndMakeVisible(coherence_mod);
+		addAndMakeVisible(spectrum_mod);
+
+		frequency_mod.setJustificationType(Justification::centred);
+		magnitude_mod.setJustificationType(Justification::centred);
+		phase_mod.setJustificationType(Justification::centred);
+		coherence_mod.setJustificationType(Justification::centred);
+		spectrum_mod.setJustificationType(Justification::centred);
+
+		frequency_mod.setColour(frequency_mod.textColourId, Colours::white);
+		magnitude_mod.setColour(magnitude_mod.textColourId, Colours::green);
+		phase_mod.setColour(phase_mod.textColourId, Colours::red);
+		coherence_mod.setColour(coherence_mod.textColourId, Colours::cyan);
+		spectrum_mod.setColour(spectrum_mod.textColourId, Colours::magenta);
 
 		magnitude_visible_button.setButtonText("M");
 		magnitude_active_button.setButtonText("M");
@@ -200,11 +230,11 @@ public:
 
 		
 		coherence_visible_button.setColour(coherence_visible_button.buttonColourId, Colours::transparentBlack);
-		coherence_visible_button.setColour(coherence_visible_button.buttonOnColourId, Colours::darkblue);
+		coherence_visible_button.setColour(coherence_visible_button.buttonOnColourId, Colours::darkcyan);
 		
 		
 		coherence_active_button.setColour(coherence_active_button.buttonColourId, Colours::transparentBlack);
-		coherence_active_button.setColour(coherence_active_button.buttonOnColourId, Colours::darkblue);
+		coherence_active_button.setColour(coherence_active_button.buttonOnColourId, Colours::darkcyan);
 
 		
 		spectrum_visible_button.setColour(spectrum_visible_button.buttonColourId, Colours::transparentBlack);
@@ -265,7 +295,8 @@ public:
 
     void paint (Graphics& g) override
 	{
-
+		repaint_active = true;
+		
 		calc_display_values(display_composite_xfer_function_mag_dB, current_composite_xfer_function_mag_dB, 0);
 
 		calc_display_values(display_composite_xfer_function_phase_deg, current_composite_xfer_function_phase_deg, 1);
@@ -273,9 +304,29 @@ public:
 		calc_display_values(display_composite_coherence_value, current_composite_coherence_value, 2);
 
 		calc_display_values(display_composite_ref_spectrum_mag_dB, current_composite_ref_spectrum_mag_dB, 3);
-				
-		repaint_active = true;
 
+		mouse_current_position = getMouseXYRelative();
+
+		if (plot_clip_region.contains(mouse_current_position) == true) {
+
+			mod_line_visible = true;
+
+			update_mod_values();
+
+		}
+
+		else {
+
+			mod_line_visible = false;
+
+		}
+		
+		frequency_mod.setText(frequency_mod_value_string, dontSendNotification);
+		magnitude_mod.setText(magnitude_mod_value_string, dontSendNotification);
+		phase_mod.setText(phase_mod_value_string, dontSendNotification);
+		coherence_mod.setText(coherence_mod_value_string, dontSendNotification);
+		spectrum_mod.setText(spectrum_mod_value_string, dontSendNotification);
+		
 		magnitude_visible = magnitude_visible_button.getToggleState();
 
 		phase_visible = phase_visible_button.getToggleState();
@@ -283,7 +334,7 @@ public:
 		coherence_visible = coherence_visible_button.getToggleState();
 
 		spectrum_visible = spectrum_visible_button.getToggleState();
-
+		
 		if (magnitude_active_button.getToggleState() == true) {
 
 			active_grid_mode = 0;
@@ -307,9 +358,8 @@ public:
 			active_grid_mode = 3;
 
 		}
-		
-		Colour very_dark_grey(20, 20, 20);
-		g.fillAll(very_dark_grey);
+						
+		g.fillAll(Colour(20, 20, 20));
 
 		g.setColour(Colours::white);
 		
@@ -323,6 +373,11 @@ public:
 		//g.drawRect(bottom_label_region, 1);
 		//g.drawRect(bottom_label_clip_region, 1);
 		//g.drawRect(bottom_slider_region, 1);
+		//g.drawRect(frequency_mod_bounds, 1.0);
+		//g.drawRect(magnitude_mod_bounds, 1.0);
+		//g.drawRect(phase_mod_bounds, 1.0);
+		//g.drawRect(coherence_mod_bounds, 1.0);
+		//g.drawRect(spectrum_mod_bounds, 1.0);
 
 		//==============================================================================
 
@@ -601,7 +656,7 @@ public:
 
 			mag_trace.startNewSubPath(
 
-				plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[0]),
+				plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[0]),
 
 				plot_actual_region_y + plot_actual_region_height*amp_to_y(display_composite_xfer_function_mag_dB[0]));
 
@@ -610,7 +665,7 @@ public:
 
 				mag_trace.lineTo(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[x]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[x]),
 
 					plot_actual_region_y + plot_actual_region_height*amp_to_y(display_composite_xfer_function_mag_dB[x]));
 
@@ -631,7 +686,7 @@ public:
 
 			phase_trace.startNewSubPath(
 
-				plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[0]),
+				plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[0]),
 
 				plot_actual_region_y + plot_actual_region_height*phase_to_y(display_composite_xfer_function_phase_deg[0]));
 
@@ -640,7 +695,7 @@ public:
 
 				phase_trace.lineTo(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[x]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[x]),
 
 					plot_actual_region_y + plot_actual_region_height*phase_to_y(display_composite_xfer_function_phase_deg[x]));
 
@@ -648,7 +703,7 @@ public:
 
 			phase_smoothed_trace = phase_trace.createPathWithRoundedCorners(trace_path_smoothing_radius);
 
-			g.setColour(Colours::red);
+			g.setColour(Colours::darkred);
 
 			g.strokePath(phase_smoothed_trace, PathStrokeType(live_trace_thickness));
 
@@ -661,7 +716,7 @@ public:
 
 			coh_trace.startNewSubPath(
 
-				plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[0]),
+				plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[0]),
 
 				plot_actual_region_y + plot_actual_region_height*(1.0-display_composite_coherence_value[0]));
 
@@ -669,7 +724,7 @@ public:
 
 				coh_trace.lineTo(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[x]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[x]),
 
 					plot_actual_region_y + plot_actual_region_height*(1.0-display_composite_coherence_value[x]));
 
@@ -677,7 +732,7 @@ public:
 
 			coh_smoothed_trace = coh_trace.createPathWithRoundedCorners(trace_path_smoothing_radius);
 
-			g.setColour(Colours::blue);
+			g.setColour(Colours::darkcyan);
 
 			g.strokePath(coh_smoothed_trace, PathStrokeType(live_trace_thickness));
 
@@ -690,7 +745,7 @@ public:
 
 			spectrum_trace.startNewSubPath(
 
-				plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[0]),
+				plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[0]),
 
 				plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_ref_spectrum_mag_dB[0]));
 
@@ -699,7 +754,7 @@ public:
 
 				spectrum_trace.lineTo(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(current_composite_fft_bin_frequencies[x]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[x]),
 
 					plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_ref_spectrum_mag_dB[x]));
 
@@ -707,7 +762,7 @@ public:
 
 			spectrum_smoothed_trace = spectrum_trace.createPathWithRoundedCorners(trace_path_smoothing_radius);
 
-			g.setColour(Colours::magenta);
+			g.setColour(Colours::darkmagenta);
 
 			g.strokePath(spectrum_smoothed_trace, PathStrokeType(live_trace_thickness));
 
@@ -722,7 +777,7 @@ public:
 
 				mag_trace.startNewSubPath(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[0]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(loaded_composite_fft_bin_frequencies[0]),
 
 					plot_actual_region_y + plot_actual_region_height*amp_to_y(loaded_composite_xfer_function_mag_dB_avg_cal[0]));
 
@@ -731,7 +786,7 @@ public:
 
 					mag_trace.lineTo(
 
-						plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[x]),
+						plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(loaded_composite_fft_bin_frequencies[x]),
 
 						plot_actual_region_y + plot_actual_region_height*amp_to_y(loaded_composite_xfer_function_mag_dB_avg_cal[x]));
 
@@ -752,7 +807,7 @@ public:
 
 				phase_trace.startNewSubPath(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[0]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(loaded_composite_fft_bin_frequencies[0]),
 
 					plot_actual_region_y + plot_actual_region_height*phase_to_y(loaded_composite_xfer_function_phase_deg_avg[0]));
 
@@ -761,7 +816,7 @@ public:
 
 					phase_trace.lineTo(
 
-						plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[x]),
+						plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(loaded_composite_fft_bin_frequencies[x]),
 
 						plot_actual_region_y + plot_actual_region_height*phase_to_y(loaded_composite_xfer_function_phase_deg_avg[x]));
 
@@ -782,7 +837,7 @@ public:
 
 				coh_trace.startNewSubPath(
 
-					plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[0]),
+					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(loaded_composite_fft_bin_frequencies[0]),
 
 					plot_actual_region_y + plot_actual_region_height*(1.0 - loaded_composite_coherence_value[0]));
 
@@ -790,7 +845,7 @@ public:
 
 					coh_trace.lineTo(
 
-						plot_actual_region_x + plot_actual_region_width*freq_to_x(loaded_composite_fft_bin_frequencies[x]),
+						plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(loaded_composite_fft_bin_frequencies[x]),
 
 						plot_actual_region_y + plot_actual_region_height*(1.0 - loaded_composite_coherence_value[x]));
 
@@ -808,6 +863,26 @@ public:
 		
 		g.restoreState();
 
+		//==============================================================================
+
+		if (mod_line_visible == true) {
+
+			g.saveState();
+
+			g.reduceClipRegion(plot_clip_region);
+
+			g.setColour(Colours::white);
+
+			g.drawRect(mouse_current_position.getX(), plot_actual_region.getY(), mod_crosshair_thickness, plot_actual_region.getHeight(), 1.0);
+
+			g.restoreState();
+
+		}
+
+		else {};
+
+		//==============================================================================
+
 		repaint_active = false;
 
 	}
@@ -819,6 +894,29 @@ public:
 		plot_clip_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.1, plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.8);
 		
 		top_title_region.setBounds(0, 0, plot_outline.getWidth(), plot_outline.getHeight()*0.05);
+
+		mod_region.setBounds(top_title_region.getX() + top_title_region.getWidth() / 2 - top_title_region.getWidth()*0.15, top_title_region.getY(), top_title_region.getWidth()*0.3, top_title_region.getHeight());
+				
+		mod_region_width = mod_region.getWidth();
+		
+		frequency_mod_bounds = mod_region.removeFromLeft(mod_region_width*0.2);
+		magnitude_mod_bounds = mod_region.removeFromLeft(mod_region_width*0.2);
+		phase_mod_bounds = mod_region.removeFromLeft(mod_region_width*0.2);
+		coherence_mod_bounds = mod_region.removeFromLeft(mod_region_width*0.2);
+		spectrum_mod_bounds = mod_region;
+
+		frequency_mod.setBounds(frequency_mod_bounds);
+		magnitude_mod.setBounds(magnitude_mod_bounds);
+		phase_mod.setBounds(phase_mod_bounds);
+		coherence_mod.setBounds(coherence_mod_bounds);
+		spectrum_mod.setBounds(spectrum_mod_bounds);
+
+		frequency_mod.setFont(frequency_mod.getHeight()*0.5);
+		magnitude_mod.setFont(frequency_mod.getHeight()*0.5);
+		phase_mod.setFont(frequency_mod.getHeight()*0.5);
+		coherence_mod.setFont(frequency_mod.getHeight()*0.5);
+		spectrum_mod.setFont(frequency_mod.getHeight()*0.5);
+		
 		top_slider_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.05, plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.05);
 				
 		right_slider_region.setBounds(plot_outline.getWidth()*0.95, plot_outline.getHeight()*0.1, plot_outline.getWidth()*0.05, plot_outline.getHeight()*0.8);
@@ -831,10 +929,6 @@ public:
 		
 		bottom_label_clip_region = bottom_label_region.expanded(bottom_label_region.getHeight()*axis_label_scale*0.85, 0);
 		left_label_clip_region = left_label_region.expanded(0, bottom_label_region.getHeight()*axis_label_scale*0.5);
-
-		/*load_indicator_region.setBounds(0, plot_outline.getHeight()*0.95, plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.05);
-		ui_load_label_outline = load_indicator_region.removeFromTop(load_indicator_region.getHeight()*0.5);
-		analyser_load_label_outline = load_indicator_region;*/
 
 		horizontal_zoom_slider.setBounds(bottom_slider_region);
 		horizontal_center_slider.setBounds(top_slider_region);
@@ -1012,6 +1106,14 @@ private:
 	TextButton spectrum_visible_button;
 	TextButton spectrum_active_button;
 
+	Label frequency_mod;
+	Label magnitude_mod;
+	Label phase_mod;
+	Label coherence_mod;
+	Label spectrum_mod;
+
+	Point<int> mouse_current_position;
+
 	void calc_display_values(std::vector<double> &display_value_vector, std::vector<double> &current_value_vector, int plot_type) {
 
 		float snap_range = 0.0;
@@ -1081,8 +1183,50 @@ private:
 		}
 
 	}
+
+	void update_mod_values() {
+
+		frequency_mod_value = mouse_x_to_freq(mouse_current_position.getX());
+
+		if (frequency_mod_value < 20) {
+
+			frequency_mod_value = 20;
+			
+		}
+
+		else if (frequency_mod_value > 20000) {
+
+			frequency_mod_value = 20000;
+
+		}
+
+		else {};
+
+		frequency_mod_value_string = String(frequency_mod_value);
+		frequency_mod_value_string += " Hz";
+
+		magnitude_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_xfer_function_mag_dB);
+		magnitude_mod_value_string = String(magnitude_mod_value);
+		magnitude_mod_value_string = magnitude_mod_value_string.substring(0, magnitude_mod_value_string.indexOfChar('.') + 2);
+		magnitude_mod_value_string += " dB";
+
+		phase_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_xfer_function_phase_deg);
+		phase_mod_value_string = String(phase_mod_value);
+		phase_mod_value_string = phase_mod_value_string.substring(0, phase_mod_value_string.indexOfChar('.'));
+		phase_mod_value_string += " Deg";
+
+		coherence_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_coherence_value);
+		coherence_mod_value_string = String(coherence_mod_value);
+		coherence_mod_value_string = coherence_mod_value_string.substring(0, coherence_mod_value_string.indexOfChar('.') + 3);
+
+		spectrum_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_ref_spectrum_mag_dB);
+		spectrum_mod_value_string = String(spectrum_mod_value);
+		spectrum_mod_value_string = spectrum_mod_value_string.substring(0, spectrum_mod_value_string.indexOfChar('.'));
+		spectrum_mod_value_string += " dB";
+
+	}
 	
-	float freq_to_x(double freq) {
+	float freq_to_normalized_distance(double freq) {
 		
 		double raw_distance = log10(freq);
 
@@ -1093,6 +1237,20 @@ private:
 
 		return normalized_distance;
 
+	}
+
+	int mouse_x_to_freq(int mouse_x) {
+
+		mouse_x -= plot_actual_region.getX() - getX(); //mouse_x argument is relative to component, not the actuat plot region. This compensates for that. 
+
+		double normalized_distance = mouse_x*1.0 / plot_actual_region.getWidth();
+	
+		double zeroed_distance = normalized_distance * 3;
+
+		double raw_distance = zeroed_distance + log10(grid_frequencies[0]);
+
+		return pow(10, raw_distance);
+	
 	}
 
 	float amp_to_y(double amp) {
@@ -1108,6 +1266,37 @@ private:
 	float spectrum_mag_to_y(double spectrum_mag) {
 		double spectrum_mag_percentage_y = -(spectrum_mag * (0.01 / 0.96)); 
 		return spectrum_mag_percentage_y;
+	}
+
+	double frequency_to_value(int specified_frequency, std::vector<double> &frequency_vector, std::vector<double> &value_vector) {
+
+		double x0 = 0;
+		double x1 = 0;
+		double y0 = 0;
+		double y1 = 0;
+		
+		int index = 0;
+
+		while (true) {
+
+			if (specified_frequency > frequency_vector[index]) {
+
+				index++;
+
+			}
+
+			else { break; }
+
+		}
+
+		x0 = frequency_vector[index-1];
+		x1 = frequency_vector[index];
+
+		y0 = value_vector[index - 1];
+		y1 = value_vector[index];
+
+		return y0 + (specified_frequency - x0)*((y1 - y0) / (x1 - x0));
+
 	}
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (plots)
