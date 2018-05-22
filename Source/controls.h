@@ -62,11 +62,17 @@ public:
 	Rectangle<int> right_column_row_3_active;
 	Rectangle<int> right_column_row_3_active_left;
 	Rectangle<int> right_column_row_3_active_right;
-	Rectangle<int> right_column_row_4_active;
-		
+	Rectangle<int> right_column_row_4;
+	Rectangle<int> right_column_row_4_left;
+	Rectangle<int> right_column_row_4_right;
+	Rectangle<int> right_column_row_4_left_active;
+	Rectangle<int> right_column_row_4_right_active;
+			
 	int analysis_status = 0; //0 is stopped, 1 is running
 
 	int saved_traces_visible = 0; //0 is non-visible, 1 is visible
+
+	int curves_only = 0; //0 is regular mode, 1 is curves only mode
 
 	//==========//
 
@@ -198,6 +204,18 @@ public:
 		loaded_composite_xfer_function_mag_dB_avg_cal.resize(composite_fft_bins);
 		loaded_composite_xfer_function_phase_deg_avg.resize(composite_fft_bins);
 		loaded_composite_coherence_value.resize(composite_fft_bins);
+
+		addAndMakeVisible(curves_only_button);
+		curves_only_button.setClickingTogglesState(true);
+		curves_only_button.setButtonText("Curves Only");
+		curves_only_button.addListener(this);
+		curves_only_button.setColour(curves_only_button.buttonColourId, Colours::transparentBlack);
+		curves_only_button.setColour(curves_only_button.buttonOnColourId, Colour(160, 79, 0));
+
+		addAndMakeVisible(ir_window_button);
+		ir_window_button.setButtonText("IR Window");
+		ir_window_button.addListener(this);
+		ir_window_button.setColour(ir_window_button.buttonColourId, Colours::transparentBlack);
 		
     }
 
@@ -233,6 +251,12 @@ public:
 		//g.drawRect(right_column_row_2, 1);
 		//g.drawRect(right_column_row_3, 1);
 		//g.drawRect(right_column_row_4, 1);
+
+		//g.drawRect(right_column_row_4, 1.0);
+		//g.drawRect(right_column_row_4_left, 1.0);
+		//g.drawRect(right_column_row_4_right, 1.0);
+		//g.drawRect(right_column_row_4_left_active, 1.0);
+		//g.drawRect(right_column_row_4_right_active, 1.0);
 
 		mic_cal_filename_label.setFont(left_column_row_1.getHeight()*0.8);
 
@@ -333,6 +357,13 @@ public:
 
 		right_column_row_3 = right_column.removeFromTop(controls_height * 0.25);
 		right_column_row_3_active = right_column_row_3.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
+		right_column_row_4 = right_column;
+		right_column_row_4_left = right_column_row_4.removeFromLeft(right_column_row_4.getWidth()*0.5);
+		right_column_row_4_right = right_column_row_4;
+		right_column_row_4_left_active = right_column_row_4_left.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+		right_column_row_4_right_active = right_column_row_4_right.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
+
 		
 		//
 
@@ -359,6 +390,10 @@ public:
 		saved_traces_visible_onoff_button.setBounds(right_column_row_2_active_far_right);
 
 		saved_traces_filename_label.setBounds(right_column_row_3_active);
+
+		curves_only_button.setBounds(right_column_row_4_left_active);
+
+		ir_window_button.setBounds(right_column_row_4_right_active);
     
 	}
 
@@ -367,6 +402,8 @@ public:
 		analysis_status = analysis_onoff_button.getToggleState();
 
 		saved_traces_visible = saved_traces_visible_onoff_button.getToggleState();
+
+		curves_only = curves_only_button.getToggleState();
 		
 		if (button == &choose_mic_cal_button)
 	
@@ -575,6 +612,10 @@ private:
 	Label saved_traces_filename_label;
 
 	TextButton config_audio_io_button;
+
+	TextButton curves_only_button;
+
+	TextButton ir_window_button;
 					
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (controls)
 

@@ -22,8 +22,6 @@ public:
 		
 	int num_samples_stored = 0;
 
-	int buffer_ready = 0;
-
 	int update_rate = 30; //In Hz
 	
 	MainContentComponent()
@@ -58,8 +56,6 @@ public:
 
 		audio_device_setup.sampleRate = 48000;
 
-		//audio_device_setup.bufferSize = 480;
-
 		this->deviceManager.setAudioDeviceSetup(audio_device_setup, true);
 
 	}
@@ -71,8 +67,6 @@ public:
 		double ref_sample_value = 0;
 		double system_sample_value = 0;
 		
-		if (audio_device_setup.inputChannels.toInteger() != 3) {} //there must be exactly two input channels (JUCE thinks there are 3 on Focusrite 2i2) for this audio callback to run correctly
-
 		if (audio_device_setup.inputChannels.toInteger() == 3) {
 
 			supervisor1->audio_buffer_mtx_supervisor.lock();
@@ -81,7 +75,7 @@ public:
 
 				ref_sample_value = ref_in_buffer[sample];
 				system_sample_value = system_in_buffer[sample];
-				
+
 				supervisor1->buffer_ref_samples.push_front(ref_sample_value);
 				supervisor1->buffer_ref_samples.pop_back();
 
@@ -96,9 +90,7 @@ public:
 
 		}
 
-		if (num_samples_stored >= 100000) {
-			buffer_ready = 1;
-		}
+		else {}; //there must be exactly two input channels (JUCE thinks there are 3 on Focusrite 2i2) for this audio callback to run correctly
 
 	}
 	
@@ -134,10 +126,10 @@ public:
 	void update_current_plot_data() {
 
 		supervisor1->plot_data_mtx_supervisor.lock();
-		
+
 		for (int col = 0; col < composite_fft_bins; col++) {
-						
-			
+
+
 			main_plot.current_composite_fft_bin_frequencies[col] = supervisor1->composite_fft_bin_frequencies[col];
 			main_plot.current_composite_xfer_function_mag_dB[col] = supervisor1->composite_xfer_function_mag_dB_avg[col];
 			main_plot.current_composite_xfer_function_phase_deg[col] = supervisor1->composite_xfer_function_phase_deg_avg[col];
@@ -220,6 +212,7 @@ public:
 		supervisor1->system_curve_path = main_settings_bar.main_controls.fixed_system_curve_file_path;
 		supervisor1->analyser_update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
 		supervisor1->smoothing_passes = main_settings_bar.main_controls.smoothing_slider_value;
+		supervisor1->curves_only = main_settings_bar.main_controls.curves_only;
 
 	}
 

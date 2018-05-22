@@ -139,6 +139,8 @@ public:
 
 	float spectrum_slope_db_octave = -4.5;
 
+	int curves_only = 0;
+
 	supervisor(): Thread("Supervisor_Thread",0)
 	
 	{
@@ -493,15 +495,33 @@ private:
 
 	void apply_mic_and_system_curves(std::vector<double> & source_vector, std::vector<double> & destination_vector) {
 
-		for (int x = 0; x < composite_fft_bins; x++) {
+		if (curves_only == 0) {
 
-			destination_vector[x] =
+			for (int x = 0; x < composite_fft_bins; x++) {
 
-			source_vector[x] -
+				destination_vector[x] =
 
-			interpolated_mic_cal_amplitudes[x] -
+					source_vector[x] -
 
-			interpolated_system_curve_amplitudes[x];
+					interpolated_mic_cal_amplitudes[x] -
+
+					interpolated_system_curve_amplitudes[x];
+
+			}
+
+		}
+
+		else {
+
+			for (int x = 0; x < composite_fft_bins; x++) {
+
+				destination_vector[x] =
+					
+					interpolated_mic_cal_amplitudes[x] +
+
+					interpolated_system_curve_amplitudes[x];
+
+			}
 
 		}
 
