@@ -91,6 +91,7 @@ public:
 
 		g.setColour(Colours::black);
 		g.fillRect(delay_indicator_display_black_area);
+		g.drawRect(getLocalBounds(), 1.0);
 
 		g.setColour(Colours::white);
 		g.setFont(delay_indicator_display_black_area.getHeight()*0.5);

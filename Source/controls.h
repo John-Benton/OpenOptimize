@@ -226,13 +226,11 @@ public:
 
     void paint (Graphics& g) override
     {
+		g.setColour (Colours::black);
 
-		//g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+		g.drawRect (getLocalBounds(), 1.0);
 
-        //g.setColour (Colours::grey);
-        //g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-        g.setColour (Colours::white);
+		g.setColour(Colours::white);
 
 		//g.drawRect(left_column, 1);
 		//g.drawRect(left_column_row_1, 1);

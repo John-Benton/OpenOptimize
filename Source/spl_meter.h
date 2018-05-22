@@ -174,6 +174,9 @@ public:
 
 		}
 
+		g.setColour(Colours::black);
+		g.drawRect(getLocalBounds(), 1.0);
+
 		repaint_active = false;
 
     }
