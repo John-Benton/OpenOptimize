@@ -110,16 +110,6 @@ public:
 
 	int smoothing_slider_value = 0;
 
-	//double composite_fft_bin_frequencies_for_save[162] = { 0 };
-	//double composite_xfer_function_mag_dB_avg_cal_for_save[162] = { 0 };
-	//double composite_xfer_function_phase_deg_avg_for_save[162] = { 0 };
-	//double composite_coherence_value_for_save[162] = { 0 };
-
-	//double loaded_composite_fft_bin_frequencies[162] = { 0 };
-	//double loaded_composite_xfer_function_mag_dB_avg_cal[162] = { 0 };
-	//double loaded_composite_xfer_function_phase_deg_avg[162] = { 0 };
-	//double loaded_composite_coherence_value[162] = { 0 };
-
 	std::vector<double> composite_fft_bin_frequencies_for_save;
 	std::vector<double> composite_xfer_function_mag_dB_avg_cal_for_save;
 	std::vector<double> composite_xfer_function_phase_deg_avg_for_save;

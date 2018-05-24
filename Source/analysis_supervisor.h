@@ -521,72 +521,42 @@ private:
 
 	}
 
-	//void calc_system_spectrum() {
-
-	//	for (int col = 0; col < spectrum_fft_bins; col++) {
-
-	//		system_spectrum_fft_bin_frequencies[col] = fft_4k->fft_bin_frequencies[col];
-
-	//		system_spectrum_mag_linear[col] = 
-	//			
-	//			sqrt(pow(fft_4k->fftw_complex_out_system_vector[0][col], 2) +
-	//				
-	//				pow(fft_4k->fftw_complex_out_system_vector[1][col], 2));
-
-	//		system_spectrum_mag_dB[col] = 20 * log10(system_spectrum_mag_linear[col]);
-
-	//	}
-
-	//}
-
 	void process_fft_data() {
 
-		complex_conjugate_system();
-		complex_conjugate_ref();
-		calc_ref_autospectrum();
-		calc_system_autospectrum();
+		complex_conjugate(composite_ref_complex_vector, composite_ref_complex_conjugate);
+		complex_conjugate(composite_system_complex_vector, composite_system_complex_conjugate);
+
+		calc_autospectrum(composite_ref_complex_vector, composite_ref_complex_conjugate, composite_ref_autospectrum);
+		calc_autospectrum(composite_system_complex_vector, composite_system_complex_conjugate, composite_system_autospectrum);
+
 		calc_cross_spectrum();
 		calc_xfer_function();
 		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
 		smooth_xfer_function_data();
 
 	}
-	
-	void complex_conjugate_ref() {
 
-		std::copy(composite_ref_complex_vector[0].begin(), composite_ref_complex_vector[0].begin() + composite_fft_bins, composite_ref_complex_conjugate[0].begin());
+	void complex_conjugate(	std::vector<std::vector<double>> & composite_complex_vector, 
+							std::vector<std::vector<double>> & composite_complex_conjugate) {
+
+		std::copy(	composite_complex_vector[0].begin(), 
+					composite_complex_vector[0].begin() + composite_fft_bins, 
+					composite_complex_conjugate[0].begin());
 
 		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_ref_complex_conjugate[1][col] = -composite_ref_complex_vector[1][col];
+			composite_complex_conjugate[1][col] = -composite_complex_vector[1][col];
 		}
 
 	}
 
-	void complex_conjugate_system() {
-
-		std::copy(composite_system_complex_vector[0].begin(), composite_system_complex_vector[0].begin() + composite_fft_bins, composite_system_complex_conjugate[0].begin());
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_system_complex_conjugate[1][col] = -composite_system_complex_vector[1][col];
-		}
-
-	}
-
-	void calc_ref_autospectrum() {
+	void calc_autospectrum(	std::vector<std::vector<double>> & composite_complex_vector, 
+							std::vector<std::vector<double>> & composite_complex_conjugate,
+							std::vector<double> & composite_autospectrum) {
 
 		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_ref_autospectrum[col] =
-				((composite_ref_complex_vector[0][col])*(composite_ref_complex_conjugate[0][col]) -
-				((composite_ref_complex_vector[1][col])*(composite_ref_complex_conjugate[1][col])));
-		}
-	}
-
-	void calc_system_autospectrum() {
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_system_autospectrum[col] =
-				((composite_system_complex_vector[0][col])*(composite_system_complex_conjugate[0][col]) -
-				((composite_system_complex_vector[1][col])*(composite_system_complex_conjugate[1][col])));
+			composite_autospectrum[col] =
+				((composite_complex_vector[0][col])*(composite_complex_conjugate[0][col]) -
+				((composite_complex_vector[1][col])*(composite_complex_conjugate[1][col])));
 		}
 	}
 
@@ -605,7 +575,9 @@ private:
 		}
 
 		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_cross_spectrum_magnitude[col] = sqrt(pow(composite_cross_spectrum_complex[0][col], 2) + pow(composite_cross_spectrum_complex[1][col], 2));
+				composite_cross_spectrum_magnitude[col] = 
+				sqrt(pow(composite_cross_spectrum_complex[0][col], 2) + 
+				pow(composite_cross_spectrum_complex[1][col], 2));
 		}
 		int x = 0;
 	}
@@ -945,170 +917,6 @@ private:
 		}
 
 	};
-
-	//void interpolate_mic_cal_amplitudes() {
-
-	//	for (int x = 0; x < composite_fft_bins; x++) {
-
-	//		if (composite_fft_bin_frequencies[x] < original_mic_cal_frequencies[0]) {
-
-	//			interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[0];
-
-	//		}
-
-	//		if (composite_fft_bin_frequencies[x] > original_mic_cal_frequencies[original_mic_cal_frequencies.size() - 1]) {
-
-	//			interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[original_mic_cal_frequencies.size() - 1];
-
-	//		}
-
-	//		if (composite_fft_bin_frequencies[x] >= original_mic_cal_frequencies[0] &&
-	//			composite_fft_bin_frequencies[x] <= original_mic_cal_frequencies[original_mic_cal_frequencies.size() - 1]) {
-
-	//			int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
-
-	//			int current_pos = 0;
-	//			int x0_pos = 0;
-	//			int x1_pos = 0;
-
-	//			while (1) {
-
-	//				current_pos++;
-
-	//				if (current_pos >= original_mic_cal_frequencies.size() - 1) {
-
-	//					x0_pos = original_mic_cal_frequencies.size() - 1;
-
-	//					break;
-
-	//				}
-
-	//				if (original_mic_cal_frequencies[current_pos] > composite_fft_bin_frequency) {
-
-	//					x1_pos = current_pos;
-
-	//					break;
-
-	//				}
-
-	//			}
-
-	//			while (1) {
-
-	//				current_pos--;
-
-	//				if (current_pos <= 0) {
-
-	//					x0_pos = 0;
-
-	//					break;
-
-	//				}
-
-	//				if (original_mic_cal_frequencies[current_pos] < composite_fft_bin_frequency) {
-
-	//					x0_pos = current_pos;
-
-	//					break;
-
-	//				}
-
-	//			}
-
-	//			interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[x0_pos] +
-
-	//				(composite_fft_bin_frequency - original_mic_cal_frequencies[x0_pos])*
-
-	//				((original_mic_cal_amplitudes[x1_pos] - original_mic_cal_amplitudes[x0_pos]) / (original_mic_cal_frequencies[x1_pos] - original_mic_cal_frequencies[x0_pos]));
-
-	//		}
-
-	//	}
-
-	//};
-	//
-	//void interpolate_system_curve_amplitudes() {
-
-	//	for (int x = 0; x < composite_fft_bins; x++) {
-
-	//		if (composite_fft_bin_frequencies[x] < original_system_curve_frequencies[0]) {
-
-	//			interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[0];
-
-	//		}
-
-	//		if (composite_fft_bin_frequencies[x] > original_system_curve_frequencies[original_system_curve_frequencies.size() - 1]) {
-
-	//			interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[original_system_curve_frequencies.size() - 1];
-
-	//		}
-
-	//		if (composite_fft_bin_frequencies[x] >= original_system_curve_frequencies[0] &&
-	//			composite_fft_bin_frequencies[x] <= original_system_curve_frequencies[original_system_curve_frequencies.size() - 1]) {
-
-	//			int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
-
-	//			int current_pos = 0;
-	//			int x0_pos = 0;
-	//			int x1_pos = 0;
-
-	//			while (1) {
-
-	//				current_pos++;
-
-	//				if (current_pos >= original_system_curve_frequencies.size() - 1) {
-
-	//					x0_pos = original_system_curve_frequencies.size() - 1;
-
-	//					break;
-
-	//				}
-
-	//				if (original_system_curve_frequencies[current_pos] > composite_fft_bin_frequency) {
-
-	//					x1_pos = current_pos;
-
-	//					break;
-
-	//				}
-
-	//			}
-
-	//			while (1) {
-
-	//				current_pos--;
-
-	//				if (current_pos <= 0) {
-
-	//					x0_pos = 0;
-
-	//					break;
-
-	//				}
-
-	//				if (original_system_curve_frequencies[current_pos] < composite_fft_bin_frequency) {
-
-	//					x0_pos = current_pos;
-
-	//					break;
-
-	//				}
-
-	//			}
-
-	//			interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[x0_pos] +
-
-	//				(composite_fft_bin_frequency - original_system_curve_frequencies[x0_pos])*
-
-	//				((original_system_curve_amplitudes[x1_pos] - original_system_curve_amplitudes[x0_pos]) / 
-	//				
-	//				(original_system_curve_frequencies[x1_pos] - original_system_curve_frequencies[x0_pos]));
-
-	//		}
-
-	//	}
-	//	
-	//}
 
 	void run_calcs_for_SPL_and_meters() {
 
