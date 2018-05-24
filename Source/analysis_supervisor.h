@@ -96,6 +96,7 @@ public:
 	/*---------------------------------------------------*/
 
 	std::string mic_cal_path;
+	std::string mic_cal_path_in_use;
 
 	std::vector<double> original_mic_cal_frequencies;
 	std::vector<double> original_mic_cal_amplitudes;
@@ -105,6 +106,7 @@ public:
 	/*---------------------------------------------------*/
 
 	std::string system_curve_path;
+	std::string system_curve_path_in_use;
 
 	std::vector<double> original_system_curve_frequencies;
 	std::vector<double> original_system_curve_amplitudes;
@@ -239,16 +241,8 @@ public:
 
 		refresh_supervisor_buffer();
 
-		if (mic_cal_path != "") {
-			load_mic_cal();
-			interpolate_mic_cal_amplitudes();
-		}
-
-		if (system_curve_path != "") {
-			load_system_curve();
-			interpolate_system_curve_amplitudes();
-		}
-
+		update_mic_system_curves();
+		
 		fft_32k->run_fft_analysis(current_ref_samples, current_system_samples);
 		//fft_16k->run_fft_analysis(current_ref_samples, current_system_samples);
 		fft_8k->run_fft_analysis(current_ref_samples, current_system_samples);
@@ -803,7 +797,27 @@ private:
 
 	}
 
-	void load_mic_cal() {
+	void update_mic_system_curves() {
+
+		if (mic_cal_path_in_use != mic_cal_path) {
+			mic_cal_path_in_use = mic_cal_path;
+			load_curve(mic_cal_path_in_use, original_mic_cal_frequencies, original_mic_cal_amplitudes);
+			interpolate_curve(original_mic_cal_frequencies, original_mic_cal_amplitudes, interpolated_mic_cal_amplitudes);
+		}
+
+		else {};
+
+		if (system_curve_path_in_use != system_curve_path) {
+			system_curve_path_in_use = system_curve_path;
+			load_curve(system_curve_path_in_use, original_system_curve_frequencies, original_system_curve_amplitudes);
+			interpolate_curve(original_system_curve_frequencies, original_system_curve_amplitudes, interpolated_system_curve_amplitudes);
+		}
+
+		else {};
+			
+	}
+
+	void load_curve(std::string curve_path, std::vector<double> & original_curve_frequencies, std::vector<double> & original_curve_amplitudes) {
 
 		std::string blank;
 
@@ -821,21 +835,21 @@ private:
 
 		int tab_pos = 0;
 
-		std::ifstream mic_cal(mic_cal_path);
+		std::ifstream curve(curve_path);
 
-		while (std::getline(mic_cal, blank)) {
+		while (std::getline(curve, blank)) {
 
 			numlines++;
 
 		}
 
-		mic_cal.clear();
+		curve.clear();
 
-		mic_cal.seekg(0, mic_cal.beg);
+		curve.seekg(0, curve.beg);
 
 		for (int x = 0; x < numlines; x++) {
 
-			std::getline(mic_cal, current_line);
+			std::getline(curve, current_line);
 
 			tab_pos = current_line.find('\t');
 
@@ -843,32 +857,32 @@ private:
 
 			current_line.copy(amplitude, current_line.length() - tab_pos, tab_pos + 1);
 
-			original_mic_cal_frequencies.push_back(atof(frequency));
+			original_curve_frequencies.push_back(atof(frequency));
 
-			original_mic_cal_amplitudes.push_back(atof(amplitude));
+			original_curve_amplitudes.push_back(atof(amplitude));
 
 		}
 
 	}
 
-	void interpolate_mic_cal_amplitudes() {
+	void interpolate_curve(std::vector<double> & original_frequencies, std::vector<double> & original_amplitudes, std::vector<double> & interpolated_amplitudes) {
 
 		for (int x = 0; x < composite_fft_bins; x++) {
 
-			if (composite_fft_bin_frequencies[x] < original_mic_cal_frequencies[0]) {
+			if (composite_fft_bin_frequencies[x] < original_frequencies[0]) {
 
-				interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[0];
-
-			}
-
-			if (composite_fft_bin_frequencies[x] > original_mic_cal_frequencies[original_mic_cal_frequencies.size() - 1]) {
-
-				interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[original_mic_cal_frequencies.size() - 1];
+				interpolated_amplitudes[x] = original_amplitudes[0];
 
 			}
 
-			if (composite_fft_bin_frequencies[x] >= original_mic_cal_frequencies[0] &&
-				composite_fft_bin_frequencies[x] <= original_mic_cal_frequencies[original_mic_cal_frequencies.size() - 1]) {
+			if (composite_fft_bin_frequencies[x] > original_frequencies[original_frequencies.size() - 1]) {
+
+				interpolated_amplitudes[x] = original_amplitudes[original_amplitudes.size() - 1];
+
+			}
+
+			if (composite_fft_bin_frequencies[x] >= original_frequencies[0] &&
+				composite_fft_bin_frequencies[x] <= original_frequencies[original_frequencies.size() - 1]) {
 
 				int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
 
@@ -880,15 +894,15 @@ private:
 
 					current_pos++;
 
-					if (current_pos >= original_mic_cal_frequencies.size() - 1) {
+					if (current_pos >= original_frequencies.size() - 1) {
 
-						x0_pos = original_mic_cal_frequencies.size() - 1;
+						x0_pos = original_frequencies.size() - 1;
 
 						break;
 
 					}
 
-					if (original_mic_cal_frequencies[current_pos] > composite_fft_bin_frequency) {
+					if (original_frequencies[current_pos] > composite_fft_bin_frequency) {
 
 						x1_pos = current_pos;
 
@@ -910,7 +924,7 @@ private:
 
 					}
 
-					if (original_mic_cal_frequencies[current_pos] < composite_fft_bin_frequency) {
+					if (original_frequencies[current_pos] < composite_fft_bin_frequency) {
 
 						x0_pos = current_pos;
 
@@ -920,11 +934,11 @@ private:
 
 				}
 
-				interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[x0_pos] +
+				interpolated_amplitudes[x] = original_amplitudes[x0_pos] +
 
-					(composite_fft_bin_frequency - original_mic_cal_frequencies[x0_pos])*
+					(composite_fft_bin_frequency - original_frequencies[x0_pos])*
 
-					((original_mic_cal_amplitudes[x1_pos] - original_mic_cal_amplitudes[x0_pos]) / (original_mic_cal_frequencies[x1_pos] - original_mic_cal_frequencies[x0_pos]));
+					((original_amplitudes[x1_pos] - original_amplitudes[x0_pos]) / (original_frequencies[x1_pos] - original_frequencies[x0_pos]));
 
 			}
 
@@ -932,136 +946,169 @@ private:
 
 	};
 
-	void load_system_curve() {
+	//void interpolate_mic_cal_amplitudes() {
 
-		std::string blank;
+	//	for (int x = 0; x < composite_fft_bins; x++) {
 
-		std::string current_line;
+	//		if (composite_fft_bin_frequencies[x] < original_mic_cal_frequencies[0]) {
 
-		char frequency[8];
+	//			interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[0];
 
-		double frequency_double;
+	//		}
 
-		char amplitude[8];
+	//		if (composite_fft_bin_frequencies[x] > original_mic_cal_frequencies[original_mic_cal_frequencies.size() - 1]) {
 
-		double amplitude_double;
+	//			interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[original_mic_cal_frequencies.size() - 1];
 
-		int numlines = 0;
+	//		}
 
-		int tab_pos = 0;
+	//		if (composite_fft_bin_frequencies[x] >= original_mic_cal_frequencies[0] &&
+	//			composite_fft_bin_frequencies[x] <= original_mic_cal_frequencies[original_mic_cal_frequencies.size() - 1]) {
 
-		std::ifstream system_curve(system_curve_path);
+	//			int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
 
-		while (std::getline(system_curve, blank)) {
+	//			int current_pos = 0;
+	//			int x0_pos = 0;
+	//			int x1_pos = 0;
 
-			numlines++;
+	//			while (1) {
 
-		}
+	//				current_pos++;
 
-		system_curve.clear();
+	//				if (current_pos >= original_mic_cal_frequencies.size() - 1) {
 
-		system_curve.seekg(0, system_curve.beg);
+	//					x0_pos = original_mic_cal_frequencies.size() - 1;
 
-		for (int x = 0; x < numlines; x++) {
+	//					break;
 
-			std::getline(system_curve, current_line);
+	//				}
 
-			tab_pos = current_line.find('\t');
+	//				if (original_mic_cal_frequencies[current_pos] > composite_fft_bin_frequency) {
 
-			current_line.copy(frequency, tab_pos);
+	//					x1_pos = current_pos;
 
-			current_line.copy(amplitude, current_line.length() - tab_pos, tab_pos + 1);
+	//					break;
 
-			original_system_curve_frequencies.push_back(atof(frequency));
+	//				}
 
-			original_system_curve_amplitudes.push_back(atof(amplitude));
+	//			}
 
-		}
+	//			while (1) {
 
-	};
+	//				current_pos--;
 
-	void interpolate_system_curve_amplitudes() {
+	//				if (current_pos <= 0) {
 
-		for (int x = 0; x < composite_fft_bins; x++) {
+	//					x0_pos = 0;
 
-			if (composite_fft_bin_frequencies[x] < original_system_curve_frequencies[0]) {
+	//					break;
 
-				interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[0];
+	//				}
 
-			}
+	//				if (original_mic_cal_frequencies[current_pos] < composite_fft_bin_frequency) {
 
-			if (composite_fft_bin_frequencies[x] > original_system_curve_frequencies[original_system_curve_frequencies.size() - 1]) {
+	//					x0_pos = current_pos;
 
-				interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[original_system_curve_frequencies.size() - 1];
+	//					break;
 
-			}
+	//				}
 
-			if (composite_fft_bin_frequencies[x] >= original_system_curve_frequencies[0] &&
-				composite_fft_bin_frequencies[x] <= original_system_curve_frequencies[original_system_curve_frequencies.size() - 1]) {
+	//			}
 
-				int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
+	//			interpolated_mic_cal_amplitudes[x] = original_mic_cal_amplitudes[x0_pos] +
 
-				int current_pos = 0;
-				int x0_pos = 0;
-				int x1_pos = 0;
+	//				(composite_fft_bin_frequency - original_mic_cal_frequencies[x0_pos])*
 
-				while (1) {
+	//				((original_mic_cal_amplitudes[x1_pos] - original_mic_cal_amplitudes[x0_pos]) / (original_mic_cal_frequencies[x1_pos] - original_mic_cal_frequencies[x0_pos]));
 
-					current_pos++;
+	//		}
 
-					if (current_pos >= original_system_curve_frequencies.size() - 1) {
+	//	}
 
-						x0_pos = original_system_curve_frequencies.size() - 1;
+	//};
+	//
+	//void interpolate_system_curve_amplitudes() {
 
-						break;
+	//	for (int x = 0; x < composite_fft_bins; x++) {
 
-					}
+	//		if (composite_fft_bin_frequencies[x] < original_system_curve_frequencies[0]) {
 
-					if (original_system_curve_frequencies[current_pos] > composite_fft_bin_frequency) {
+	//			interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[0];
 
-						x1_pos = current_pos;
+	//		}
 
-						break;
+	//		if (composite_fft_bin_frequencies[x] > original_system_curve_frequencies[original_system_curve_frequencies.size() - 1]) {
 
-					}
+	//			interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[original_system_curve_frequencies.size() - 1];
 
-				}
+	//		}
 
-				while (1) {
+	//		if (composite_fft_bin_frequencies[x] >= original_system_curve_frequencies[0] &&
+	//			composite_fft_bin_frequencies[x] <= original_system_curve_frequencies[original_system_curve_frequencies.size() - 1]) {
 
-					current_pos--;
+	//			int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
 
-					if (current_pos <= 0) {
+	//			int current_pos = 0;
+	//			int x0_pos = 0;
+	//			int x1_pos = 0;
 
-						x0_pos = 0;
+	//			while (1) {
 
-						break;
+	//				current_pos++;
 
-					}
+	//				if (current_pos >= original_system_curve_frequencies.size() - 1) {
 
-					if (original_system_curve_frequencies[current_pos] < composite_fft_bin_frequency) {
+	//					x0_pos = original_system_curve_frequencies.size() - 1;
 
-						x0_pos = current_pos;
+	//					break;
 
-						break;
+	//				}
 
-					}
+	//				if (original_system_curve_frequencies[current_pos] > composite_fft_bin_frequency) {
 
-				}
+	//					x1_pos = current_pos;
 
-				interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[x0_pos] +
+	//					break;
 
-					(composite_fft_bin_frequency - original_system_curve_frequencies[x0_pos])*
+	//				}
 
-					((original_system_curve_amplitudes[x1_pos] - original_system_curve_amplitudes[x0_pos]) / 
-					
-					(original_system_curve_frequencies[x1_pos] - original_system_curve_frequencies[x0_pos]));
+	//			}
 
-			}
+	//			while (1) {
 
-		}
-		
-	}
+	//				current_pos--;
+
+	//				if (current_pos <= 0) {
+
+	//					x0_pos = 0;
+
+	//					break;
+
+	//				}
+
+	//				if (original_system_curve_frequencies[current_pos] < composite_fft_bin_frequency) {
+
+	//					x0_pos = current_pos;
+
+	//					break;
+
+	//				}
+
+	//			}
+
+	//			interpolated_system_curve_amplitudes[x] = original_system_curve_amplitudes[x0_pos] +
+
+	//				(composite_fft_bin_frequency - original_system_curve_frequencies[x0_pos])*
+
+	//				((original_system_curve_amplitudes[x1_pos] - original_system_curve_amplitudes[x0_pos]) / 
+	//				
+	//				(original_system_curve_frequencies[x1_pos] - original_system_curve_frequencies[x0_pos]));
+
+	//		}
+
+	//	}
+	//	
+	//}
 
 	void run_calcs_for_SPL_and_meters() {
 
@@ -1084,19 +1131,5 @@ private:
 		current_system_samples_RMS = pow(current_system_samples_squared_mean, 0.5);
 
 	}
-
-	//std::ofstream interpolation;
-	//interpolation.open("C:\\interpolation.txt");
-	//for (int row = 0; row < composite_fft_bins; row++) {
-	//	interpolation << composite_fft_bin_frequencies[row] << "," << interpolated_mic_cal_amplitudes[row] << std::endl;
-	//};
-
-	//void dump_analysis_averages() {
-	//
-	//	std::ofstream analysis;
-	//	analysis.open("C:\\analysis.txt");
-	//	for (int col = 0; col < fft_bins; col++) {
-	//		analysis << fft_bin_frequencies[col] << "," << composite_xfer_function_mag_dB_avg[col] << "," << composite_xfer_function_phase_deg_avg[col] << "," << composite_coherence_value[col] << std::endl;
-	//	}
 
 };
