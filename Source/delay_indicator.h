@@ -73,20 +73,19 @@ public:
 		repaint_active = true;
 		
 		delay_in_milliseconds = ((delay_in_samples*1.0) / (sample_rate*1.0))*1000.0;
+
 		std::string delay_in_milliseconds_str = std::to_string(delay_in_milliseconds);
 		
-		std::string delay_in_milliseconds_str_short;
-		
 		if (delay_in_milliseconds < 10.0) {
-			delay_in_milliseconds_str_short = delay_in_milliseconds_str.substr(0, 4);
+			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 4);
 		}
 
 		if (delay_in_milliseconds >= 10.0 && delay_in_milliseconds < 100.0) {
-			delay_in_milliseconds_str_short = delay_in_milliseconds_str.substr(0, 5);
+			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 5);
 		}
 
 		if (delay_in_milliseconds >= 100.0) {
-			delay_in_milliseconds_str_short = delay_in_milliseconds_str.substr(0, 6);
+			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 6);
 		}
 
 		g.setColour(Colours::black);
@@ -96,7 +95,7 @@ public:
 		g.setColour(Colours::white);
 		g.setFont(delay_indicator_display_black_area.getHeight()*0.5);
 		g.drawFittedText(std::to_string(delay_in_samples), delay_indicator_display_black_area, Justification::centredTop, 0, 1.0f);
-		g.drawFittedText(delay_in_milliseconds_str_short, delay_indicator_display_black_area, Justification::centredBottom, 0, 1.0f);
+		g.drawFittedText(delay_in_milliseconds_str, delay_indicator_display_black_area, Justification::centredBottom, 0, 1.0f);
 
 		g.setFont(delay_indicator_controls_division1.getHeight()*0.75);
 

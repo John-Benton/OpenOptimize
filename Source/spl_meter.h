@@ -151,7 +151,7 @@ public:
 		update_display_spl();
 
 		spl_display_value_string = String(display_spl_dB);
-
+		
 		if (display_spl_dB < 100.0) {
 			spl_display_value_string = spl_display_value_string.substring(0, 4);
 		}
