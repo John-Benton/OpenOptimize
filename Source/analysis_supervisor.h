@@ -842,6 +842,7 @@ private:
 	}
 
 	void interpolate_curve(std::vector<double> & original_frequencies, 
+		
 		std::vector<double> & original_amplitudes, 
 		std::vector<double> & interpolated_amplitudes) {
 
@@ -872,14 +873,6 @@ private:
 
 					current_pos++;
 
-					if (current_pos >= original_frequencies.size() - 1) {
-
-						x0_pos = original_frequencies.size() - 1;
-
-						break;
-
-					}
-
 					if (original_frequencies[current_pos] > composite_fft_bin_frequency) {
 
 						x1_pos = current_pos;
@@ -887,20 +880,20 @@ private:
 						break;
 
 					}
+					
+					if (current_pos >= original_frequencies.size() - 1) {
 
+						x1_pos = original_frequencies.size() - 1;
+
+						break;
+
+					}
+					
 				}
 
 				while (1) {
 
 					current_pos--;
-
-					if (current_pos <= 0) {
-
-						x0_pos = 0;
-
-						break;
-
-					}
 
 					if (original_frequencies[current_pos] < composite_fft_bin_frequency) {
 
@@ -910,6 +903,14 @@ private:
 
 					}
 
+					if (current_pos <= 0) {
+
+						x0_pos = 0;
+
+						break;
+
+					}
+					
 				}
 
 				interpolated_amplitudes[x] = original_amplitudes[x0_pos] +
