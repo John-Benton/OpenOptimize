@@ -497,7 +497,17 @@ public:
 
 		for (int x = 0; x < composite_fft_bins; x++) {
 
-			save_traces << composite_fft_bin_frequencies_for_save[x] << "," << composite_xfer_function_mag_dB_avg_cal_for_save[x] << "," << composite_xfer_function_phase_deg_avg_for_save[x] << "," << composite_coherence_value_for_save[x] << std::endl;
+			save_traces 
+				
+				<< composite_fft_bin_frequencies_for_save[x] 
+				
+				<< "," << composite_xfer_function_mag_dB_avg_cal_for_save[x] 
+				
+				<< "," << composite_xfer_function_phase_deg_avg_for_save[x] 
+				
+				<< "," << composite_coherence_value_for_save[x] 
+				
+				<< std::endl;
 
 		}
 

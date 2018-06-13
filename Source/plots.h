@@ -891,11 +891,15 @@ public:
     {
 		plot_outline = getLocalBounds();
 
-		plot_clip_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.1, plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.8);
+		plot_clip_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.1, 
+			
+			plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.8);
 		
 		top_title_region.setBounds(0, 0, plot_outline.getWidth(), plot_outline.getHeight()*0.05);
 
-		mod_region.setBounds(top_title_region.getX() + top_title_region.getWidth() / 2 - top_title_region.getWidth()*0.15, top_title_region.getY(), top_title_region.getWidth()*0.3, top_title_region.getHeight());
+		mod_region.setBounds(top_title_region.getX() + top_title_region.getWidth() / 2 - top_title_region.getWidth()*0.15, 
+			
+			top_title_region.getY(), top_title_region.getWidth()*0.3, top_title_region.getHeight());
 				
 		mod_region_width = mod_region.getWidth();
 		
@@ -917,15 +921,35 @@ public:
 		coherence_mod.setFont(frequency_mod.getHeight()*0.5);
 		spectrum_mod.setFont(frequency_mod.getHeight()*0.5);
 		
-		top_slider_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.05, plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.05);
+		top_slider_region.setBounds(plot_outline.getWidth()*0.1, 
+			plot_outline.getHeight()*0.05, 
+			plot_outline.getWidth()*0.85, 
+			plot_outline.getHeight()*0.05);
 				
-		right_slider_region.setBounds(plot_outline.getWidth()*0.95, plot_outline.getHeight()*0.1, plot_outline.getWidth()*0.05, plot_outline.getHeight()*0.8);
+		right_slider_region.setBounds(plot_outline.getWidth()*0.95, 
+			plot_outline.getHeight()*0.1, 
+			plot_outline.getWidth()*0.05, 
+			plot_outline.getHeight()*0.8);
 		
-		bottom_label_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.9, plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.05);
-		bottom_slider_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.95, plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.05);
+		bottom_label_region.setBounds(plot_outline.getWidth()*0.1, 
+			plot_outline.getHeight()*0.9, 
+			plot_outline.getWidth()*0.85, 
+			plot_outline.getHeight()*0.05);
+		
+		bottom_slider_region.setBounds(plot_outline.getWidth()*0.1, 
+			plot_outline.getHeight()*0.95, 
+			plot_outline.getWidth()*0.85, 
+			plot_outline.getHeight()*0.05);
 
-		left_slider_region.setBounds(0, plot_outline.getHeight()*0.1, plot_outline.getWidth()*0.05, plot_outline.getHeight()*0.8);
-		left_label_region.setBounds(plot_outline.getWidth()*0.05, plot_outline.getHeight()*0.1, plot_outline.getWidth()*0.05, plot_outline.getHeight()*0.8);
+		left_slider_region.setBounds(0, 
+			plot_outline.getHeight()*0.1, 
+			plot_outline.getWidth()*0.05,
+			plot_outline.getHeight()*0.8);
+		
+		left_label_region.setBounds(plot_outline.getWidth()*0.05, 
+			plot_outline.getHeight()*0.1, 
+			plot_outline.getWidth()*0.05, 
+			plot_outline.getHeight()*0.8);
 		
 		bottom_label_clip_region = bottom_label_region.expanded(bottom_label_region.getHeight()*axis_label_scale*0.85, 0);
 		left_label_clip_region = left_label_region.expanded(0, bottom_label_region.getHeight()*axis_label_scale*0.5);
@@ -944,10 +968,25 @@ public:
 		coherence_visible_button.setBounds(top_title_region.getX() + button_width*2, top_title_region.getY(), button_height, button_width);
 		spectrum_visible_button.setBounds(top_title_region.getX() + button_width * 3, top_title_region.getY(), button_height, button_width);
 
-		magnitude_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width * 4, top_title_region.getY(), button_height, button_width);
-		phase_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width * 3, top_title_region.getY(), button_height, button_width);
-		coherence_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width * 2, top_title_region.getY(), button_height, button_width);
-		spectrum_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width, top_title_region.getY(), button_height, button_width);
+		magnitude_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width * 4, 
+			top_title_region.getY(), 
+			button_height, 
+			button_width);
+
+		phase_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width * 3, 
+			top_title_region.getY(), 
+			button_height, 
+			button_width);
+
+		coherence_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width * 2, 
+			top_title_region.getY(), 
+			button_height, 
+			button_width);
+		
+		spectrum_active_button.setBounds(top_title_region.getX() + top_title_region.getWidth() - button_width, 
+			top_title_region.getY(), 
+			button_height, 
+			button_width);
 
 		set_plot_zoom_center_from_slider();
 		
@@ -961,7 +1000,8 @@ public:
 
 		plot_horizontal_center_offset = ((horizontal_center_slider.getValue())*(plot_actual_region.getWidth() - plot_clip_region.getWidth())*0.5);
 		plot_vertical_center_offset = ((vertical_center_slider.getValue())*(plot_actual_region.getHeight() - plot_clip_region.getHeight())*0.5);
-		plot_actual_region.setCentre(plot_clip_region.getCentreX() + plot_horizontal_center_offset, plot_clip_region.getCentreY() + plot_vertical_center_offset);
+		plot_actual_region.setCentre(plot_clip_region.getCentreX() + plot_horizontal_center_offset, 
+			plot_clip_region.getCentreY() + plot_vertical_center_offset);
 				
 		repaint();
 
@@ -1205,21 +1245,29 @@ private:
 		frequency_mod_value_string = String(frequency_mod_value);
 		frequency_mod_value_string += " Hz";
 
-		magnitude_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_xfer_function_mag_dB);
+		magnitude_mod_value = frequency_to_value(frequency_mod_value, 
+			current_composite_fft_bin_frequencies, 
+			current_composite_xfer_function_mag_dB);
 		magnitude_mod_value_string = String(magnitude_mod_value);
 		magnitude_mod_value_string = magnitude_mod_value_string.substring(0, magnitude_mod_value_string.indexOfChar('.') + 2);
 		magnitude_mod_value_string += " dB";
 
-		phase_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_xfer_function_phase_deg);
+		phase_mod_value = frequency_to_value(frequency_mod_value, 
+			current_composite_fft_bin_frequencies, 
+			current_composite_xfer_function_phase_deg);
 		phase_mod_value_string = String(phase_mod_value);
 		phase_mod_value_string = phase_mod_value_string.substring(0, phase_mod_value_string.indexOfChar('.'));
 		phase_mod_value_string += " Deg";
 
-		coherence_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_coherence_value);
+		coherence_mod_value = frequency_to_value(frequency_mod_value, 
+			current_composite_fft_bin_frequencies, 
+			current_composite_coherence_value);
 		coherence_mod_value_string = String(coherence_mod_value);
 		coherence_mod_value_string = coherence_mod_value_string.substring(0, coherence_mod_value_string.indexOfChar('.') + 3);
 
-		spectrum_mod_value = frequency_to_value(frequency_mod_value, current_composite_fft_bin_frequencies, current_composite_ref_spectrum_mag_dB);
+		spectrum_mod_value = frequency_to_value(frequency_mod_value, 
+			current_composite_fft_bin_frequencies, 
+			current_composite_ref_spectrum_mag_dB);
 		spectrum_mod_value_string = String(spectrum_mod_value);
 		spectrum_mod_value_string = spectrum_mod_value_string.substring(0, spectrum_mod_value_string.indexOfChar('.'));
 		spectrum_mod_value_string += " dB";

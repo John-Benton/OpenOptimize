@@ -282,9 +282,13 @@ public:
 
 		audio_buffer_mtx_supervisor.lock();
 
-		std::copy(buffer_ref_samples.begin() + delay_in_samples, buffer_ref_samples.begin() + current_ref_samples.size() + delay_in_samples, current_ref_samples.begin());
+		std::copy(buffer_ref_samples.begin() + delay_in_samples, 
+			buffer_ref_samples.begin() + current_ref_samples.size() + delay_in_samples, 
+			current_ref_samples.begin());
 
-		std::copy(buffer_system_samples.begin(), buffer_system_samples.begin() + current_system_samples.size(), current_system_samples.begin());
+		std::copy(buffer_system_samples.begin(), 
+			buffer_system_samples.begin() + current_system_samples.size(), 
+			current_system_samples.begin());
 
 		audio_buffer_mtx_supervisor.unlock();
 
@@ -837,7 +841,9 @@ private:
 
 	}
 
-	void interpolate_curve(std::vector<double> & original_frequencies, std::vector<double> & original_amplitudes, std::vector<double> & interpolated_amplitudes) {
+	void interpolate_curve(std::vector<double> & original_frequencies, 
+		std::vector<double> & original_amplitudes, 
+		std::vector<double> & interpolated_amplitudes) {
 
 		for (int x = 0; x < composite_fft_bins; x++) {
 

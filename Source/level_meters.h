@@ -97,7 +97,11 @@ public:
 			dbFS_to_mask_offset_percent(display_ref_input_level_dBFS),
 			0.0);
 
-		system_meter_graphic_mask.setX(system_meter_graphic_background.getX() + system_meter_graphic_background.getWidth() * dbFS_to_mask_offset_percent(display_system_input_level_dBFS));
+		system_meter_graphic_mask.setX(
+			
+			system_meter_graphic_background.getX()
+			
+			+ system_meter_graphic_background.getWidth() * dbFS_to_mask_offset_percent(display_system_input_level_dBFS));
 
 		g.setColour(Colour(66, 162, 200));
 
@@ -143,9 +147,13 @@ public:
 
 		system_meter_graphics_region = graphics_region;
 
-		ref_meter_graphic_background = ref_meter_graphics_region.reduced(ref_meter_graphics_region.getWidth()*0.01, ref_meter_graphics_region.getHeight()*0.25);
+		ref_meter_graphic_background = ref_meter_graphics_region.reduced(ref_meter_graphics_region.getWidth()*0.01, 
+			
+			ref_meter_graphics_region.getHeight()*0.25);
 
-		system_meter_graphic_background = system_meter_graphics_region.reduced(system_meter_graphics_region.getWidth()*0.01, system_meter_graphics_region.getHeight()*0.25);
+		system_meter_graphic_background = system_meter_graphics_region.reduced(system_meter_graphics_region.getWidth()*0.01, 
+			
+			system_meter_graphics_region.getHeight()*0.25);
 
 		ref_meter_graphic_mask = ref_meter_graphic_background;
 
@@ -177,7 +185,9 @@ public:
 
 		if (display_ref_input_level_dBFS > current_ref_input_level_dBFS) {
 
-			display_ref_input_level_dBFS = display_ref_input_level_dBFS - (abs(display_ref_input_level_dBFS - current_ref_input_level_dBFS)*meter_rate_of_change);
+			display_ref_input_level_dBFS = display_ref_input_level_dBFS - 
+				
+				(abs(display_ref_input_level_dBFS - current_ref_input_level_dBFS)*meter_rate_of_change);
 
 		}
 
@@ -189,7 +199,9 @@ public:
 
 		if (display_system_input_level_dBFS > current_system_input_level_dBFS) {
 
-			display_system_input_level_dBFS = display_system_input_level_dBFS - (abs(display_system_input_level_dBFS - current_system_input_level_dBFS)*meter_rate_of_change);
+			display_system_input_level_dBFS = display_system_input_level_dBFS - 
+				
+				(abs(display_system_input_level_dBFS - current_system_input_level_dBFS)*meter_rate_of_change);
 
 		}
 
