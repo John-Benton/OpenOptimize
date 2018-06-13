@@ -127,16 +127,25 @@ public:
 
 		supervisor1->plot_data_mtx_supervisor.lock();
 
-		for (int col = 0; col < composite_fft_bins; col++) {
+		std::copy(supervisor1->composite_fft_bin_frequencies.begin(), 
+			supervisor1->composite_fft_bin_frequencies.end(), 
+			main_plot.current_composite_fft_bin_frequencies.begin());
+				
+		std::copy(supervisor1->composite_xfer_function_mag_dB_avg.begin(), 
+			supervisor1->composite_xfer_function_mag_dB_avg.end(), 
+			main_plot.current_composite_xfer_function_mag_dB.begin());
 
+		std::copy(supervisor1->composite_xfer_function_phase_deg_avg.begin(),
+			supervisor1->composite_xfer_function_phase_deg_avg.end(),
+			main_plot.current_composite_xfer_function_phase_deg.begin());
 
-			main_plot.current_composite_fft_bin_frequencies[col] = supervisor1->composite_fft_bin_frequencies[col];
-			main_plot.current_composite_xfer_function_mag_dB[col] = supervisor1->composite_xfer_function_mag_dB_avg[col];
-			main_plot.current_composite_xfer_function_phase_deg[col] = supervisor1->composite_xfer_function_phase_deg_avg[col];
-			main_plot.current_composite_coherence_value[col] = supervisor1->composite_coherence_value[col];
-			main_plot.current_composite_ref_spectrum_mag_dB[col] = supervisor1->composite_ref_spectrum_mag_dB[col];
+		std::copy(supervisor1->composite_coherence_value.begin(),
+			supervisor1->composite_coherence_value.end(),
+			main_plot.current_composite_coherence_value.begin());
 
-		}
+		std::copy(supervisor1->composite_ref_spectrum_mag_dB.begin(),
+			supervisor1->composite_ref_spectrum_mag_dB.end(),
+			main_plot.current_composite_ref_spectrum_mag_dB.begin());
 
 		supervisor1->plot_data_mtx_supervisor.unlock();
 
@@ -144,29 +153,43 @@ public:
 
 	void update_loaded_plot_data() {
 
-		for (int col = 0; col < composite_fft_bins; col++) {
+		std::copy(main_settings_bar.main_controls.loaded_composite_fft_bin_frequencies.begin(),
+			main_settings_bar.main_controls.loaded_composite_fft_bin_frequencies.end(),
+			main_plot.loaded_composite_fft_bin_frequencies.begin());
 
-			main_plot.loaded_composite_fft_bin_frequencies[col] = main_settings_bar.main_controls.loaded_composite_fft_bin_frequencies[col];
-			main_plot.loaded_composite_xfer_function_mag_dB_avg_cal[col] = main_settings_bar.main_controls.loaded_composite_xfer_function_mag_dB_avg_cal[col];
-			main_plot.loaded_composite_xfer_function_phase_deg_avg[col] = main_settings_bar.main_controls.loaded_composite_xfer_function_phase_deg_avg[col];
-			main_plot.loaded_composite_coherence_value[col] = main_settings_bar.main_controls.loaded_composite_coherence_value[col];
+		std::copy(main_settings_bar.main_controls.loaded_composite_xfer_function_mag_dB_avg_cal.begin(),
+			main_settings_bar.main_controls.loaded_composite_xfer_function_mag_dB_avg_cal.end(),
+			main_plot.loaded_composite_xfer_function_mag_dB_avg_cal.begin());
 
-			main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
+		std::copy(main_settings_bar.main_controls.loaded_composite_xfer_function_phase_deg_avg.begin(),
+			main_settings_bar.main_controls.loaded_composite_xfer_function_phase_deg_avg.end(),
+			main_plot.loaded_composite_xfer_function_phase_deg_avg.begin());
 
-		}
+		std::copy(main_settings_bar.main_controls.loaded_composite_coherence_value.begin(),
+			main_settings_bar.main_controls.loaded_composite_coherence_value.end(),
+			main_plot.loaded_composite_coherence_value.begin());
+
+		main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
 
 	}
 
 	void update_controls_trace_arrays_for_saving(){
 
-		for (int col = 0; col < composite_fft_bins; col++) {
+		std::copy(main_plot.current_composite_fft_bin_frequencies.begin(),
+			main_plot.current_composite_fft_bin_frequencies.end(),
+			main_settings_bar.main_controls.composite_fft_bin_frequencies_for_save.begin());
 
-			main_settings_bar.main_controls.composite_fft_bin_frequencies_for_save[col] = main_plot.current_composite_fft_bin_frequencies[col];
-			main_settings_bar.main_controls.composite_xfer_function_mag_dB_avg_cal_for_save[col] = main_plot.current_composite_xfer_function_mag_dB[col];
-			main_settings_bar.main_controls.composite_xfer_function_phase_deg_avg_for_save[col] = main_plot.current_composite_xfer_function_phase_deg[col];
-			main_settings_bar.main_controls.composite_coherence_value_for_save[col] = main_plot.current_composite_coherence_value[col];
+		std::copy(main_plot.current_composite_xfer_function_mag_dB.begin(),
+			main_plot.current_composite_xfer_function_mag_dB.end(),
+			main_settings_bar.main_controls.composite_xfer_function_mag_dB_avg_cal_for_save.begin());
 
-		}
+		std::copy(main_plot.current_composite_xfer_function_phase_deg.begin(),
+			main_plot.current_composite_xfer_function_phase_deg.end(),
+			main_settings_bar.main_controls.composite_xfer_function_phase_deg_avg_for_save.begin());
+
+		std::copy(main_plot.current_composite_coherence_value.begin(),
+			main_plot.current_composite_coherence_value.end(),
+			main_settings_bar.main_controls.composite_coherence_value_for_save.begin());
 
 	}
 

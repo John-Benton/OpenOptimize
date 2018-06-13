@@ -46,7 +46,7 @@ public:
 
 	std::vector<double> composite_cross_spectrum_magnitude;
 
-	std::vector<int> composite_fft_bin_frequencies;
+	std::vector<double> composite_fft_bin_frequencies;
 
 	std::vector<double> composite_ref_spectrum_mag_dB;
 

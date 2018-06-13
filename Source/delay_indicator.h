@@ -137,9 +137,6 @@ public:
 			delay_indicator_controls_division5.getHeight(),
 			Justification::left, 0, 1.0f);
 
-        //g.setColour (Colours::grey);
-		//g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
 		repaint_active = false;
     }
 
