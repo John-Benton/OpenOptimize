@@ -40,7 +40,7 @@ public:
 
 	/*---------------------------------------------------*/
 
-	double fftw_samples[32768] = { 0 }; //the size of this array must atleast be as large as the largest fft size (currently 32768)
+	double *fftw_samples_dynamic;
 
 	fftw_complex *out;
 
@@ -72,8 +72,10 @@ public:
 
 		/*---------------------------------------------------*/
 
+		fftw_samples_dynamic = new double[local_fft_size];
+
 		out = fftw_alloc_complex(local_fft_size);
-		plan = fftw_plan_dft_r2c_1d(local_fft_size, fftw_samples, out, FFTW_MEASURE);
+		plan = fftw_plan_dft_r2c_1d(local_fft_size, fftw_samples_dynamic, out, FFTW_MEASURE);
 
 	};
 
@@ -81,6 +83,7 @@ public:
 
 		fftw_destroy_plan(plan);
 		fftw_free(out);
+		delete[]fftw_samples_dynamic;
 
 	};
 
@@ -119,7 +122,7 @@ private:
 
 	void run_fftw(std::vector<double> &samples, std::vector<std::vector<double>> & destinaton_vector) {
 
-		std::copy(samples.begin(), samples.begin() + local_fft_size, fftw_samples);
+		std::copy(samples.begin(), samples.begin() + local_fft_size, fftw_samples_dynamic);
 
 		fftw_execute(plan);
 
