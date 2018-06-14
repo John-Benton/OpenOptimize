@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="u5zuN7" name="OpenOptimize" displaySplashScreen="1" reportAppUsage="1"
-              splashScreenColour="Dark" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.OpenOptimize" includeBinaryInAppConfig="1"
-              cppLanguageStandard="latest" jucerVersion="5.3.2" companyCopyright="">
+<JUCERPROJECT id="u5zuN7" name="OpenOptimize" splashScreenColour="Dark" projectType="guiapp"
+              version="1.0.0" bundleIdentifier="com.yourcompany.OpenOptimize"
+              includeBinaryInAppConfig="1" cppLanguageStandard="latest" jucerVersion="5.3.2"
+              companyCopyright="">
   <MAINGROUP id="mutD4M" name="OpenOptimize">
     <GROUP id="{5957BAE9-CD64-64FD-114D-DBA564426E06}" name="Source">
       <FILE id="RNm3OL" name="data_history.h" compile="0" resource="0" file="Source/data_history.h"/>
