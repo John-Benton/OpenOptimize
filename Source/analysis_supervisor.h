@@ -788,19 +788,25 @@ private:
 		for (int x = 0; x < numlines; x++) {
 
 			std::getline(curve, current_line);
+			
+			if (current_line.find_first_of("123456789") == 0) {
 
-			tab_pos = current_line.find('\t');
+				tab_pos = current_line.find('\t');
 
-			current_line.copy(frequency, tab_pos);
+				current_line.copy(frequency, tab_pos);
 
-			current_line.copy(amplitude, current_line.length() - tab_pos, tab_pos + 1);
+				current_line.copy(amplitude, current_line.length() - tab_pos, tab_pos + 1);
 
-			original_curve_frequencies.push_back(atof(frequency));
+				original_curve_frequencies.push_back(atof(frequency));
 
-			original_curve_amplitudes.push_back(atof(amplitude));
+				original_curve_amplitudes.push_back(atof(amplitude));
+
+			}
+
+			else {};
 
 		}
-
+			
 	}
 
 	void interpolate_curve(std::vector<double> & original_frequencies, 

@@ -399,21 +399,23 @@ public:
 			
 			FileChooser mic_cal_file("Select Microphone Calibration File", File(), "", true, false);
 
-			mic_cal_file.browseForFileToOpen();
+			if (mic_cal_file.browseForFileToOpen() == true) {
 
-			mic_cal_file_name = mic_cal_file.getResult().getFileName();
+				mic_cal_file_name = mic_cal_file.getResult().getFileName();
 
-			raw_mic_cal_file_path = mic_cal_file.getResult().getFullPathName();
+				raw_mic_cal_file_path = mic_cal_file.getResult().getFullPathName();
 
-			fixed_mic_cal_file_path = raw_mic_cal_file_path.toStdString();
-			
-			char bad_char = '\\';
-			
-			char good_char = '/';
-			
-			replace(fixed_mic_cal_file_path.begin(), fixed_mic_cal_file_path.end(), bad_char, good_char);
+				fixed_mic_cal_file_path = raw_mic_cal_file_path.toStdString();
 
-			repaint();
+				char bad_char = '\\';
+
+				char good_char = '/';
+
+				replace(fixed_mic_cal_file_path.begin(), fixed_mic_cal_file_path.end(), bad_char, good_char);
+
+				repaint();
+
+			}
 			
 		}
 
@@ -423,21 +425,23 @@ public:
 
 			FileChooser system_curve_file("Select System Curve File", File(), "", true, false);
 
-			system_curve_file.browseForFileToOpen();
+			if (system_curve_file.browseForFileToOpen() == true) {
 
-			system_curve_file_name = system_curve_file.getResult().getFileName();
+				system_curve_file_name = system_curve_file.getResult().getFileName();
 
-			raw_system_curve_file_path = system_curve_file.getResult().getFullPathName();
+				raw_system_curve_file_path = system_curve_file.getResult().getFullPathName();
 
-			fixed_system_curve_file_path = raw_system_curve_file_path.toStdString();
+				fixed_system_curve_file_path = raw_system_curve_file_path.toStdString();
 
-			char bad_char = '\\';
+				char bad_char = '\\';
 
-			char good_char = '/';
+				char good_char = '/';
 
-			replace(fixed_system_curve_file_path.begin(), fixed_system_curve_file_path.end(), bad_char, good_char);
+				replace(fixed_system_curve_file_path.begin(), fixed_system_curve_file_path.end(), bad_char, good_char);
 
-			repaint();
+				repaint();
+
+			}
 
 		}
 
@@ -477,111 +481,143 @@ public:
 
 		FileChooser save_traces_path_finder("Select File to Save Traces To", File(), ".txt", true, false);
 
-		save_traces_path_finder.browseForFileToSave(1);
+		if (save_traces_path_finder.browseForFileToSave(true) == true) {
 
-		saved_traces_file_name = save_traces_path_finder.getResult().getFileName();
+			saved_traces_file_name = save_traces_path_finder.getResult().getFileName();
 
-		raw_saved_traces_save_path = save_traces_path_finder.getResult().getFullPathName();
+			raw_saved_traces_save_path = save_traces_path_finder.getResult().getFullPathName();
 
-		fixed_saved_traces_save_path = raw_saved_traces_save_path.toStdString();
+			fixed_saved_traces_save_path = raw_saved_traces_save_path.toStdString();
 
-		char bad_char = '\\';
+			char bad_char = '\\';
 
-		char good_char = '/';
+			char good_char = '/';
 
-		replace(fixed_saved_traces_save_path.begin(), fixed_saved_traces_save_path.end(), bad_char, good_char);
+			replace(fixed_saved_traces_save_path.begin(), fixed_saved_traces_save_path.end(), bad_char, good_char);
 
-		std::ofstream save_traces;
+			std::ofstream save_traces;
 
-		save_traces.open(fixed_saved_traces_save_path);
+			save_traces.open(fixed_saved_traces_save_path);
 
-		for (int x = 0; x < composite_fft_bins; x++) {
+			for (int x = 0; x < composite_fft_bins; x++) {
 
-			save_traces 
-				
-				<< composite_fft_bin_frequencies_for_save[x] 
-				
-				<< "," << composite_xfer_function_mag_dB_avg_cal_for_save[x] 
-				
-				<< "," << composite_xfer_function_phase_deg_avg_for_save[x] 
-				
-				<< "," << composite_coherence_value_for_save[x] 
-				
-				<< std::endl;
+				save_traces
+
+					<< composite_fft_bin_frequencies_for_save[x]
+
+					<< "," << composite_xfer_function_mag_dB_avg_cal_for_save[x]
+
+					<< "," << composite_xfer_function_phase_deg_avg_for_save[x]
+
+					<< "," << composite_coherence_value_for_save[x]
+
+					<< std::endl;
+
+			}
+
+			save_traces.close();
+
+			for (int x = 0; x < composite_fft_bins; x++) {
+
+				loaded_composite_fft_bin_frequencies[x] = composite_fft_bin_frequencies_for_save[x];
+
+				loaded_composite_xfer_function_mag_dB_avg_cal[x] = composite_xfer_function_mag_dB_avg_cal_for_save[x];
+
+				loaded_composite_xfer_function_phase_deg_avg[x] = composite_xfer_function_phase_deg_avg_for_save[x];
+
+				loaded_composite_coherence_value[x] = composite_coherence_value_for_save[x];
+
+			}
+
+			saved_traces_visible_onoff_button.setToggleState(true, dontSendNotification);
+			
+			saved_traces_visible = 1;
 
 		}
-
-		save_traces.close();
-
-		for (int x = 0; x < composite_fft_bins; x++) {
-
-			loaded_composite_fft_bin_frequencies[x] = composite_fft_bin_frequencies_for_save[x];
-
-			loaded_composite_xfer_function_mag_dB_avg_cal[x] = composite_xfer_function_mag_dB_avg_cal_for_save[x];
-
-			loaded_composite_xfer_function_phase_deg_avg[x] = composite_xfer_function_phase_deg_avg_for_save[x];
-
-			loaded_composite_coherence_value[x] = composite_coherence_value_for_save[x];
-
-		}
-
-		saved_traces_visible_onoff_button.setToggleState(true, dontSendNotification);
-		saved_traces_visible = 1;
 
 	}
 
 	void load_traces_from_file() {
 
+		int numlines{ 0 };
+
+		std::string blank;
+
 		std::string current_line;
 
 		FileChooser traces_loader("Select Traces to Load", File(), "", true, false);
 
-		traces_loader.browseForFileToOpen();
+		if (traces_loader.browseForFileToOpen() == true) {
 
-		saved_traces_file_name = traces_loader.getResult().getFileName();
+			saved_traces_file_name = traces_loader.getResult().getFileName();
 
-		raw_saved_traces_load_path = traces_loader.getResult().getFullPathName();
+			raw_saved_traces_load_path = traces_loader.getResult().getFullPathName();
 
-		fixed_saved_traces_load_path = raw_saved_traces_load_path.toStdString();
+			fixed_saved_traces_load_path = raw_saved_traces_load_path.toStdString();
 
-		char bad_char = '\\';
+			char bad_char = '\\';
 
-		char good_char = '/';
+			char good_char = '/';
 
-		replace(fixed_saved_traces_load_path.begin(), fixed_saved_traces_load_path.end(), bad_char, good_char);
+			replace(fixed_saved_traces_load_path.begin(), fixed_saved_traces_load_path.end(), bad_char, good_char);
 
-		std::ifstream load_traces(fixed_saved_traces_load_path);
+			std::ifstream load_traces(fixed_saved_traces_load_path);
 
-		for (int x = 0; x < 162; x++) {
+			while (std::getline(load_traces, blank)) {
 
-			std::string frequency_string;
+				numlines++;
 
-			std::string amplitude_string;
+			}
 
-			std::string phase_string;
+			if (numlines == composite_fft_bins) {
 
-			std::string coherence_string;
+				load_traces.clear();
 
-			std::getline(load_traces, frequency_string, ',');
+				load_traces.seekg(0, load_traces.beg);
 
-			loaded_composite_fft_bin_frequencies[x] = stod(frequency_string);
+				for (int x = 0; x < composite_fft_bins; x++) {
 
-			std::getline(load_traces, amplitude_string, ',');
+					std::string frequency_string;
 
-			loaded_composite_xfer_function_mag_dB_avg_cal[x] = stod(amplitude_string);
+					std::string amplitude_string;
 
-			std::getline(load_traces, phase_string, ',');
+					std::string phase_string;
 
-			loaded_composite_xfer_function_phase_deg_avg[x] = stod(phase_string);
+					std::string coherence_string;
 
-			std::getline(load_traces, coherence_string);
+					std::getline(load_traces, frequency_string, ',');
 
-			loaded_composite_coherence_value[x] = stod(coherence_string);
+					loaded_composite_fft_bin_frequencies[x] = stod(frequency_string);
+
+					std::getline(load_traces, amplitude_string, ',');
+
+					loaded_composite_xfer_function_mag_dB_avg_cal[x] = stod(amplitude_string);
+
+					std::getline(load_traces, phase_string, ',');
+
+					loaded_composite_xfer_function_phase_deg_avg[x] = stod(phase_string);
+
+					std::getline(load_traces, coherence_string);
+
+					loaded_composite_coherence_value[x] = stod(coherence_string);
+
+				}
+
+			}
+
+			else {
+
+				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, 
+					"ERROR", 
+					"The trace file you attempted to load is incorrectly formatted");
+
+			}
+
+			saved_traces_visible_onoff_button.setToggleState(true, dontSendNotification);
+		
+			saved_traces_visible = 1;
 
 		}
-
-		saved_traces_visible_onoff_button.setToggleState(true, dontSendNotification);
-		saved_traces_visible = 1;
 
 	}
 

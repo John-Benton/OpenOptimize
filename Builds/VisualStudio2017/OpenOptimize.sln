@@ -1,9 +1,18 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2017
-
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenOptimize - App", "OpenOptimize_App.vcxproj", "{DE8F2365-A94B-7608-F4FA-8DB2FCF2B218}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenOptimize_App", "OpenOptimize_App.vcxproj", "{DE8F2365-A94B-7608-F4FA-8DB2FCF2B218}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B890A679-0661-4023-8991-F206DB51C571}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+	EndProjectSection
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
@@ -16,5 +25,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7D7DB3CD-485C-4420-A32D-94AEA581B158}
 	EndGlobalSection
 EndGlobal
