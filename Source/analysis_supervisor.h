@@ -21,6 +21,7 @@
 #include "phase.h"
 #include "fft.h"
 #include "constants.h"
+#include "data_history.h"
 #include <algorithm>
 
 class supervisor : public constants, public Timer, public Thread
@@ -143,6 +144,8 @@ public:
 
 	int curves_only = 0;
 
+	int num_averages = 4;
+
 	supervisor(): Thread("Supervisor_Thread",0)
 	
 	{
@@ -201,6 +204,16 @@ public:
 		assemble_composite_fft_bin_frequencies();
 				
 		startTimerHz(analyser_update_rate);
+
+		composite_ref_autospectrum_data_history.set_num_histories(num_averages);
+
+		composite_system_autospectrum_data_history.set_num_histories(num_averages);
+
+		composite_cross_spectrum_mag_data_history.set_num_histories(num_averages);
+
+		composite_xfer_function_mag_dB_data_history.set_num_histories(num_averages);
+
+		composite_xfer_function_phase_deg_data_history.set_num_histories(num_averages);
 		
 	};
 
@@ -342,6 +355,16 @@ private:
 	MovingAverage1DVector composite_data_smoother;
 
 	MovingAverage2DVector complex_data_smoother;
+
+	data_history composite_ref_autospectrum_data_history{ composite_fft_bins };
+
+	data_history composite_system_autospectrum_data_history{ composite_fft_bins };
+
+	data_history composite_cross_spectrum_mag_data_history{ composite_fft_bins };
+
+	data_history composite_xfer_function_mag_dB_data_history{ composite_fft_bins };
+
+	data_history composite_xfer_function_phase_deg_data_history{ composite_fft_bins };
 
 	void assemble_composite_complex_vectors() {
 
@@ -617,90 +640,29 @@ private:
 
 	void update_histories() {
 
-		for (int col = 0; col < composite_fft_bins; col++) {
+		composite_ref_autospectrum_data_history.add_latest_values(composite_ref_autospectrum);
 
-			//using a loop to was found to be more efficient than std::copy for this function
+		composite_system_autospectrum_data_history.add_latest_values(composite_system_autospectrum);
 
-			composite_ref_autospectrum_history[3][col] = composite_ref_autospectrum_history[2][col];
-			composite_ref_autospectrum_history[2][col] = composite_ref_autospectrum_history[1][col];
-			composite_ref_autospectrum_history[1][col] = composite_ref_autospectrum_history[0][col];
-			composite_ref_autospectrum_history[0][col] = composite_ref_autospectrum[col];
+		composite_cross_spectrum_mag_data_history.add_latest_values(composite_cross_spectrum_magnitude);
 
-			composite_system_autospectrum_history[3][col] = composite_system_autospectrum_history[2][col];
-			composite_system_autospectrum_history[2][col] = composite_system_autospectrum_history[1][col];
-			composite_system_autospectrum_history[1][col] = composite_system_autospectrum_history[0][col];
-			composite_system_autospectrum_history[0][col] = composite_system_autospectrum[col];
+		composite_xfer_function_mag_dB_data_history.add_latest_values(composite_xfer_function_mag_dB_cal);
 
-			composite_cross_spectrum_mag_history[3][col] = composite_cross_spectrum_mag_history[2][col];
-			composite_cross_spectrum_mag_history[2][col] = composite_cross_spectrum_mag_history[1][col];
-			composite_cross_spectrum_mag_history[1][col] = composite_cross_spectrum_mag_history[0][col];
-			composite_cross_spectrum_mag_history[0][col] = composite_cross_spectrum_magnitude[col];
-
-			composite_xfer_function_mag_dB_history[3][col] = composite_xfer_function_mag_dB_history[2][col];
-			composite_xfer_function_mag_dB_history[2][col] = composite_xfer_function_mag_dB_history[1][col];
-			composite_xfer_function_mag_dB_history[1][col] = composite_xfer_function_mag_dB_history[0][col];
-			composite_xfer_function_mag_dB_history[0][col] = composite_xfer_function_mag_dB_cal[col];
-
-			composite_xfer_function_phase_deg_history[3][col] = composite_xfer_function_phase_deg_history[2][col];
-			composite_xfer_function_phase_deg_history[2][col] = composite_xfer_function_phase_deg_history[1][col];
-			composite_xfer_function_phase_deg_history[1][col] = composite_xfer_function_phase_deg_history[0][col];
-			composite_xfer_function_phase_deg_history[0][col] = composite_xfer_function_phase_deg[col];
-
-		}
+		composite_xfer_function_phase_deg_data_history.add_latest_values(composite_xfer_function_phase_deg);
 
 	}
 
 	void update_averages() {
 
-		for (int col = 0; col < composite_fft_bins; col++) {
+		composite_ref_autospectrum_data_history.get_data_average(composite_ref_autospectrum_avg);
 
-			composite_ref_autospectrum_avg[col] =
-				(composite_ref_autospectrum_history[0][col] +
-					composite_ref_autospectrum_history[1][col] +
-					composite_ref_autospectrum_history[2][col] +
-					composite_ref_autospectrum_history[3][col]) / 4;
+		composite_system_autospectrum_data_history.get_data_average(composite_system_autospectrum_avg);
 
-		}
+		composite_cross_spectrum_mag_data_history.get_data_average(composite_cross_spectrum_mag_avg);
 
-		for (int col = 0; col < composite_fft_bins; col++) {
-
-			composite_system_autospectrum_avg[col] =
-				(composite_system_autospectrum_history[0][col] +
-					composite_system_autospectrum_history[1][col] +
-					composite_system_autospectrum_history[2][col] +
-					composite_system_autospectrum_history[3][col]) / 4;
-
-		}
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-
-			composite_cross_spectrum_mag_avg[col] =
-				(composite_cross_spectrum_mag_history[0][col] +
-					composite_cross_spectrum_mag_history[1][col] +
-					composite_cross_spectrum_mag_history[2][col] +
-					composite_cross_spectrum_mag_history[3][col]) / 4;
-
-		}
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-
-			composite_xfer_function_mag_dB_avg[col] =
-				(composite_xfer_function_mag_dB_history[0][col] +
-					composite_xfer_function_mag_dB_history[1][col] +
-					composite_xfer_function_mag_dB_history[2][col] +
-					composite_xfer_function_mag_dB_history[3][col]) / 4;
-
-		}
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-
-			composite_xfer_function_phase_deg_avg[col] =
-				(composite_xfer_function_phase_deg_history[0][col] +
-					composite_xfer_function_phase_deg_history[1][col] +
-					composite_xfer_function_phase_deg_history[2][col] +
-					composite_xfer_function_phase_deg_history[3][col]) / 4;
-
-		}
+		composite_xfer_function_mag_dB_data_history.get_data_average(composite_xfer_function_mag_dB_avg);
+		
+		composite_xfer_function_phase_deg_data_history.get_data_average(composite_xfer_function_phase_deg_avg);
 
 	}
 

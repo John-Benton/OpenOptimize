@@ -1825,6 +1825,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\data_history.h"/>
     <ClInclude Include="..\..\Source\spl_cal.h"/>
     <ClInclude Include="..\..\Source\phase.h"/>
     <ClInclude Include="..\..\Source\moving_average.h"/>
