@@ -98,7 +98,7 @@ public:
 		run_fftw(local_ref_samples, fftw_complex_out_ref_vector);
 		run_fftw(local_system_samples, fftw_complex_out_system_vector);
 
-		normalize_fftw_output();
+		//normalize_fftw_output();
 
 	}
 

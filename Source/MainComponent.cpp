@@ -131,12 +131,12 @@ public:
 			supervisor1->composite_fft_bin_frequencies.end(), 
 			main_plot.current_composite_fft_bin_frequencies.begin());
 				
-		std::copy(supervisor1->composite_xfer_function_mag_dB_avg.begin(), 
-			supervisor1->composite_xfer_function_mag_dB_avg.end(), 
+		std::copy(supervisor1->composite_xfer_function_mag_dB_cal.begin(),
+			supervisor1->composite_xfer_function_mag_dB_cal.end(),
 			main_plot.current_composite_xfer_function_mag_dB.begin());
 
-		std::copy(supervisor1->composite_xfer_function_phase_deg_avg.begin(),
-			supervisor1->composite_xfer_function_phase_deg_avg.end(),
+		std::copy(supervisor1->composite_xfer_function_phase_deg.begin(),
+			supervisor1->composite_xfer_function_phase_deg.end(),
 			main_plot.current_composite_xfer_function_phase_deg.begin());
 
 		std::copy(supervisor1->composite_coherence_value.begin(),
