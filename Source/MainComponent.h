@@ -1,0 +1,83 @@
+/*
+  ==============================================================================
+
+    MainComponent.h
+    Created: 4 Sep 2018 1:02:58pm
+    Author:  John
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "settings_bar.h"
+#include "level_meters.h"
+#include "plots.h"
+#include "fft.h"
+#include "constants.h"
+#include "analysis_supervisor.h"
+
+class MainContentComponent : public AudioAppComponent, public constants, public Timer
+{
+
+public:
+	//==============================================================================
+
+	int num_samples_stored = 0;
+
+	int update_rate = 30; //In Hz
+
+	MainContentComponent();
+
+	~MainContentComponent();
+
+	void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+
+	void getNextAudioBlock(const AudioSourceChannelInfo& audio_device_buffer) override;
+
+	void releaseResources() override;
+
+	//==============================================================================
+	void paint(Graphics& g) override;
+
+	void resized() override;
+
+	void update_current_plot_data();
+
+	void update_loaded_plot_data();
+
+	void update_controls_trace_arrays_for_saving();
+
+	void update_meters();
+
+	void open_audio_io_window();
+
+	void update_supervisor_parameters();
+
+	void repaint_ui();
+
+	void timerCallback() override;
+
+private:
+	//==============================================================================
+
+	supervisor * supervisor1 = new supervisor;
+
+	settings_bar main_settings_bar;
+
+	plots main_plot;
+
+	level_meters main_level_meters;
+
+	AudioDeviceManager::AudioDeviceSetup audio_device_setup;
+
+	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
+
+	DialogWindow::LaunchOptions audio_io_config_window;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainContentComponent)
+
+};
+
+Component* createMainContentComponent() { return new MainContentComponent(); }

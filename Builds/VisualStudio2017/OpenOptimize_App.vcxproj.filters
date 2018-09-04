@@ -2076,6 +2076,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\MainComponent.h">
+      <Filter>OpenOptimize\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\data_history.h">
       <Filter>OpenOptimize\Source</Filter>
     </ClInclude>
