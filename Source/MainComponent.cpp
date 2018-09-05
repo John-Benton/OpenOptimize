@@ -21,6 +21,10 @@ MainContentComponent::MainContentComponent()
 	update_current_plot_data();
 		
     setAudioChannels (2, 0);
+
+	main_settings_bar.main_controls.addActionListener(this);
+	main_settings_bar.main_delay_indicator.addActionListener(this);
+	supervisor1->addActionListener(this);
 						
 }
 
@@ -223,39 +227,51 @@ void MainContentComponent::update_supervisor_parameters() {
 
 }
 
-void MainContentComponent::repaint_ui() {
-
+void MainContentComponent::timerCallback()
+{
+				
 	main_settings_bar.main_spl_meter.try_repaint();
 
 	main_plot.try_repaint();
 
 	main_level_meters.try_repaint();
-
-	main_settings_bar.main_delay_indicator.try_repaint();
-
+		
 }
 
-void MainContentComponent::timerCallback()
+void MainContentComponent::actionListenerCallback(const String &message)
 {
-		
-	if (main_settings_bar.main_controls.open_audio_io_config_window == 1) {
 
-		main_settings_bar.main_controls.open_audio_io_config_window = 0;
+	if (message == "cmd_open_audio_io") 
+	{
 
 		open_audio_io_window();
-			
+
 	}
 
-	update_supervisor_parameters();
-				
-	update_current_plot_data();
+	else if (message == "cmd_update_supervisor") 
+	{
 
-	update_loaded_plot_data();
-			
-	update_controls_trace_arrays_for_saving();
+		update_supervisor_parameters();
 		
-	update_meters();
+	}
 
-	repaint_ui();
+	else if (message == "cmd_supervisor_cycle_done" && data_update_active==false)
+	{
+
+		data_update_active = true;
 		
+		update_current_plot_data();
+
+		update_loaded_plot_data();
+
+		update_controls_trace_arrays_for_saving();
+
+		update_meters();
+
+		data_update_active = false;
+
+	}
+
+	else {}
+
 }

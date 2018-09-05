@@ -24,7 +24,7 @@
 #include "data_history.h"
 #include <algorithm>
 
-class supervisor : public constants, public Timer, public Thread
+class supervisor : public constants, public Timer, public Thread, public ActionBroadcaster
 
 {
 
@@ -265,6 +265,8 @@ public:
 		run_calcs_for_SPL_and_meters();
 
 		analysis_cycle_active = false;
+
+		sendActionMessage("cmd_supervisor_cycle_done");
 
 	}
 
@@ -770,17 +772,20 @@ private:
 
 		std::string current_line;
 
-		char frequency[8];
+		char frequency[16];
 
 		double frequency_double;
 
-		char amplitude[8];
+		char amplitude[16];
 
 		double amplitude_double;
 
 		int numlines = 0;
 
 		int tab_pos = 0;
+
+		original_curve_frequencies.clear();
+		original_curve_amplitudes.clear();
 
 		std::ifstream curve(curve_path);
 
@@ -798,7 +803,7 @@ private:
 
 			std::getline(curve, current_line);
 			
-			if (current_line.find_first_of("123456789") == 0) {
+			if (current_line.find_first_of("0123456789") == 0) {
 
 				tab_pos = current_line.find('\t');
 
@@ -818,8 +823,9 @@ private:
 			
 	}
 
-	void interpolate_curve(std::vector<double> & original_frequencies, 
+	void interpolate_curve(
 		
+		std::vector<double> & original_frequencies, 
 		std::vector<double> & original_amplitudes, 
 		std::vector<double> & interpolated_amplitudes) {
 

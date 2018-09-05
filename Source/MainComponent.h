@@ -18,7 +18,7 @@
 #include "constants.h"
 #include "analysis_supervisor.h"
 
-class MainContentComponent : public AudioAppComponent, public constants, public Timer
+class MainContentComponent : public AudioAppComponent, public constants, public Timer, public ActionListener
 {
 
 public:
@@ -55,9 +55,9 @@ public:
 
 	void update_supervisor_parameters();
 
-	void repaint_ui();
-
 	void timerCallback() override;
+
+	void actionListenerCallback(const String &message) override;
 
 private:
 	//==============================================================================
@@ -75,6 +75,8 @@ private:
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
 	DialogWindow::LaunchOptions audio_io_config_window;
+
+	bool data_update_active{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainContentComponent)
 

@@ -19,7 +19,7 @@
 //==============================================================================
 /*
 */
-class controls    : public constants, public Component, public Button::Listener, public Slider::Listener
+class controls    : public constants, public Component, public Button::Listener, public Slider::Listener, public ActionBroadcaster
 {
 public:
 
@@ -119,8 +119,6 @@ public:
 	std::vector<double> loaded_composite_xfer_function_mag_dB_avg_cal;
 	std::vector<double> loaded_composite_xfer_function_phase_deg_avg;
 	std::vector<double> loaded_composite_coherence_value;
-	
-	int open_audio_io_config_window = 0;
 
 	float active_horizontal_padding_factor = 0.025;
 
@@ -386,12 +384,28 @@ public:
 	}
 
 	void buttonClicked(Button* button) override {
-		
-		analysis_status = analysis_onoff_button.getToggleState();
+
+		if (button == &analysis_onoff_button)
+		{
+
+			analysis_status = analysis_onoff_button.getToggleState();
+			
+			sendActionMessage("cmd_update_supervisor");
+
+		}
 
 		saved_traces_visible = saved_traces_visible_onoff_button.getToggleState();
 
 		curves_only = curves_only_button.getToggleState();
+
+		if (button == &curves_only_button)
+		{
+
+			curves_only = curves_only_button.getToggleState();
+
+			sendActionMessage("cmd_update_supervisor");
+			
+		}
 		
 		if (button == &choose_mic_cal_button)
 	
@@ -416,6 +430,8 @@ public:
 				repaint();
 
 			}
+
+			sendActionMessage("cmd_update_supervisor");
 			
 		}
 
@@ -443,6 +459,8 @@ public:
 
 			}
 
+			sendActionMessage("cmd_update_supervisor");
+
 		}
 
 		if (button == &capture_traces_button)
@@ -465,7 +483,7 @@ public:
 
 		{
 
-			open_audio_io_config_window = 1;
+			sendActionMessage("cmd_open_audio_io");
 
 		}
 
@@ -475,6 +493,8 @@ public:
 	{
 		refresh_rate_slider_value = refresh_rate_slider.getValue();
 		smoothing_slider_value = smoothing_slider.getValue();
+
+		sendActionMessage("cmd_update_supervisor");
 	}
 
 	void save_traces_to_file() {

@@ -17,7 +17,7 @@
 //==============================================================================
 /*
 */
-class delay_indicator    : public Component, public constants, public Button::Listener
+class delay_indicator    : public Component, public constants, public Button::Listener, public ActionBroadcaster
 {
 public:
 
@@ -255,6 +255,10 @@ public:
 		{
 			delay_in_samples = 0;
 		}
+
+		sendActionMessage("cmd_update_supervisor");
+
+		repaint();
 
 	}
 
