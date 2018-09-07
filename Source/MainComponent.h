@@ -78,6 +78,8 @@ private:
 
 	bool data_update_active{ false };
 
+	OpenGLContext gl_renderer;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainContentComponent)
 
 };

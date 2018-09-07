@@ -25,7 +25,9 @@ MainContentComponent::MainContentComponent()
 	main_settings_bar.main_controls.addActionListener(this);
 	main_settings_bar.main_delay_indicator.addActionListener(this);
 	supervisor1->addActionListener(this);
-						
+
+	gl_renderer.attachTo(*this);
+							
 }
 
 MainContentComponent::~MainContentComponent()
