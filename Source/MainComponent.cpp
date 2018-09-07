@@ -63,13 +63,10 @@ void MainContentComponent::getNextAudioBlock(const AudioSourceChannelInfo& audio
 
 		for (int sample = 0; sample < audio_device_buffer.numSamples; ++sample) {
 
-			ref_sample_value = ref_in_buffer[sample];
-			system_sample_value = system_in_buffer[sample];
-
-			supervisor1->buffer_ref_samples.push_front(ref_sample_value);
+			supervisor1->buffer_ref_samples.push_front(ref_in_buffer[sample]);
 			supervisor1->buffer_ref_samples.pop_back();
 
-			supervisor1->buffer_system_samples.push_front(system_sample_value);
+			supervisor1->buffer_system_samples.push_front(system_in_buffer[sample]);
 			supervisor1->buffer_system_samples.pop_back();
 
 			num_samples_stored++;
@@ -223,7 +220,7 @@ void MainContentComponent::update_supervisor_parameters() {
 	supervisor1->delay_in_samples = main_settings_bar.main_delay_indicator.delay_in_samples;
 	supervisor1->mic_cal_path = main_settings_bar.main_controls.fixed_mic_cal_file_path;
 	supervisor1->system_curve_path = main_settings_bar.main_controls.fixed_system_curve_file_path;
-	supervisor1->analyser_update_rate = main_settings_bar.main_controls.refresh_rate_slider_value;
+	supervisor1->analyser_update_rate_hz = main_settings_bar.main_controls.refresh_rate_slider_value;
 	supervisor1->smoothing_passes = main_settings_bar.main_controls.smoothing_slider_value;
 	supervisor1->curves_only = main_settings_bar.main_controls.curves_only;
 

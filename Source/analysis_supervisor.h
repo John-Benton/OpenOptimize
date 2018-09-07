@@ -116,7 +116,7 @@ public:
 
 	std::mutex plot_data_mtx_supervisor;
 
-	int analyser_update_rate = 1; //in Hz
+	int analyser_update_rate_hz = 1; //in Hz
 
 	bool analysis_cycle_active = false;
 
@@ -186,7 +186,7 @@ public:
 
 		assemble_composite_fft_bin_frequencies();
 				
-		startTimerHz(analyser_update_rate);
+		startTimer(1000/analyser_update_rate_hz);
 
 		composite_ref_autospectrum_data_history.set_num_histories(num_averages);
 
@@ -312,10 +312,13 @@ public:
 
 		}
 
-		stopTimer();
+		if (getTimerInterval() != (1000 / analyser_update_rate_hz))
+		{
 
-		startTimerHz(analyser_update_rate);
+			startTimer(1000 / analyser_update_rate_hz);
 
+		}
+		
 	}
 
 private:

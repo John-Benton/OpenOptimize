@@ -104,6 +104,8 @@ public:
 
 	std::string fixed_saved_traces_load_path;
 
+	bool saved_trace_loaded{ false };
+
 	//==========//
 
 	int refresh_rate_slider_value = 1;
@@ -152,6 +154,7 @@ public:
 
 		addAndMakeVisible(refresh_rate_slider);
 		refresh_rate_slider.setRange(1, 20, 1);
+		refresh_rate_slider.setValue(10);
 		refresh_rate_slider.addListener(this);
 
 		addAndMakeVisible(smoothing_slider);
@@ -384,6 +387,10 @@ public:
 	}
 
 	void buttonClicked(Button* button) override {
+		
+		saved_traces_visible = saved_traces_visible_onoff_button.getToggleState();
+
+		curves_only = curves_only_button.getToggleState();
 
 		if (button == &analysis_onoff_button)
 		{
@@ -393,11 +400,7 @@ public:
 			sendActionMessage("cmd_update_supervisor");
 
 		}
-
-		saved_traces_visible = saved_traces_visible_onoff_button.getToggleState();
-
-		curves_only = curves_only_button.getToggleState();
-
+		
 		if (button == &curves_only_button)
 		{
 
@@ -623,6 +626,12 @@ public:
 
 				}
 
+				saved_trace_loaded = true;
+
+				saved_traces_visible_onoff_button.setToggleState(true, dontSendNotification);
+
+				saved_traces_visible = 1;
+
 			}
 
 			else {
@@ -632,11 +641,7 @@ public:
 					"The trace file you attempted to load is incorrectly formatted");
 
 			}
-
-			saved_traces_visible_onoff_button.setToggleState(true, dontSendNotification);
-		
-			saved_traces_visible = 1;
-
+			
 		}
 
 	}

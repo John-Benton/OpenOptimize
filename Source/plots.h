@@ -66,10 +66,10 @@ public:
 
 	double horizontal_center_span = 0.0;
 
-	std::vector<double>current_composite_fft_bin_frequencies;
+	std::vector<double> current_composite_fft_bin_frequencies;
 
-	std::vector<double>current_composite_xfer_function_mag_dB;
-	std::vector<double>display_composite_xfer_function_mag_dB;
+	std::vector<double> current_composite_xfer_function_mag_dB;
+	std::vector<double> display_composite_xfer_function_mag_dB;
 
 	std::vector<double> current_composite_xfer_function_phase_deg;
 	std::vector<double> display_composite_xfer_function_phase_deg;
@@ -286,6 +286,11 @@ public:
 
 		spectrum_visible_button.addListener(this);
 		spectrum_active_button.addListener(this);
+
+		std::fill(loaded_composite_fft_bin_frequencies.begin(), loaded_composite_fft_bin_frequencies.end(), 0.0);
+		std::fill(loaded_composite_xfer_function_mag_dB_avg_cal.begin(), loaded_composite_xfer_function_mag_dB_avg_cal.end(), 0.0);
+		std::fill(loaded_composite_xfer_function_phase_deg_avg.begin(), loaded_composite_xfer_function_phase_deg_avg.end(), 0.0);
+		std::fill(loaded_composite_coherence_value.begin(), loaded_composite_coherence_value.end(), 0.0);
 
     }
 
@@ -768,7 +773,7 @@ public:
 
 		};
 
-		if (saved_traces_visible == 1) {
+		if (saved_traces_visible == 1 && loaded_composite_fft_bin_frequencies[0] != 0.0) {
 
 			if (magnitude_visible == 1) {
 
