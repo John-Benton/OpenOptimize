@@ -2127,6 +2127,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\ifft.h">
+      <Filter>OpenOptimize\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\flexplot.h">
+      <Filter>OpenOptimize\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ir_window.h">
+      <Filter>OpenOptimize\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MainComponent.h">
       <Filter>OpenOptimize\Source</Filter>
     </ClInclude>

@@ -214,6 +214,29 @@ void MainContentComponent::open_audio_io_window() {
 
 }
 
+void MainContentComponent::open_ir_window()
+{
+
+	OptionalScopedPointer<Component> ir_window_content_ptr{ & ir_window, 0 };
+
+	ir_window_config.dialogTitle = "System Impulse Response";
+
+	ir_window_config.dialogBackgroundColour = Colours::darkgrey;
+
+	ir_window_config.content = ir_window_content_ptr;
+
+	ir_window_config.componentToCentreAround = NULL;
+
+	ir_window_config.escapeKeyTriggersCloseButton = true;
+
+	ir_window_config.useNativeTitleBar = true;
+
+	ir_window_config.useBottomRightCornerResizer = false;
+
+	ir_window_config.launchAsync();
+
+}
+
 void MainContentComponent::update_supervisor_parameters() {
 
 	supervisor1->analyser_run = main_settings_bar.main_controls.analysis_status;
@@ -268,6 +291,12 @@ void MainContentComponent::actionListenerCallback(const String &message)
 		update_meters();
 
 		data_update_active = false;
+
+	}
+
+	else if (message == "cmd_open_ir_window") {
+
+		open_ir_window();
 
 	}
 

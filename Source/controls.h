@@ -490,6 +490,12 @@ public:
 
 		}
 
+		if (button == &ir_window_button) {
+
+			sendActionMessage("cmd_open_ir_window");
+
+		}
+
 	}
 
 	void sliderValueChanged(Slider* slider) override

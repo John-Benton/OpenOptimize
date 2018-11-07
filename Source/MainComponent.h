@@ -17,6 +17,7 @@
 #include "fft.h"
 #include "constants.h"
 #include "analysis_supervisor.h"
+#include "ir_window.h"
 
 class MainContentComponent : public AudioAppComponent, public constants, public Timer, public ActionListener
 {
@@ -53,6 +54,8 @@ public:
 
 	void open_audio_io_window();
 
+	void open_ir_window();
+
 	void update_supervisor_parameters();
 
 	void timerCallback() override;
@@ -75,6 +78,10 @@ private:
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
 	DialogWindow::LaunchOptions audio_io_config_window;
+
+	ir_window ir_window;
+
+	DialogWindow::LaunchOptions ir_window_config;
 
 	bool data_update_active{ false };
 

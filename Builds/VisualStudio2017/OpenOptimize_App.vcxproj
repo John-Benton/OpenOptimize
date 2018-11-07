@@ -1793,6 +1793,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\ifft.h"/>
+    <ClInclude Include="..\..\Source\flexplot.h"/>
+    <ClInclude Include="..\..\Source\ir_window.h"/>
     <ClInclude Include="..\..\Source\MainComponent.h"/>
     <ClInclude Include="..\..\Source\data_history.h"/>
     <ClInclude Include="..\..\Source\spl_cal.h"/>
