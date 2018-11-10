@@ -1793,6 +1793,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\xfer_func.h"/>
     <ClInclude Include="..\..\Source\ifft.h"/>
     <ClInclude Include="..\..\Source\flexplot.h"/>
     <ClInclude Include="..\..\Source\ir_window.h"/>

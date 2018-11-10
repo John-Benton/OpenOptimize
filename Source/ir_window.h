@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "flexplot.h"
+#include "constants.h"
 
 //==============================================================================
 /*
@@ -28,8 +29,9 @@ public:
 		int component_height = display_outline.getHeight()*0.5;
 		this->setSize(component_width, component_height);
 
-		ir_plot.set_plot_properties(0.0, 683.0, -1.0, 1.0, 50.0, 0.2, "", "");
-		ir_plot.set_plot_max_zooms(50, 10);
+		ir_plot.set_plot_properties(-1.0, 10.0, -1.0, 1.0, 1.0, 0.2, "", "");
+		ir_plot.set_plot_max_zooms(10, 10);
+		ir_plot.add_data_set(&ir_data);
 
 		addAndMakeVisible(ir_plot);
 
@@ -41,16 +43,9 @@ public:
 
     void paint (Graphics& g) override
     {
-        
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
 
-        g.setColour (Colours::grey);
-        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+		ir_plot.repaint();
 
-        g.setColour (Colours::white);
-        g.setFont (14.0f);
-        g.drawText ("ir_window", getLocalBounds(),
-                    Justification::centred, true);   // draw some placeholder text
     }
 
     void resized() override
@@ -60,11 +55,26 @@ public:
         
     }
 
+	void update_ir_plot_data(std::vector<float> &new_ir_data) {
+
+		ir_data.clear_data();
+
+		for (int data_point = 0; data_point < new_ir_data.size(); data_point++) {
+
+			float x_value = ( (data_point*1.0) / constants::sample_rate) * 1000.0;
+			float y_value = new_ir_data[data_point];
+
+			ir_data.add_single_data_point(x_value, y_value);
+
+		}
+
+	}
+
 private:
 
 	flexplot ir_plot;
 
 	flexplot_data_object ir_data;
-
+	
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ir_window)
 };

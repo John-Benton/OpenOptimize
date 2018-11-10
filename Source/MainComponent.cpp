@@ -136,6 +136,8 @@ void MainContentComponent::update_current_plot_data() {
 
 	supervisor1->plot_data_mtx_supervisor.unlock();
 
+	ir_window.update_ir_plot_data(supervisor1->composite_impulse_response);
+
 }
 
 void MainContentComponent::update_loaded_plot_data() {

@@ -20,9 +20,11 @@
 #include "moving_average.h"
 #include "phase.h"
 #include "fft.h"
+#include "ifft.h"
 #include "constants.h"
 #include "data_history.h"
 #include <algorithm>
+#include "xfer_func.h"
 
 class supervisor : public constants, public Timer, public Thread, public ActionBroadcaster
 
@@ -39,8 +41,8 @@ public:
 	std::vector<std::vector<double>> composite_ref_complex_vector;
 	std::vector<std::vector<double>> composite_system_complex_vector;
 
-	std::vector<std::vector<double>> composite_ref_complex_conjugate;
-	std::vector<std::vector<double>> composite_system_complex_conjugate;
+	/*std::vector<std::vector<double>> composite_ref_complex_conjugate;
+	std::vector<std::vector<double>> composite_system_complex_conjugate;*/
 
 	std::vector<double> composite_ref_autospectrum;
 	std::vector<double> composite_system_autospectrum;
@@ -65,6 +67,8 @@ public:
 	std::vector<double> composite_ref_spectrum_mag_linear;
 	std::vector<double> composite_ref_spectrum_mag_dB;
 
+	std::vector<float> composite_impulse_response;
+
 	/*---------------------------------------------------*/
 
 	std::deque<double> buffer_ref_samples;
@@ -80,7 +84,7 @@ public:
 
 	/*---------------------------------------------------*/
 
-	const int fft_bins = (largest_fft_size / 2) + 1;
+	/*const int fft_bins = (largest_fft_size / 2) + 1;*/
 
 	int delay_in_samples = 0;
 
@@ -143,16 +147,17 @@ public:
 		composite_ref_complex_vector.resize(2, std::vector<double>(composite_fft_bins)); //two rows, each row has as many columns as there are composite fft bins
 		composite_system_complex_vector.resize(2, std::vector<double>(composite_fft_bins));
 
-		composite_ref_complex_conjugate.resize(2, std::vector<double>(composite_fft_bins));
-		composite_system_complex_conjugate.resize(2, std::vector<double>(composite_fft_bins));
+		/*composite_ref_complex_conjugate.resize(2, std::vector<double>(composite_fft_bins));
+		composite_system_complex_conjugate.resize(2, std::vector<double>(composite_fft_bins));*/
 
-		composite_ref_autospectrum.resize(composite_fft_bins);
-		composite_system_autospectrum.resize(composite_fft_bins);
+		/*composite_ref_autospectrum.resize(composite_fft_bins);
+		composite_system_autospectrum.resize(composite_fft_bins);*/
 
-		composite_cross_spectrum_complex.resize(2, std::vector<double>(composite_fft_bins));
+		/*composite_cross_spectrum_complex.resize(2, std::vector<double>(composite_fft_bins));*/
+		
 		composite_cross_spectrum_complex_avg.resize(2, std::vector<double>(composite_fft_bins));
 
-		composite_cross_spectrum_magnitude.resize(composite_fft_bins);
+		/*composite_cross_spectrum_magnitude.resize(composite_fft_bins);*/
 
 		composite_xfer_function_complex.resize(2, std::vector<double>(composite_fft_bins));
 		composite_xfer_function_mag_dB_uncal.resize(composite_fft_bins);
@@ -171,6 +176,8 @@ public:
 
 		composite_ref_spectrum_mag_linear.resize(composite_fft_bins);
 		composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+
+		composite_impulse_response.resize((composite_fft_bins - 1) * 2);
 
 		interpolated_mic_cal_amplitudes.resize(composite_fft_bins);
 
@@ -253,6 +260,8 @@ public:
 		plot_data_mtx_supervisor.lock();
 			
 		process_fft_data();
+
+		calculate_impulse_response();
 		
 		calculate_coherence();
 
@@ -332,6 +341,10 @@ private:
 	fft * fft_256 = new fft(largest_fft_size / 128);
 	fft * fft_128 = new fft(largest_fft_size / 256);
 	fft * fft_64 = new fft(largest_fft_size / 512);
+
+	xfer_func composite_xfer_func{ composite_fft_bins };
+
+	ifft impulse_response_calculator;
 
 	MovingAverage1DVector composite_data_smoother;
 
@@ -531,26 +544,40 @@ private:
 
 	void process_fft_data() {
 
-		complex_conjugate(composite_ref_complex_vector, composite_ref_complex_conjugate);
-		complex_conjugate(composite_system_complex_vector, composite_system_complex_conjugate);
+		/*complex_conjugate(composite_ref_complex_vector, composite_ref_complex_conjugate);
+		complex_conjugate(composite_system_complex_vector, composite_system_complex_conjugate);*/
 
-		calc_autospectrum(composite_ref_complex_vector, composite_ref_complex_conjugate, composite_ref_autospectrum);
-		calc_autospectrum(composite_system_complex_vector, composite_system_complex_conjugate, composite_system_autospectrum);
+		/*calc_autospectrum(composite_ref_complex_vector, composite_ref_complex_conjugate, composite_ref_autospectrum);
+		calc_autospectrum(composite_system_complex_vector, composite_system_complex_conjugate, composite_system_autospectrum);*/
 
-		calc_cross_spectrum();
+		/*calc_cross_spectrum();*/
+		
+		/*calc_xfer_function();*/
 
+		composite_xfer_func.run_xfer_func(	composite_ref_complex_vector, 
+											composite_system_complex_vector, 
+											composite_xfer_function_complex);
+
+		process_xfer_function_data();
+		
 		update_histories();
 		update_averages();
-
-		calc_xfer_function();
-
+		
 		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
-
-		smooth_xfer_function_data();
 
 	}
 
-	void complex_conjugate(	std::vector<std::vector<double>> & composite_complex_vector, 
+	void calculate_impulse_response() {
+
+		impulse_response_calculator.set_freq_response_data(composite_xfer_function_complex);
+
+		impulse_response_calculator.run_ifft();
+
+		impulse_response_calculator.get_output_samples(composite_impulse_response);
+
+	}
+
+	/*void complex_conjugate(	std::vector<std::vector<double>> & composite_complex_vector, 
 							std::vector<std::vector<double>> & composite_complex_conjugate) {
 
 		std::copy(	composite_complex_vector[0].begin(), 
@@ -561,9 +588,9 @@ private:
 			composite_complex_conjugate[1][col] = -composite_complex_vector[1][col];
 		}
 
-	}
+	}*/
 
-	void calc_autospectrum(	std::vector<std::vector<double>> & composite_complex_vector, 
+	/*void calc_autospectrum(	std::vector<std::vector<double>> & composite_complex_vector, 
 							std::vector<std::vector<double>> & composite_complex_conjugate,
 							std::vector<double> & composite_autospectrum) {
 
@@ -572,9 +599,9 @@ private:
 				((composite_complex_vector[0][col])*(composite_complex_conjugate[0][col]) -
 				((composite_complex_vector[1][col])*(composite_complex_conjugate[1][col])));
 		}
-	}
+	}*/
 
-	void calc_cross_spectrum() {
+	/*void calc_cross_spectrum() {
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 			composite_cross_spectrum_complex[0][col] =
@@ -594,22 +621,22 @@ private:
 				pow(composite_cross_spectrum_complex[1][col], 2));
 		}
 		int x = 0;
-	}
+	}*/
 
-	void calc_xfer_function() {
-
-		double xfer_function_magnitude_linear;
-
-		double xfer_function_phase_radians;
-
-		for (int col = 0; col < composite_fft_bins; col++) {
+	void process_xfer_function_data() {
+		
+		/*for (int col = 0; col < composite_fft_bins; col++) {
 			composite_xfer_function_complex[0][col] = composite_cross_spectrum_complex_avg[0][col] / composite_ref_autospectrum_avg[col];
 			composite_xfer_function_complex[1][col] = composite_cross_spectrum_complex_avg[1][col] / composite_ref_autospectrum_avg[col];
 
 
-		}
+		}*/
 
-		smooth_xfer_function_data();
+		smooth_xfer_function_data(); //complex smoothing
+
+		double xfer_function_magnitude_linear;
+
+		double xfer_function_phase_radians;
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 			
@@ -624,15 +651,20 @@ private:
 
 	void update_histories() {
 
-		composite_ref_autospectrum_data_history.add_latest_values(composite_ref_autospectrum);
+		/*composite_ref_autospectrum_data_history.add_latest_values(composite_ref_autospectrum);*/
+		composite_ref_autospectrum_data_history.add_latest_values(composite_xfer_func.ref_autospectrum);
 
-		composite_system_autospectrum_data_history.add_latest_values(composite_system_autospectrum);
+		/*composite_system_autospectrum_data_history.add_latest_values(composite_system_autospectrum);*/
+		composite_system_autospectrum_data_history.add_latest_values(composite_xfer_func.system_autospectum);
 
-		composite_cross_spectrum_real_data_history.add_latest_values(composite_cross_spectrum_complex[0]);
+		/*composite_cross_spectrum_real_data_history.add_latest_values(composite_cross_spectrum_complex[0]);*/
+		composite_cross_spectrum_real_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_complex[0]);
 
-		composite_cross_spectrum_imag_data_history.add_latest_values(composite_cross_spectrum_complex[1]);
+		/*composite_cross_spectrum_imag_data_history.add_latest_values(composite_cross_spectrum_complex[1]);*/
+		composite_cross_spectrum_imag_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_complex[1]);
 
-		composite_cross_spectrum_mag_data_history.add_latest_values(composite_cross_spectrum_magnitude);
+		/*composite_cross_spectrum_mag_data_history.add_latest_values(composite_cross_spectrum_magnitude);*/
+		composite_cross_spectrum_mag_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_magnitude);
 
 	}
 
@@ -668,7 +700,7 @@ private:
 
 		}
 
-		/* The constants used on the right side of the equations in the following lines was calculated with the following equation:
+		/* The final constants used on the right side of the equations in the following lines was calculated with the following equation:
 		
 		constant = sqrt(N1/N2), where N1 is the largest fft size (currently 32768), and N2 is the size of the fft used for that
 		region of the composite amplitude spectrum. 

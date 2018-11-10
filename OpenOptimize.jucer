@@ -6,6 +6,7 @@
               companyCopyright="">
   <MAINGROUP id="mutD4M" name="OpenOptimize">
     <GROUP id="{5957BAE9-CD64-64FD-114D-DBA564426E06}" name="Source">
+      <FILE id="eFgnTq" name="xfer_func.h" compile="0" resource="0" file="Source/xfer_func.h"/>
       <FILE id="Q0Br0p" name="ifft.h" compile="0" resource="0" file="Source/ifft.h"/>
       <FILE id="E2mDMS" name="flexplot.h" compile="0" resource="0" file="Source/flexplot.h"/>
       <FILE id="kKZkJ0" name="ir_window.h" compile="0" resource="0" file="Source/ir_window.h"/>

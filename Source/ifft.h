@@ -1,146 +1,124 @@
-/*
-  ==============================================================================
-
-    fft.h
-    Created: 17 Sep 2017 2:57:29pm
-    Author:  John
-
-  ==============================================================================
-*/
-
-//Complex arrays use the following format: [Re][0], [Imag][1]
-
-//Complex vectors use the following format: [0][Re], [1][Imag]
 
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <algorithm>
 #include <fftw3.h>
 #include <array>
 #include "constants.h"
 #include <vector>
 #include <deque>
 
-class fft : public constants
+class ifft : public constants
 {
 
 public:
 
-	const int local_fft_size;
-	int local_fft_bins;
-
-	std::vector<double> hann_window_weights;
-
-	/*---------------------------------------------------*/
-
-	std::vector<double> local_ref_samples;
-	std::vector<double> local_system_samples;
-
-	/*---------------------------------------------------*/
-
-	double *fftw_samples_dynamic;
-
-	fftw_complex *out;
-
-	fftw_plan plan;
-
-	/*---------------------------------------------------*/
-
-	std::vector<std::vector<double>> fftw_complex_out_ref_vector;
-	std::vector<std::vector<double>> fftw_complex_out_system_vector;
-
-	/*---------------------------------------------------*/
-
-	fft(int fft_size) : local_fft_size(fft_size)
+	ifft()
 	{
-		local_fft_bins = (local_fft_size / 2) + 1;
+		ifft_num_input_bins = composite_fft_bins;
 
-		/*---------------------------------------------------*/ //set sizes of vectors
+		ifft_num_output_samples = (ifft_num_input_bins - 1) * 2;
 
-		hann_window_weights.resize(local_fft_size);
-		local_ref_samples.resize(local_fft_size);
-		local_system_samples.resize(local_fft_size);
+		output_samples = new double[ifft_num_output_samples];
 
-		fftw_complex_out_ref_vector.resize(2, std::vector<double>(local_fft_bins)); //two rows, each row has as many columns as there are fft bins
-		fftw_complex_out_system_vector.resize(2, std::vector<double>(local_fft_bins));
+		input_freq_response = fftw_alloc_complex(ifft_num_input_bins);
 
-		/*---------------------------------------------------*/
-
-		generate_hann_window_weights_array();
-
-		/*---------------------------------------------------*/
-
-		fftw_samples_dynamic = new double[local_fft_size];
-
-		out = fftw_alloc_complex(local_fft_size);
-		plan = fftw_plan_dft_r2c_1d(local_fft_size, fftw_samples_dynamic, out, FFTW_MEASURE);
+		plan = fftw_plan_dft_c2r_1d(ifft_num_output_samples, input_freq_response, output_samples, FFTW_MEASURE);
 
 	};
 
-	~fft() {
+	~ifft() {
 
 		fftw_destroy_plan(plan);
-		fftw_free(out);
-		delete[]fftw_samples_dynamic;
+		fftw_free(input_freq_response);
+		delete[]output_samples;
 
 	};
 
-	void run_fft_analysis(std::vector<double> &ref_samples_in, std::vector<double> &system_samples_in) {
+	void set_freq_response_data(std::vector<std::vector<double>> & complex_freq_response_data) {
+		
+		for (int bin = 0; bin < ifft_num_input_bins; bin++) {
 
-		std::copy(ref_samples_in.begin(), ref_samples_in.begin() + local_fft_size, local_ref_samples.begin());
-		std::copy(system_samples_in.begin(), system_samples_in.begin() + local_fft_size, local_system_samples.begin());
+			input_freq_response[bin][0] = complex_freq_response_data[0][bin]; //real data
+			input_freq_response[bin][1] = complex_freq_response_data[1][bin]; //imag data
 
-		window_samples(local_ref_samples);
-		window_samples(local_system_samples);
+		}
 
-		run_fftw(local_ref_samples, fftw_complex_out_ref_vector);
-		run_fftw(local_system_samples, fftw_complex_out_system_vector);
+		for (int bin = 0; bin < ifft_num_input_bins; bin++) { //scaled per instructions in 
+			                                                 //The Scientist and Engineer's Guide to Digital Signal Processing
 
-		//normalize_fftw_output();
+			input_freq_response[bin][0] = input_freq_response[bin][0] / (ifft_num_output_samples / 2);
+			input_freq_response[bin][1] = -input_freq_response[bin][1] / (ifft_num_output_samples / 2);
+			
+		}
+
+		input_freq_response[0][0] = input_freq_response[0][0] / 2;
+		input_freq_response[ifft_num_input_bins-1][0] = input_freq_response[ifft_num_input_bins - 1][0] / 2;
+
+	}
+
+	void run_ifft() {
+
+		fftw_execute(plan);
+
+		//normalize_output_samples();
+
+	}
+
+	void get_output_samples(std::vector<float> &destination_vector) {
+
+		for (int sample = 0; sample < ifft_num_output_samples; sample++) {
+
+			destination_vector[sample] = output_samples[sample];
+
+		}
 
 	}
 
 private:
+	
+	int ifft_num_output_samples, ifft_num_input_bins;
 
-	void generate_hann_window_weights_array() {
+	fftw_complex *input_freq_response;
 
-		for (int n = 0; n < local_fft_size; n++) {
-			hann_window_weights[n] = 0.5*(1 - cos((2 * 3.141592654*n) / (local_fft_size - 1)));
-		}
+	double *output_samples;
 
-	}
+	fftw_plan plan;
 
-	void window_samples(std::vector<double> &samples) {
+	void prep_input() {
 
-		for (int n = 0; n < local_fft_size; n++) {
-			samples[n] = samples[n] * hann_window_weights[n];
-		}
+
 
 	}
 
-	void run_fftw(std::vector<double> &samples, std::vector<std::vector<double>> & destinaton_vector) {
+	void normalize_output_samples() {
 
-		std::copy(samples.begin(), samples.begin() + local_fft_size, fftw_samples_dynamic);
+		float max_value{ 0 };
+		float min_value{ 0 };
+		float largest_value{ 0 };
 
-		fftw_execute(plan);
+		for (int sample = 0; sample < ifft_num_output_samples; sample++) {
 
-		for (int row = 0; row < 2; row++) {
-			for (int col = 0; col < local_fft_bins; col++) {
-				destinaton_vector[row][col] = out[col][row];
+			if(output_samples[sample] > max_value){
+				
+				max_value = output_samples[sample];
+			
 			}
+
+			else if (output_samples[sample] < min_value) {
+
+				min_value = output_samples[sample];
+
+			}
+
+			else {}
+
 		}
-	}
 
-	void normalize_fftw_output() {
+		largest_value = std::max(max_value, abs(min_value));
 
-		for (int col = 0; col < local_fft_bins; col++) {
+		for (int sample = 0; sample < ifft_num_output_samples; sample++) {
 
-			fftw_complex_out_ref_vector[0][col] = fftw_complex_out_ref_vector[0][col] / local_fft_size;
-			fftw_complex_out_ref_vector[1][col] = fftw_complex_out_ref_vector[1][col] / local_fft_size;
-			fftw_complex_out_system_vector[0][col] = fftw_complex_out_system_vector[0][col] / local_fft_size;
-			fftw_complex_out_system_vector[1][col] = fftw_complex_out_system_vector[1][col] / local_fft_size;
+			output_samples[sample] = output_samples[sample] / largest_value;
 
 		}
 

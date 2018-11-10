@@ -2127,6 +2127,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\xfer_func.h">
+      <Filter>OpenOptimize\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\ifft.h">
       <Filter>OpenOptimize\Source</Filter>
     </ClInclude>
