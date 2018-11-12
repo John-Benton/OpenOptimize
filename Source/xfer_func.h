@@ -17,7 +17,6 @@ public:
 
 	xfer_func(int freq_bins) :  num_freq_bins(freq_bins)
 	{
-		/*ref_complex_conjugate.resize(2, std::vector<double>(num_freq_bins));*/
 		ref_autospectrum.resize(num_freq_bins);
 		system_autospectum.resize(num_freq_bins);
 		ref_system_cross_spectrum_complex.resize(2, std::vector<double>(num_freq_bins));
@@ -31,8 +30,6 @@ public:
 						std::vector<std::vector<double>> &input_complex_freq_system,
 						std::vector<std::vector<double>> &output_complex_freq_response) 
 	{
-
-		/*calc_complex_conjugate(input_complex_freq_ref, ref_complex_conjugate);*/
 		
 		calc_autospectrum(input_complex_freq_ref, ref_autospectrum);
 		calc_autospectrum(input_complex_freq_system, system_autospectum);
@@ -51,18 +48,6 @@ public:
 private:
 
 	int num_freq_bins{ 0 };
-
-	/*std::vector<std::vector<double>> ref_complex_conjugate;*/
-		
-	/*void calc_complex_conjugate(std::vector<std::vector<double>> & input_complex_freq,
-								std::vector<std::vector<double>> & output_complex_conjugate) 
-	
-	{
-
-		std::copy(input_complex_freq[0].begin(), input_complex_freq[0].end(), output_complex_conjugate.begin());
-		std::transform(input_complex_freq[1].begin(), input_complex_freq[1].end(), output_complex_conjugate.begin(), std::negate<double>());
-
-	}*/
 
 	void calc_autospectrum(	std::vector<std::vector<double>> & input_complex_freq, 
 							std::vector<double> & output_autospectrum)

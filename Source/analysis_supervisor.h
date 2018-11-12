@@ -38,44 +38,31 @@ public:
 
 	std::vector<double> composite_fft_bin_frequencies;
 
-	std::vector<std::vector<double>> composite_ref_complex_vector;
-	std::vector<std::vector<double>> composite_system_complex_vector;
-
-	/*std::vector<std::vector<double>> composite_ref_complex_conjugate;
-	std::vector<std::vector<double>> composite_system_complex_conjugate;*/
-
-	std::vector<double> composite_ref_autospectrum;
-	std::vector<double> composite_system_autospectrum;
-
-	std::vector<std::vector<double>> composite_cross_spectrum_complex;
-	std::vector<std::vector<double>> composite_cross_spectrum_complex_avg;
+	std::vector<std::vector<double>> composite_ref_complex_vector, composite_system_complex_vector;
 
 	std::vector<double> composite_cross_spectrum_magnitude;
-	
-	std::vector<std::vector<double>> composite_xfer_function_complex;
 
-	std::vector<double> composite_xfer_function_mag_dB_uncal;
-	std::vector<double> composite_xfer_function_mag_dB_cal;
-	std::vector<double> composite_xfer_function_phase_deg;
+	std::vector<std::vector<double>> composite_xfer_function_complex;
 
 	std::vector<double> composite_ref_autospectrum_avg;
 	std::vector<double> composite_system_autospectrum_avg;
 	std::vector<double> composite_cross_spectrum_mag_avg;
 	
+	std::vector<double> composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal;
+	
+	std::vector<double> composite_xfer_function_phase_deg;
+		
 	std::vector<double> composite_coherence_value;
 
-	std::vector<double> composite_ref_spectrum_mag_linear;
-	std::vector<double> composite_ref_spectrum_mag_dB;
+	std::vector<double> composite_ref_spectrum_mag_linear, composite_ref_spectrum_mag_dB;
 
 	std::vector<float> composite_impulse_response;
 
 	/*---------------------------------------------------*/
 
-	std::deque<double> buffer_ref_samples;
-	std::deque<double> buffer_system_samples;
+	std::deque<double> buffer_ref_samples, buffer_system_samples;
 
-	std::vector<double> current_ref_samples;
-	std::vector<double> current_system_samples;
+	std::vector<double> current_ref_samples, current_system_samples;
 
 	std::vector<double> current_system_samples_squared;
 	double current_system_samples_squared_sum;
@@ -84,61 +71,43 @@ public:
 
 	/*---------------------------------------------------*/
 
-	/*const int fft_bins = (largest_fft_size / 2) + 1;*/
-
-	int delay_in_samples = 0;
+	int delay_in_samples{ 0 };
 
 	/*---------------------------------------------------*/
 
-	std::string mic_cal_path;
-	std::string mic_cal_path_in_use;
+	std::string mic_cal_path, mic_cal_path_in_use;
 
-	std::vector<double> original_mic_cal_frequencies;
-	std::vector<double> original_mic_cal_amplitudes;
-
-	std::vector<double> interpolated_mic_cal_amplitudes;
+	std::vector<double> original_mic_cal_frequencies, 
+						original_mic_cal_amplitudes, 
+						interpolated_mic_cal_amplitudes;
 
 	/*---------------------------------------------------*/
 
-	std::string system_curve_path;
-	std::string system_curve_path_in_use;
+	std::string system_curve_path, system_curve_path_in_use;
 
-	std::vector<double> original_system_curve_frequencies;
-	std::vector<double> original_system_curve_amplitudes;
-
-	std::vector<double> interpolated_system_curve_amplitudes;
+	std::vector<double> original_system_curve_frequencies, 
+						original_system_curve_amplitudes, 
+						interpolated_system_curve_amplitudes;
 
 	/*---------------------------------------------------*/
 
-	double peak_of_current_ref_samples = 0.0;
-
-	double peak_of_current_system_samples = 0.0;
+	double peak_of_current_ref_samples{ 0.0 }, peak_of_current_system_samples{ 0.0 };
 
 	/*---------------------------------------------------*/
 
-	std::mutex audio_buffer_mtx_supervisor;
+	std::mutex audio_buffer_mtx_supervisor, plot_data_mtx_supervisor;
 
-	std::mutex plot_data_mtx_supervisor;
+	int analyser_update_rate_hz{ 1 };
 
-	int analyser_update_rate_hz = 1; //in Hz
+	bool analysis_cycle_active{ false }, analyser_run{ false };
 
-	bool analysis_cycle_active = false;
+	int smoothing_average_size{ 3 }, smoothing_passes{ 0 };
 
-	bool analyser_run = false;
+	float spectrum_offset_db{ 12.0 }, spectrum_scaling_coefficient{ 0.5 }, spectrum_slope_db_octave = -4.5;
 
-	int smoothing_average_size = 3;
+	bool curves_only{ false };
 
-	int smoothing_passes = 0;
-
-	float spectrum_offset_db = 12.0;
-
-	float spectrum_scaling_coefficient = 0.5;
-
-	float spectrum_slope_db_octave = -4.5;
-
-	int curves_only = 0;
-
-	int num_averages = 2;
+	int num_averages{ 2 };
 
 	supervisor(): Thread("Supervisor_Thread",0)
 	
@@ -146,18 +115,6 @@ public:
 						
 		composite_ref_complex_vector.resize(2, std::vector<double>(composite_fft_bins)); //two rows, each row has as many columns as there are composite fft bins
 		composite_system_complex_vector.resize(2, std::vector<double>(composite_fft_bins));
-
-		/*composite_ref_complex_conjugate.resize(2, std::vector<double>(composite_fft_bins));
-		composite_system_complex_conjugate.resize(2, std::vector<double>(composite_fft_bins));*/
-
-		/*composite_ref_autospectrum.resize(composite_fft_bins);
-		composite_system_autospectrum.resize(composite_fft_bins);*/
-
-		/*composite_cross_spectrum_complex.resize(2, std::vector<double>(composite_fft_bins));*/
-		
-		composite_cross_spectrum_complex_avg.resize(2, std::vector<double>(composite_fft_bins));
-
-		/*composite_cross_spectrum_magnitude.resize(composite_fft_bins);*/
 
 		composite_xfer_function_complex.resize(2, std::vector<double>(composite_fft_bins));
 		composite_xfer_function_mag_dB_uncal.resize(composite_fft_bins);
@@ -544,16 +501,6 @@ private:
 
 	void process_fft_data() {
 
-		/*complex_conjugate(composite_ref_complex_vector, composite_ref_complex_conjugate);
-		complex_conjugate(composite_system_complex_vector, composite_system_complex_conjugate);*/
-
-		/*calc_autospectrum(composite_ref_complex_vector, composite_ref_complex_conjugate, composite_ref_autospectrum);
-		calc_autospectrum(composite_system_complex_vector, composite_system_complex_conjugate, composite_system_autospectrum);*/
-
-		/*calc_cross_spectrum();*/
-		
-		/*calc_xfer_function();*/
-
 		composite_xfer_func.run_xfer_func(	composite_ref_complex_vector, 
 											composite_system_complex_vector, 
 											composite_xfer_function_complex);
@@ -577,61 +524,8 @@ private:
 
 	}
 
-	/*void complex_conjugate(	std::vector<std::vector<double>> & composite_complex_vector, 
-							std::vector<std::vector<double>> & composite_complex_conjugate) {
-
-		std::copy(	composite_complex_vector[0].begin(), 
-					composite_complex_vector[0].begin() + composite_fft_bins, 
-					composite_complex_conjugate[0].begin());
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_complex_conjugate[1][col] = -composite_complex_vector[1][col];
-		}
-
-	}*/
-
-	/*void calc_autospectrum(	std::vector<std::vector<double>> & composite_complex_vector, 
-							std::vector<std::vector<double>> & composite_complex_conjugate,
-							std::vector<double> & composite_autospectrum) {
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_autospectrum[col] =
-				((composite_complex_vector[0][col])*(composite_complex_conjugate[0][col]) -
-				((composite_complex_vector[1][col])*(composite_complex_conjugate[1][col])));
-		}
-	}*/
-
-	/*void calc_cross_spectrum() {
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_cross_spectrum_complex[0][col] =
-				((composite_ref_complex_conjugate[0][col])*(composite_system_complex_vector[0][col]) -
-				(composite_ref_complex_conjugate[1][col])*(composite_system_complex_vector[1][col]));
-		}
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-			composite_cross_spectrum_complex[1][col] =
-				((composite_ref_complex_conjugate[0][col])*(composite_system_complex_vector[1][col]) +
-				(composite_ref_complex_conjugate[1][col])*(composite_system_complex_vector[0][col]));
-		}
-
-		for (int col = 0; col < composite_fft_bins; col++) {
-				composite_cross_spectrum_magnitude[col] = 
-				sqrt(pow(composite_cross_spectrum_complex[0][col], 2) + 
-				pow(composite_cross_spectrum_complex[1][col], 2));
-		}
-		int x = 0;
-	}*/
-
 	void process_xfer_function_data() {
-		
-		/*for (int col = 0; col < composite_fft_bins; col++) {
-			composite_xfer_function_complex[0][col] = composite_cross_spectrum_complex_avg[0][col] / composite_ref_autospectrum_avg[col];
-			composite_xfer_function_complex[1][col] = composite_cross_spectrum_complex_avg[1][col] / composite_ref_autospectrum_avg[col];
-
-
-		}*/
-
+	
 		smooth_xfer_function_data(); //complex smoothing
 
 		double xfer_function_magnitude_linear;
@@ -651,19 +545,10 @@ private:
 
 	void update_histories() {
 
-		/*composite_ref_autospectrum_data_history.add_latest_values(composite_ref_autospectrum);*/
 		composite_ref_autospectrum_data_history.add_latest_values(composite_xfer_func.ref_autospectrum);
 
-		/*composite_system_autospectrum_data_history.add_latest_values(composite_system_autospectrum);*/
 		composite_system_autospectrum_data_history.add_latest_values(composite_xfer_func.system_autospectum);
 
-		/*composite_cross_spectrum_real_data_history.add_latest_values(composite_cross_spectrum_complex[0]);*/
-		composite_cross_spectrum_real_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_complex[0]);
-
-		/*composite_cross_spectrum_imag_data_history.add_latest_values(composite_cross_spectrum_complex[1]);*/
-		composite_cross_spectrum_imag_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_complex[1]);
-
-		/*composite_cross_spectrum_mag_data_history.add_latest_values(composite_cross_spectrum_magnitude);*/
 		composite_cross_spectrum_mag_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_magnitude);
 
 	}
@@ -673,10 +558,6 @@ private:
 		composite_ref_autospectrum_data_history.get_data_average(composite_ref_autospectrum_avg);
 
 		composite_system_autospectrum_data_history.get_data_average(composite_system_autospectrum_avg);
-
-		composite_cross_spectrum_real_data_history.get_data_average(composite_cross_spectrum_complex_avg[0]);
-
-		composite_cross_spectrum_imag_data_history.get_data_average(composite_cross_spectrum_complex_avg[1]);
 
 		composite_cross_spectrum_mag_data_history.get_data_average(composite_cross_spectrum_mag_avg);
 
