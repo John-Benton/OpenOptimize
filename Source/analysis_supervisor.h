@@ -44,9 +44,11 @@ public:
 
 	std::vector<std::vector<double>> composite_xfer_function_complex;
 
-	std::vector<double> composite_ref_autospectrum_avg;
-	std::vector<double> composite_system_autospectrum_avg;
+	std::vector<double> composite_ref_autospectrum_avg, composite_system_autospectrum_avg;
+
 	std::vector<double> composite_cross_spectrum_mag_avg;
+
+	std::vector<double> composite_xfer_function_real_data_avg, composite_xfer_function_imag_data_avg;
 	
 	std::vector<double> composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal;
 	
@@ -127,6 +129,9 @@ public:
 
 		composite_cross_spectrum_mag_avg.resize(composite_fft_bins);
 
+		composite_xfer_function_real_data_avg.resize(composite_fft_bins);
+		composite_xfer_function_imag_data_avg.resize(composite_fft_bins);
+
 		composite_coherence_value.resize(composite_fft_bins);
 
 		composite_fft_bin_frequencies.resize(composite_fft_bins);
@@ -156,9 +161,9 @@ public:
 
 		composite_system_autospectrum_data_history.set_num_histories(num_averages);
 
-		composite_cross_spectrum_real_data_history.set_num_histories(num_averages);
+		composite_xfer_function_real_data_history.set_num_histories(num_averages);
 
-		composite_cross_spectrum_imag_data_history.set_num_histories(num_averages);
+		composite_xfer_function_imag_data_history.set_num_histories(num_averages);
 
 		composite_cross_spectrum_mag_data_history.set_num_histories(num_averages);
 		
@@ -311,9 +316,9 @@ private:
 
 	data_history composite_system_autospectrum_data_history{ composite_fft_bins };
 
-	data_history composite_cross_spectrum_real_data_history{ composite_fft_bins };
+	data_history composite_xfer_function_real_data_history{ composite_fft_bins };
 
-	data_history composite_cross_spectrum_imag_data_history{ composite_fft_bins };
+	data_history composite_xfer_function_imag_data_history{ composite_fft_bins };
 
 	data_history composite_cross_spectrum_mag_data_history{ composite_fft_bins };
 
@@ -505,10 +510,10 @@ private:
 											composite_system_complex_vector, 
 											composite_xfer_function_complex);
 
-		process_xfer_function_data();
-		
 		update_histories();
 		update_averages();
+		
+		process_xfer_function_data();
 		
 		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
 
@@ -534,10 +539,10 @@ private:
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 			
-			xfer_function_magnitude_linear = sqrt(pow(composite_xfer_function_complex[0][col], 2) + pow(composite_xfer_function_complex[1][col], 2));
+			xfer_function_magnitude_linear = sqrt(pow(composite_xfer_function_real_data_avg[col], 2) + pow(composite_xfer_function_imag_data_avg[col], 2));
 			composite_xfer_function_mag_dB_uncal[col] = 20 * log10(xfer_function_magnitude_linear);
 
-			xfer_function_phase_radians = -atan2(composite_xfer_function_complex[1][col], composite_xfer_function_complex[0][col]);
+			xfer_function_phase_radians = -atan2(composite_xfer_function_imag_data_avg[col], composite_xfer_function_real_data_avg[col]);
 			composite_xfer_function_phase_deg[col] = xfer_function_phase_radians / 0.0174533;
 		}
 
@@ -548,6 +553,10 @@ private:
 		composite_ref_autospectrum_data_history.add_latest_values(composite_xfer_func.ref_autospectrum);
 
 		composite_system_autospectrum_data_history.add_latest_values(composite_xfer_func.system_autospectum);
+
+		composite_xfer_function_real_data_history.add_latest_values(composite_xfer_function_complex[0]);
+
+		composite_xfer_function_imag_data_history.add_latest_values(composite_xfer_function_complex[1]);
 
 		composite_cross_spectrum_mag_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_magnitude);
 
@@ -560,6 +569,10 @@ private:
 		composite_system_autospectrum_data_history.get_data_average(composite_system_autospectrum_avg);
 
 		composite_cross_spectrum_mag_data_history.get_data_average(composite_cross_spectrum_mag_avg);
+
+		composite_xfer_function_real_data_history.get_data_average(composite_xfer_function_real_data_avg);
+
+		composite_xfer_function_imag_data_history.get_data_average(composite_xfer_function_imag_data_avg);
 
 	}
 
@@ -631,10 +644,10 @@ private:
 
 			for (int x = 0; x < smoothing_passes; x++) {
 
-				composite_data_smoother.process(composite_xfer_function_complex[0]);
-				composite_data_smoother.process(composite_xfer_function_complex[1]);
+				composite_data_smoother.process(composite_xfer_function_real_data_avg);
+				composite_data_smoother.process(composite_xfer_function_imag_data_avg);
 
-				composite_data_smoother.process(composite_xfer_function_mag_dB_cal);
+				//composite_data_smoother.process(composite_xfer_function_mag_dB_cal);
 
 			}
 
