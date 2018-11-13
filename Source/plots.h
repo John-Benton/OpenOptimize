@@ -77,8 +77,8 @@ public:
 	std::vector<double> current_composite_coherence_value;
 	std::vector<double> display_composite_coherence_value;
 
-	std::vector<double> current_composite_ref_spectrum_mag_dB;
-	std::vector<double> display_composite_ref_spectrum_mag_dB;
+	std::vector<double> current_composite_system_spectrum_mag_dB;
+	std::vector<double> display_composite_system_spectrum_mag_dB;
 
 	std::vector<double> loaded_composite_fft_bin_frequencies;
 	std::vector<double> loaded_composite_xfer_function_mag_dB_avg_cal;
@@ -157,8 +157,8 @@ public:
 		current_composite_coherence_value.resize(composite_fft_bins);
 		display_composite_coherence_value.resize(composite_fft_bins);
 
-		current_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
-		display_composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+		current_composite_system_spectrum_mag_dB.resize(composite_fft_bins);
+		display_composite_system_spectrum_mag_dB.resize(composite_fft_bins);
 
 		loaded_composite_fft_bin_frequencies.resize(composite_fft_bins);
 		loaded_composite_xfer_function_mag_dB_avg_cal.resize(composite_fft_bins);
@@ -308,7 +308,7 @@ public:
 
 		calc_display_values(display_composite_coherence_value, current_composite_coherence_value, 2);
 
-		calc_display_values(display_composite_ref_spectrum_mag_dB, current_composite_ref_spectrum_mag_dB, 3);
+		calc_display_values(display_composite_system_spectrum_mag_dB, current_composite_system_spectrum_mag_dB, 3);
 
 		mouse_current_position = getMouseXYRelative();
 
@@ -752,7 +752,7 @@ public:
 
 				plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[0]),
 
-				plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_ref_spectrum_mag_dB[0]));
+				plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_system_spectrum_mag_dB[0]));
 
 
 			for (int x = 1; x < composite_fft_bins; x++) {
@@ -761,7 +761,7 @@ public:
 
 					plot_actual_region_x + plot_actual_region_width*freq_to_normalized_distance(current_composite_fft_bin_frequencies[x]),
 
-					plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_ref_spectrum_mag_dB[x]));
+					plot_actual_region_y + plot_actual_region_height*spectrum_mag_to_y(display_composite_system_spectrum_mag_dB[x]));
 
 			}
 
@@ -1272,7 +1272,7 @@ private:
 
 		spectrum_mod_value = frequency_to_value(frequency_mod_value, 
 			current_composite_fft_bin_frequencies, 
-			current_composite_ref_spectrum_mag_dB);
+			current_composite_system_spectrum_mag_dB);
 		spectrum_mod_value_string = String(spectrum_mod_value);
 		spectrum_mod_value_string = spectrum_mod_value_string.substring(0, spectrum_mod_value_string.indexOfChar('.'));
 		spectrum_mod_value_string += " dB";

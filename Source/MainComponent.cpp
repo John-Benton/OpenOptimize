@@ -130,9 +130,9 @@ void MainContentComponent::update_current_plot_data() {
 		supervisor1->composite_coherence_value.end(),
 		main_plot.current_composite_coherence_value.begin());
 
-	std::copy(supervisor1->composite_ref_spectrum_mag_dB.begin(),
-		supervisor1->composite_ref_spectrum_mag_dB.end(),
-		main_plot.current_composite_ref_spectrum_mag_dB.begin());
+	std::copy(supervisor1->composite_system_spectrum_mag_dB.begin(),
+		supervisor1->composite_system_spectrum_mag_dB.end(),
+		main_plot.current_composite_system_spectrum_mag_dB.begin());
 
 	supervisor1->plot_data_mtx_supervisor.unlock();
 

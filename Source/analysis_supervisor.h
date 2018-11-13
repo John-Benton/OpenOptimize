@@ -56,7 +56,7 @@ public:
 		
 	std::vector<double> composite_coherence_value;
 
-	std::vector<double> composite_ref_spectrum_mag_linear, composite_ref_spectrum_mag_dB;
+	std::vector<double> composite_system_spectrum_mag_linear, composite_system_spectrum_mag_dB;
 
 	std::vector<float> composite_impulse_response;
 
@@ -136,8 +136,8 @@ public:
 
 		composite_fft_bin_frequencies.resize(composite_fft_bins);
 
-		composite_ref_spectrum_mag_linear.resize(composite_fft_bins);
-		composite_ref_spectrum_mag_dB.resize(composite_fft_bins);
+		composite_system_spectrum_mag_linear.resize(composite_fft_bins);
+		composite_system_spectrum_mag_dB.resize(composite_fft_bins);
 
 		composite_impulse_response.resize((composite_fft_bins - 1) * 2);
 
@@ -227,7 +227,7 @@ public:
 		
 		calculate_coherence();
 
-		calc_ref_spectrum();
+		calc_system_spectrum();
 
 		smooth_spectrum_data();
 		
@@ -586,11 +586,11 @@ private:
 		}
 	}
 
-	void calc_ref_spectrum() {
+	void calc_system_spectrum() {
 
 		for (int index = 0; index < 70; index++) {
 
-			composite_ref_spectrum_mag_linear[index] = sqrt(pow(composite_ref_complex_vector[0][index], 2) + pow(composite_ref_complex_vector[1][index], 2)) * 1.0; //from fft_32k
+			composite_system_spectrum_mag_linear[index] = sqrt(pow(composite_system_complex_vector[0][index], 2) + pow(composite_system_complex_vector[1][index], 2)) * 1.0; //from fft_32k
 
 		}
 
@@ -606,31 +606,31 @@ private:
 
 		for (int index = 0; index < 21; index++) {
 
-			composite_ref_spectrum_mag_linear[index + 70] = sqrt(pow(composite_ref_complex_vector[0][index + 70], 2) + pow(composite_ref_complex_vector[1][index + 70], 2)) * 2.0; //from fft_8k
+			composite_system_spectrum_mag_linear[index + 70] = sqrt(pow(composite_system_complex_vector[0][index + 70], 2) + pow(composite_system_complex_vector[1][index + 70], 2)) * 2.0; //from fft_8k
 			
-			composite_ref_spectrum_mag_linear[index + 91] = sqrt(pow(composite_ref_complex_vector[0][index + 91], 2) + pow(composite_ref_complex_vector[1][index + 91], 2)) * 2.82842712474619; //from fft_4k
+			composite_system_spectrum_mag_linear[index + 91] = sqrt(pow(composite_system_complex_vector[0][index + 91], 2) + pow(composite_system_complex_vector[1][index + 91], 2)) * 2.82842712474619; //from fft_4k
 			
-			composite_ref_spectrum_mag_linear[index + 112] = sqrt(pow(composite_ref_complex_vector[0][index + 112], 2) + pow(composite_ref_complex_vector[1][index + 112], 2)) * 4.0; //from fft_2k
+			composite_system_spectrum_mag_linear[index + 112] = sqrt(pow(composite_system_complex_vector[0][index + 112], 2) + pow(composite_system_complex_vector[1][index + 112], 2)) * 4.0; //from fft_2k
 
-			composite_ref_spectrum_mag_linear[index + 133] = sqrt(pow(composite_ref_complex_vector[0][index + 133], 2) + pow(composite_ref_complex_vector[1][index + 133], 2)) * 5.65685424949238; //from fft_1k
+			composite_system_spectrum_mag_linear[index + 133] = sqrt(pow(composite_system_complex_vector[0][index + 133], 2) + pow(composite_system_complex_vector[1][index + 133], 2)) * 5.65685424949238; //from fft_1k
 			
-			composite_ref_spectrum_mag_linear[index + 154] = sqrt(pow(composite_ref_complex_vector[0][index + 154], 2) + pow(composite_ref_complex_vector[1][index + 154], 2)) * 8.0; //from fft_512
+			composite_system_spectrum_mag_linear[index + 154] = sqrt(pow(composite_system_complex_vector[0][index + 154], 2) + pow(composite_system_complex_vector[1][index + 154], 2)) * 8.0; //from fft_512
 
-			composite_ref_spectrum_mag_linear[index + 175] = sqrt(pow(composite_ref_complex_vector[0][index + 175], 2) + pow(composite_ref_complex_vector[1][index + 175], 2)) * 11.31370849898476; //from fft_256
+			composite_system_spectrum_mag_linear[index + 175] = sqrt(pow(composite_system_complex_vector[0][index + 175], 2) + pow(composite_system_complex_vector[1][index + 175], 2)) * 11.31370849898476; //from fft_256
 
-			composite_ref_spectrum_mag_linear[index + 196] = sqrt(pow(composite_ref_complex_vector[0][index + 196], 2) + pow(composite_ref_complex_vector[1][index + 196], 2)) * 16.0; //from fft_128
+			composite_system_spectrum_mag_linear[index + 196] = sqrt(pow(composite_system_complex_vector[0][index + 196], 2) + pow(composite_system_complex_vector[1][index + 196], 2)) * 16.0; //from fft_128
 
 		}
 
 		for (int index = 0; index < 7; index++) {
 
-			composite_ref_spectrum_mag_linear[index + 217] = sqrt(pow(composite_ref_complex_vector[0][index + 217], 2) + pow(composite_ref_complex_vector[1][index + 217], 2)) * 22.62741699796952; //from fft_64
+			composite_system_spectrum_mag_linear[index + 217] = sqrt(pow(composite_system_complex_vector[0][index + 217], 2) + pow(composite_system_complex_vector[1][index + 217], 2)) * 22.62741699796952; //from fft_64
 
 		}
 		
 		for (int index = 0; index < composite_fft_bins; index++) {
 
-			composite_ref_spectrum_mag_dB[index] = 20 * log10(composite_ref_spectrum_mag_linear[index]) - 62.0;
+			composite_system_spectrum_mag_dB[index] = 20 * log10(composite_system_spectrum_mag_linear[index]) - 62.0;
 
 		}
 
@@ -665,7 +665,7 @@ private:
 
 			for (int x = 0; x < smoothing_passes; x++) {
 
-				composite_data_smoother.process(composite_ref_spectrum_mag_dB);
+				composite_data_smoother.process(composite_system_spectrum_mag_dB);
 
 			}
 
