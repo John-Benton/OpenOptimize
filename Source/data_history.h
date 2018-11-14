@@ -28,7 +28,7 @@ class data_history
 		
 public:
 
-	data_history(int dp) : number_of_data_points(dp)
+	data_history(int num_data_points) : number_of_data_points(num_data_points)
 	{
 
 		latest_data_values.resize(number_of_data_points);
@@ -66,6 +66,16 @@ public:
 
 	}
 
+	void add_latest_values(std::vector<float> &latest_value_source) {
+
+		std::copy(latest_value_source.begin(), latest_value_source.end(), latest_data_values.begin());
+
+		data_value_history.push_front(latest_data_values);
+
+		data_value_history.pop_back();
+
+	}
+
 	void get_data_average(std::vector<double> &destination_vector) {
 
 		for (int index = 0; index < number_of_data_points; index++) {
@@ -80,6 +90,26 @@ public:
 
 			average[index] = value / data_value_history.size()*1.0;
 			
+		}
+
+		std::copy(average.begin(), average.end(), destination_vector.begin());
+
+	}
+
+	void get_data_average(std::vector<float> &destination_vector) {
+
+		for (int index = 0; index < number_of_data_points; index++) {
+
+			value = 0;
+
+			for (int history = 0; history < data_value_history.size(); history++) {
+
+				value += data_value_history[history][index];
+
+			}
+
+			average[index] = value / data_value_history.size()*1.0;
+
 		}
 
 		std::copy(average.begin(), average.end(), destination_vector.begin());
