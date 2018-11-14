@@ -29,7 +29,7 @@ public:
 		int component_height = display_outline.getHeight()*0.5;
 		this->setSize(component_width, component_height);
 
-		ir_plot.set_plot_properties(-1.0, 10.0, -1.0, 1.0, 1.0, 0.2, "", "");
+		ir_plot.set_plot_properties(-100.0, 1000.0, -1.0, 1.0, 50, 0.2, "", "");
 		ir_plot.set_plot_max_zooms(10, 10);
 		ir_plot.add_data_set(&ir_data);
 

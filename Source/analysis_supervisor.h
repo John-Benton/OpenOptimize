@@ -58,7 +58,9 @@ public:
 
 	std::vector<double> composite_system_spectrum_mag_linear, composite_system_spectrum_mag_dB;
 
-	std::vector<float> composite_impulse_response;
+	std::vector<std::vector<double>> impulse_response_complex_freq_samples;
+
+	std::vector<float> impulse_response_time_samples;
 
 	/*---------------------------------------------------*/
 
@@ -139,7 +141,8 @@ public:
 		composite_system_spectrum_mag_linear.resize(composite_fft_bins);
 		composite_system_spectrum_mag_dB.resize(composite_fft_bins);
 
-		composite_impulse_response.resize((composite_fft_bins - 1) * 2);
+		impulse_response_complex_freq_samples.resize(2, std::vector<double>((largest_fft_size / 2) + 1));
+		impulse_response_time_samples.resize(largest_fft_size);
 
 		interpolated_mic_cal_amplitudes.resize(composite_fft_bins);
 
@@ -306,7 +309,9 @@ private:
 
 	xfer_func composite_xfer_func{ composite_fft_bins };
 
-	ifft impulse_response_calculator;
+	xfer_func impulse_reponse_transfer_func{ (largest_fft_size / 2) + 1 };
+
+	ifft impulse_response_calculator{ largest_fft_size };
 
 	MovingAverage1DVector composite_data_smoother;
 
@@ -521,11 +526,13 @@ private:
 
 	void calculate_impulse_response() {
 
-		impulse_response_calculator.set_freq_response_data(composite_xfer_function_complex);
+		impulse_reponse_transfer_func.run_xfer_func(fft_32k->fftw_complex_out_ref_vector, fft_32k->fftw_complex_out_system_vector, impulse_response_complex_freq_samples);
+
+		impulse_response_calculator.set_freq_response_data(impulse_response_complex_freq_samples);
 
 		impulse_response_calculator.run_ifft();
 
-		impulse_response_calculator.get_output_samples(composite_impulse_response);
+		impulse_response_calculator.get_output_samples(impulse_response_time_samples);
 
 	}
 

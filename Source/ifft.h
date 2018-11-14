@@ -12,12 +12,13 @@ class ifft : public constants
 
 public:
 
-	ifft()
+	ifft(int ifft_size) : local_ifft_size(ifft_size) //size is specified as number of output samples, not number of freq bins
 	{
-		ifft_num_input_bins = composite_fft_bins;
-
-		ifft_num_output_samples = (ifft_num_input_bins - 1) * 2;
-
+		
+		ifft_num_output_samples = ifft_size;
+		
+		ifft_num_input_bins = (ifft_num_output_samples / 2) + 1;
+		
 		output_samples = new double[ifft_num_output_samples];
 
 		input_freq_response = fftw_alloc_complex(ifft_num_input_bins);
@@ -75,6 +76,8 @@ public:
 	}
 
 private:
+
+	int local_ifft_size;
 	
 	int ifft_num_output_samples, ifft_num_input_bins;
 
