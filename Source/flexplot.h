@@ -467,8 +467,8 @@ private:
 
 	void set_fixed_label_text() {
 
-		x_min_fixed_label_text = String(actual_x_min) + " " + unit_x;
-		x_max_fixed_label_text = String(actual_x_max) + " " + unit_x;
+		x_min_fixed_label_text = String(int(actual_x_min)) + " " + unit_x;
+		x_max_fixed_label_text = String(int(actual_x_max)) + " " + unit_x;
 		y_min_fixed_label_text = String(actual_y_min) + " " + unit_y;
 		y_max_fixed_label_text = String(actual_y_max) + " " + unit_y;
 		

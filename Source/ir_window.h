@@ -1,22 +1,9 @@
-/*
-  ==============================================================================
-
-    ir_window.h
-    Created: 5 Nov 2018 4:14:37pm
-    Author:  John
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "flexplot.h"
 #include "constants.h"
 
-//==============================================================================
-/*
-*/
 class ir_window    : public Component
 {
 public:
@@ -31,9 +18,11 @@ public:
 
 		ir_data_history.set_num_histories(10);
 
-		ir_data_avg.resize(constants::largest_fft_size);
+		decimated_ir_data.resize(num_decimated_ir_data_points);
 
-		ir_plot.set_plot_properties(-100.0, 1000.0, -1.0, 1.0, 50, 0.2, "", "");
+		decimated_ir_data_avg.resize(num_decimated_ir_data_points);
+
+		ir_plot.set_plot_properties(0.0, 500.0, -1.0, 1.0, 50, 0.2, "", "");
 		ir_plot.set_plot_max_zooms(10, 10);
 		ir_plot.add_data_set(&ir_data);
 
@@ -61,16 +50,26 @@ public:
 
 	void update_ir_plot_data(std::vector<float> &new_ir_data) {
 
-		ir_data_history.add_latest_values(new_ir_data);
+		int raw_data_point{ 0 };
 
-		ir_data_history.get_data_average(ir_data_avg);
+		for (int decimated_data_point = 0; decimated_data_point < num_decimated_ir_data_points; decimated_data_point++) {
+
+			decimated_ir_data[decimated_data_point] = new_ir_data[raw_data_point];
+
+			raw_data_point += constants::sample_rate / 1000; //this skips over samples between each whole milisecond
+
+		}
+
+		ir_data_history.add_latest_values(decimated_ir_data);
+
+		ir_data_history.get_data_average(decimated_ir_data_avg);
 		
 		ir_data.clear_data();
 
-		for (int data_point = 0; data_point < ir_data_avg.size(); data_point++) {
+		for (int data_point = 0; data_point < decimated_ir_data_avg.size(); data_point++) {
 
-			float x_value = ( (data_point*1.0) / constants::sample_rate) * 1000.0;
-			float y_value = ir_data_avg[data_point];
+			float x_value = data_point;
+			float y_value = decimated_ir_data_avg[data_point];
 
 			ir_data.add_single_data_point(x_value, y_value);
 
@@ -80,11 +79,15 @@ public:
 
 private:
 
-	std::vector<float> ir_data_avg;
+	int num_decimated_ir_data_points = 500; //data points will be at 1 msec intervals.
+
+	std::vector<float> decimated_ir_data;
+
+	std::vector<float> decimated_ir_data_avg;
 
 	flexplot ir_plot;
 
-	data_history ir_data_history{ constants::largest_fft_size };
+	data_history ir_data_history{ num_decimated_ir_data_points };
 
 	flexplot_data_object ir_data;
 	
