@@ -363,8 +363,6 @@ public:
 			active_grid_mode = 3;
 
 		}
-						
-		g.fillAll(Colour(20, 20, 20));
 
 		g.setColour(Colours::white);
 		
