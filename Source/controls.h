@@ -182,7 +182,7 @@ public:
 		saved_traces_filename_label.setColour(Label::backgroundColourId, Colours::black);
 
 		addAndMakeVisible(config_audio_io_button);
-		config_audio_io_button.setButtonText("Audio I/O Setup");
+		config_audio_io_button.setButtonText("Audio Input Setup");
 		config_audio_io_button.addListener(this);
 		config_audio_io_button.setColour(config_audio_io_button.buttonColourId, Colours::transparentBlack);
 

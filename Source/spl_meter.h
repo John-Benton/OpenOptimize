@@ -30,7 +30,7 @@ public:
 
 	double display_spl_dB = 0.0;
 
-	const double dBFS_offset = 120;
+	const double dBFS_offset = 0.0;
 
 	double spl_calibration_offset = 0.0;
 
@@ -73,7 +73,11 @@ public:
 
 		addAndMakeVisible(spl_meter_label);
 
-		addAndMakeVisible(spl_meter_display_area);
+		addAndMakeVisible(spl_meter_reading_text);
+
+		addAndMakeVisible(spl_uncal_label);
+
+		addAndMakeVisible(spl_weight_z_label);
 		
 		/*z_weight_button.setButtonText("Z Weighting");
 		c_weight_button.setButtonText("C Weighting");
@@ -85,11 +89,21 @@ public:
 		fast_time_button.setButtonText("Faster");
 
 		spl_meter_label.setText("SPL", dontSendNotification);
+		
+		spl_uncal_label.setText("UNCALIBRATED", dontSendNotification);
 
-		spl_meter_display_area.setJustificationType(Justification::centred);
+		spl_weight_z_label.setText("dB(Z)", dontSendNotification);
+
+		spl_meter_reading_text.setJustificationType(Justification::centred);
 		spl_meter_label.setJustificationType(Justification::centred);
 
-		spl_meter_display_area.setColour(Label::backgroundColourId, Colours::black);
+		spl_uncal_label.setJustificationType(Justification::centred);
+
+		spl_weight_z_label.setJustificationType(Justification::centred);
+
+		spl_meter_reading_text.setColour(Label::backgroundColourId, Colours::black);
+
+		spl_uncal_label.setColour(Label::textColourId, Colours::red);
 				
 		/*z_weight_button.addListener(this);
 		c_weight_button.addListener(this);
@@ -151,8 +165,12 @@ public:
 		update_display_spl();
 
 		spl_display_value_string = String(display_spl_dB);
+
+		if (display_spl_dB < 0.0) {
+			spl_display_value_string = spl_display_value_string.substring(0, 5);
+		}
 		
-		if (display_spl_dB < 100.0) {
+		if (display_spl_dB < 100.0 && display_spl_dB >= 0.0) {
 			spl_display_value_string = spl_display_value_string.substring(0, 4);
 		}
 
@@ -160,17 +178,19 @@ public:
 			spl_display_value_string = spl_display_value_string.substring(0, 3);
 		}
 
-		spl_meter_display_area.setText(spl_display_value_string, dontSendNotification);
-
+		spl_meter_reading_text.setText(spl_display_value_string, dontSendNotification);
+		
 		if (spl_calibration_offset != 0.0) {
 
 			cal_spl_button.setToggleState(1, dontSendNotification);
+			spl_uncal_label.setVisible(false);
 
 		}
 
 		else {
 
 			cal_spl_button.setToggleState(0, dontSendNotification);
+			spl_uncal_label.setVisible(true);
 
 		}
 
@@ -202,15 +222,31 @@ public:
 		right_column_row_3_active = right_column_row_3.reduced(horizontal_padding_pixels, vertical_padding_pixels);
 		right_column_row_4_active = right_column_row_4.reduced(horizontal_padding_pixels, vertical_padding_pixels);
 
-		spl_meter_display_area.setBounds(left_column_row_1_active);
+		spl_meter_reading_text.setBounds(left_column_row_1_active);
+
+		spl_uncal_label.setBounds(
+			left_column_row_1_active.getX(),
+			left_column_row_1_active.getY(),
+			left_column_row_1_active.getWidth(),
+			left_column_row_1_active.getHeight() / 5);
+
+		spl_weight_z_label.setBounds(
+			left_column_row_1_active.getX(),
+			left_column_row_1_active.getY() + left_column_row_1_active.getHeight() * (4.0 / 5.0),
+			left_column_row_1_active.getWidth() / 3,
+			left_column_row_1_active.getHeight() / 5
+		);
 		
 		spl_meter_label.setBounds(right_column_row_1_active);
 		cal_spl_button.setBounds(right_column_row_2_active);
 		slow_time_button.setBounds(right_column_row_3_active);
 		fast_time_button.setBounds(right_column_row_4_active);
 
-		spl_meter_display_area.setFont(spl_meter_display_area.getHeight()*0.75);
+		spl_meter_reading_text.setFont(spl_meter_reading_text.getHeight()*0.75);
 		spl_meter_label.setFont(spl_meter_label.getHeight());
+
+		spl_uncal_label.setFont(spl_uncal_label.getHeight()*0.75);
+		spl_weight_z_label.setFont(spl_weight_z_label.getHeight()*0.75);
 		
     }
 
@@ -343,8 +379,10 @@ private:
 	TextButton fast_time_button;
 	DialogWindow::LaunchOptions spl_calibration_window;
 	spl_cal spl_calibration_component;
-	Label spl_meter_display_area;
+	Label spl_meter_reading_text;
 	Label spl_meter_label;
+	Label spl_uncal_label;
+	Label spl_weight_z_label;
 	String spl_display_value_string;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (spl_meter)
 
