@@ -67,6 +67,11 @@ public:
 	std::deque<double> buffer_ref_samples, buffer_system_samples;
 
 	std::vector<double> current_ref_samples, current_system_samples;
+	
+	std::vector<double> current_ref_samples_squared;
+	double current_ref_samples_squared_sum;
+	double current_ref_samples_squared_mean;
+	double current_ref_samples_RMS;
 
 	std::vector<double> current_system_samples_squared;
 	double current_system_samples_squared_sum;
@@ -92,10 +97,6 @@ public:
 	std::vector<double> original_system_curve_frequencies, 
 						original_system_curve_amplitudes, 
 						interpolated_system_curve_amplitudes;
-
-	/*---------------------------------------------------*/
-
-	double peak_of_current_ref_samples{ 0.0 }, peak_of_current_system_samples{ 0.0 };
 
 	/*---------------------------------------------------*/
 
@@ -154,6 +155,7 @@ public:
 		current_ref_samples.resize(largest_fft_size);
 		current_system_samples.resize(largest_fft_size);
 
+		current_ref_samples_squared.resize(largest_fft_size);
 		current_system_samples_squared.resize(largest_fft_size);
 
 		assemble_composite_fft_bin_frequencies();
@@ -846,23 +848,22 @@ private:
 
 	void run_calcs_for_SPL_and_meters() {
 
-		peak_of_current_ref_samples = *std::max_element(current_ref_samples.begin(), current_ref_samples.end());
+		for (int x = 0; x < current_system_samples_squared.size(); x++) {
 
-		peak_of_current_system_samples = *std::max_element(current_system_samples.begin(), current_system_samples.end());
-
-		current_system_samples_squared = current_system_samples;
-
-		for (int x = 0; x < current_ref_samples.size(); x++) {
-
-			current_system_samples_squared[x] = pow(current_system_samples_squared[x], 2);
-
+			current_ref_samples_squared[x] = pow(current_ref_samples[x], 2);
+			current_system_samples_squared[x] = pow(current_system_samples[x], 2);
+			
 		}
 
+		current_ref_samples_squared_sum = std::accumulate(current_ref_samples_squared.begin(), current_ref_samples_squared.end(), 0.0);
 		current_system_samples_squared_sum = std::accumulate(current_system_samples_squared.begin(), current_system_samples_squared.end(), 0.0);
 
-		current_system_samples_squared_mean = current_system_samples_squared_sum / current_ref_samples.size();
 
-		current_system_samples_RMS = pow(current_system_samples_squared_mean, 0.5);
+		current_system_samples_squared_mean = current_system_samples_squared_sum / current_system_samples_squared.size();
+		current_ref_samples_squared_mean = current_ref_samples_squared_sum / current_ref_samples_squared.size();
+
+		current_ref_samples_RMS = std::sqrt(current_ref_samples_squared_mean);
+		current_system_samples_RMS = std::sqrt(current_system_samples_squared_mean);
 
 	}
 
