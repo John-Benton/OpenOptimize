@@ -710,14 +710,6 @@ private:
 
 		std::string current_line;
 
-		char frequency[16];
-
-		double frequency_double;
-
-		char amplitude[16];
-
-		double amplitude_double;
-
 		int numlines = 0;
 
 		int tab_pos = 0;
@@ -742,16 +734,16 @@ private:
 			std::getline(curve, current_line);
 			
 			if (current_line.find_first_of("0123456789") == 0) {
-
+				
 				tab_pos = current_line.find('\t');
 
-				current_line.copy(frequency, tab_pos);
+				std::string frequency = current_line.substr(0, tab_pos);
 
-				current_line.copy(amplitude, current_line.length() - tab_pos, tab_pos + 1);
+				original_curve_frequencies.push_back(std::stod(frequency, NULL));
 
-				original_curve_frequencies.push_back(atof(frequency));
-
-				original_curve_amplitudes.push_back(atof(amplitude));
+				std::string amplitude = current_line.substr(tab_pos + 1, current_line.length() - tab_pos - 1);
+				
+				original_curve_amplitudes.push_back(std::stod(amplitude, NULL));
 
 			}
 
