@@ -20,47 +20,69 @@
 class delay_indicator    : public Component, public constants, public Button::Listener, public ActionBroadcaster
 {
 public:
-
-	Rectangle<int> delay_indicator_remaining_outline;
-	Rectangle<int> delay_indicator_display_area;
-	Rectangle<int> delay_indicator_display_black_area;
-	Rectangle<int> delay_indicator_controls_area;
-	Rectangle<int> delay_indicator_controls_division1;
-	Rectangle<int> delay_indicator_controls_division2;
-	Rectangle<int> delay_indicator_controls_division3;
-	Rectangle<int> delay_indicator_controls_division4;
-	Rectangle<int> delay_indicator_controls_division5;
-
-	int delay_in_samples = 0;
-
-	float delay_in_milliseconds = 0.0;
-
-	bool repaint_active = false;
+	
+	int delay_in_samples{ 0 };
 
     delay_indicator()
     {
-		addAndMakeVisible(increase_1000);
-		addAndMakeVisible(decrease_1000);
-		addAndMakeVisible(increase_100);
-		addAndMakeVisible(decrease_100);
-		addAndMakeVisible(increase_10);
-		addAndMakeVisible(decrease_10);
-		addAndMakeVisible(increase_1);
-		addAndMakeVisible(decrease_1);
-		addAndMakeVisible(reset_to_0);
+		addAndMakeVisible(increase_1000_button);
+		addAndMakeVisible(decrease_1000_button);
+		addAndMakeVisible(increase_100_button);
+		addAndMakeVisible(decrease_100_button);
+		addAndMakeVisible(increase_10_button);
+		addAndMakeVisible(decrease_10_button);
+		addAndMakeVisible(increase_1_button);
+		addAndMakeVisible(decrease_1_button);
+		addAndMakeVisible(reset_to_0_button);
+		addAndMakeVisible(change_1000_label);
+		addAndMakeVisible(change_100_label);
+		addAndMakeVisible(change_10_label);
+		addAndMakeVisible(change_1_label);
 
-		reset_to_0.setButtonText("Reset to 0");
-		reset_to_0.setColour(reset_to_0.buttonColourId, Colours::transparentBlack);
+		addAndMakeVisible(delay_samples_label);
+		addAndMakeVisible(delay_msec_label);
 
-		increase_1000.addListener(this);
-		decrease_1000.addListener(this);
-		increase_100.addListener(this);
-		decrease_100.addListener(this);
-		increase_10.addListener(this);
-		decrease_10.addListener(this);
-		increase_1.addListener(this);
-		decrease_1.addListener(this);
-		reset_to_0.addListener(this);
+		addAndMakeVisible(control_area_label);
+
+		addAndMakeVisible(manual_delay_entry_box);
+		addAndMakeVisible(set_delay_manual_button);
+
+		reset_to_0_button.setButtonText("Reset to 0");
+		reset_to_0_button.setColour(reset_to_0_button.buttonColourId, Colours::transparentBlack);
+
+		delay_samples_label.setColour(delay_samples_label.backgroundColourId, Colours::black);
+		delay_samples_label.setJustificationType(Justification::centred);
+		
+		delay_msec_label.setColour(delay_msec_label.backgroundColourId, Colours::black);
+		delay_msec_label.setJustificationType(Justification::centred);
+
+		control_area_label.setJustificationType(Justification::centred);
+		control_area_label.setText("Reference Delay", dontSendNotification);
+
+		manual_delay_entry_box.setColour(manual_delay_entry_box.backgroundColourId, Colours::black);
+		manual_delay_entry_box.setEditable(true, false, false);
+		
+		set_delay_manual_button.setColour(set_delay_manual_button.buttonColourId, Colours::transparentBlack);
+		set_delay_manual_button.setButtonText("Set Delay");
+
+		change_1000_label.setText("x1000", dontSendNotification);
+
+		change_100_label.setText("x100", dontSendNotification);
+
+		change_10_label.setText("x10", dontSendNotification);
+
+		change_1_label.setText("x1", dontSendNotification);
+
+		increase_1000_button.addListener(this);
+		decrease_1000_button.addListener(this);
+		increase_100_button.addListener(this);
+		decrease_100_button.addListener(this);
+		increase_10_button.addListener(this);
+		decrease_10_button.addListener(this);
+		increase_1_button.addListener(this);
+		decrease_1_button.addListener(this);
+		reset_to_0_button.addListener(this);
+		set_delay_manual_button.addListener(this);
 
     }
 
@@ -88,172 +110,137 @@ public:
 			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 6);
 		}
 
-		g.setColour(Colours::black);
-		g.fillRect(delay_indicator_display_black_area);
-		g.drawRect(getLocalBounds(), 1.0);
-
-		g.setColour(Colours::white);
-		g.setFont(delay_indicator_display_black_area.getHeight()*0.5);
-		g.drawFittedText(std::to_string(delay_in_samples), delay_indicator_display_black_area, Justification::centredTop, 0, 1.0f);
-		g.drawFittedText(delay_in_milliseconds_str, delay_indicator_display_black_area, Justification::centredBottom, 0, 1.0f);
-
-		g.setFont(delay_indicator_controls_division1.getHeight()*0.75);
-
-		g.drawFittedText("Reference Delay",
-			delay_indicator_controls_division1.getX(),
-			delay_indicator_controls_division1.getY(),
-			delay_indicator_controls_division1.getWidth(),
-			delay_indicator_controls_division1.getHeight(),
-			Justification::centred, 0, 1.0f);
-
-		g.setFont(delay_indicator_controls_division2.getHeight()*0.5);
-
-		g.drawFittedText("x1000",
-			delay_indicator_controls_division2.getX(),
-			delay_indicator_controls_division2.getY(),
-			delay_indicator_controls_division2.getWidth()*0.25,
-			delay_indicator_controls_division2.getHeight(),
-			Justification::left, 0, 1.0f);
-
-		g.drawFittedText("x100",
-			delay_indicator_controls_division3.getX(),
-			delay_indicator_controls_division3.getY(),
-			delay_indicator_controls_division3.getWidth()*0.25,
-			delay_indicator_controls_division3.getHeight(),
-			Justification::left, 0, 1.0f);
-
-		g.drawFittedText("x10",
-			delay_indicator_controls_division4.getX(),
-			delay_indicator_controls_division4.getY(),
-			delay_indicator_controls_division4.getWidth()*0.25,
-			delay_indicator_controls_division4.getHeight(),
-			Justification::left, 0, 1.0f);
-
-		g.drawFittedText("x1",
-			delay_indicator_controls_division5.getX(),
-			delay_indicator_controls_division5.getY(),
-			delay_indicator_controls_division5.getWidth()*0.25,
-			delay_indicator_controls_division5.getHeight(),
-			Justification::left, 0, 1.0f);
+		delay_samples_label.setText(std::to_string(delay_in_samples), dontSendNotification);
+		delay_msec_label.setText(delay_in_milliseconds_str, dontSendNotification);
 
 		repaint_active = false;
     }
 
     void resized() override
     {
-		delay_indicator_remaining_outline = getLocalBounds();
-		delay_indicator_display_area = delay_indicator_remaining_outline.removeFromLeft(getWidth()*0.50);
-		delay_indicator_display_black_area = delay_indicator_display_area;
-		delay_indicator_display_black_area.reduce((delay_indicator_display_area.getWidth()*0.05),(delay_indicator_display_area.getHeight()*0.1));
+		component_outline = getLocalBounds();
 
-		delay_indicator_controls_area = delay_indicator_remaining_outline;
-		delay_indicator_controls_division1 = delay_indicator_controls_area.removeFromTop(getHeight()*0.2);
-		delay_indicator_controls_division2 = delay_indicator_controls_area.removeFromTop(getHeight()*0.175);
-		delay_indicator_controls_division3 = delay_indicator_controls_area.removeFromTop(getHeight()*0.175);
-		delay_indicator_controls_division4 = delay_indicator_controls_area.removeFromTop(getHeight()*0.175);
-		delay_indicator_controls_division5 = delay_indicator_controls_area.removeFromTop(getHeight()*0.175);
+		meter_area_outline = component_outline.removeFromLeft(getWidth()*0.5);
+		meter_area_active = meter_area_outline.reduced(padding_pix);
+		meter_area_upper_label = meter_area_active.removeFromTop(meter_area_active.getHeight()*0.5);
+		meter_area_lower_label = meter_area_active;
 
-		reset_to_0.setBounds(
-			delay_indicator_controls_division2.getX() + delay_indicator_controls_division2.getWidth()*0.4,
-			delay_indicator_controls_division2.getY() + delay_indicator_controls_division2.getHeight()*0.35,
-			delay_indicator_controls_division2.getWidth() *0.5,
-			delay_indicator_controls_division2.getHeight() *1.0);
+		control_area_outline = component_outline;
+		control_area_active = control_area_outline.reduced(padding_pix);
+		control_area_top_label = control_area_active.removeFromTop(getHeight()*0.2);
+		control_area_left_column = control_area_active.removeFromLeft(control_area_active.getWidth()*0.5);
+		control_area_right_column = control_area_active;
 		
-		increase_1000.setBounds(
-			delay_indicator_controls_division2.getX() + delay_indicator_controls_division2.getWidth()*0.2,
-			delay_indicator_controls_division2.getY() + delay_indicator_controls_division2.getHeight()*0.35,
-			delay_indicator_controls_division2.getHeight() *0.5,
-			delay_indicator_controls_division2.getHeight() *0.5);
+		int control_area_left_column_height = control_area_left_column.getHeight();
+		
+		control_area_left_column_row_1 = control_area_left_column.removeFromTop(control_area_left_column_height*0.25);
+		control_area_left_column_row_2 = control_area_left_column.removeFromTop(control_area_left_column_height*0.25);
+		control_area_left_column_row_3 = control_area_left_column.removeFromTop(control_area_left_column_height*0.25);
+		control_area_left_column_row_4 = control_area_left_column;
 
-		decrease_1000.setBounds(
-			delay_indicator_controls_division2.getX() + delay_indicator_controls_division2.getWidth()*0.275,
-			delay_indicator_controls_division2.getY() + delay_indicator_controls_division2.getHeight()*0.35,
-			delay_indicator_controls_division2.getHeight() *0.5,
-			delay_indicator_controls_division2.getHeight() *0.5);
+		change_1000_label_area = control_area_left_column_row_1.removeFromLeft(control_area_left_column_row_1.getWidth()*0.5);
+		increase_1000_button_area = control_area_left_column_row_1.removeFromLeft(control_area_left_column_row_1.getWidth()*0.5);
+		decrease_1000_button_area = control_area_left_column_row_1;
 
-		increase_100.setBounds(
-			delay_indicator_controls_division3.getX() + delay_indicator_controls_division3.getWidth()*0.2,
-			delay_indicator_controls_division3.getY() + delay_indicator_controls_division3.getHeight()*0.35,
-			delay_indicator_controls_division3.getHeight() *0.5,
-			delay_indicator_controls_division3.getHeight() *0.5);
+		change_100_label_area = control_area_left_column_row_2.removeFromLeft(control_area_left_column_row_2.getWidth()*0.5);
+		increase_100_button_area = control_area_left_column_row_2.removeFromLeft(control_area_left_column_row_2.getWidth()*0.5);
+		decrease_100_button_area = control_area_left_column_row_2;
 
-		decrease_100.setBounds(
-			delay_indicator_controls_division3.getX() + delay_indicator_controls_division3.getWidth()*0.275,
-			delay_indicator_controls_division3.getY() + delay_indicator_controls_division3.getHeight()*0.35,
-			delay_indicator_controls_division3.getHeight() *0.5,
-			delay_indicator_controls_division3.getHeight() *0.5);
+		change_10_label_area = control_area_left_column_row_3.removeFromLeft(control_area_left_column_row_3.getWidth()*0.5);
+		increase_10_button_area = control_area_left_column_row_3.removeFromLeft(control_area_left_column_row_3.getWidth()*0.5);
+		decrease_10_button_area = control_area_left_column_row_3;
 
-		increase_10.setBounds(
-			delay_indicator_controls_division4.getX() + delay_indicator_controls_division4.getWidth()*0.2,
-			delay_indicator_controls_division4.getY() + delay_indicator_controls_division4.getHeight()*0.35,
-			delay_indicator_controls_division4.getHeight() *0.5,
-			delay_indicator_controls_division4.getHeight() *0.5);
+		change_1_label_area = control_area_left_column_row_4.removeFromLeft(control_area_left_column_row_4.getWidth()*0.5);
+		increase_1_button_area = control_area_left_column_row_4.removeFromLeft(control_area_left_column_row_4.getWidth()*0.5);
+		decrease_1_button_area = control_area_left_column_row_4;
+		
+		int control_area_right_column_height = control_area_right_column.getHeight();
 
-		decrease_10.setBounds(
-			delay_indicator_controls_division4.getX() + delay_indicator_controls_division4.getWidth()*0.275,
-			delay_indicator_controls_division4.getY() + delay_indicator_controls_division4.getHeight()*0.35,
-			delay_indicator_controls_division4.getHeight() *0.5,
-			delay_indicator_controls_division4.getHeight() *0.5);
+		control_area_right_column_row_1 = control_area_right_column.removeFromTop(control_area_right_column_height / 3);
+		control_area_right_column_row_2 = control_area_right_column.removeFromTop(control_area_right_column_height / 3);
+		control_area_right_column_row_3 = control_area_right_column;
 
-		increase_1.setBounds(
-			delay_indicator_controls_division5.getX() + delay_indicator_controls_division5.getWidth()*0.2,
-			delay_indicator_controls_division5.getY() + delay_indicator_controls_division5.getHeight()*0.35,
-			delay_indicator_controls_division5.getHeight() *0.5,
-			delay_indicator_controls_division5.getHeight() *0.5);
+		delay_samples_label.setBounds(meter_area_upper_label);
+		delay_msec_label.setBounds(meter_area_lower_label);
+		control_area_label.setBounds(control_area_top_label);
 
-		decrease_1.setBounds(
-			delay_indicator_controls_division5.getX() + delay_indicator_controls_division5.getWidth()*0.275,
-			delay_indicator_controls_division5.getY() + delay_indicator_controls_division5.getHeight()*0.35,
-			delay_indicator_controls_division5.getHeight() *0.5,
-			delay_indicator_controls_division5.getHeight() *0.5);
+		change_1000_label.setBounds(change_1000_label_area);
+		increase_1000_button.setBounds(increase_1000_button_area.reduced(increase_1000_button_area.getHeight()*0.25));
+		decrease_1000_button.setBounds(decrease_1000_button_area.reduced(decrease_1000_button_area.getHeight()*0.25));
+
+		change_100_label.setBounds(change_100_label_area);
+		increase_100_button.setBounds(increase_100_button_area.reduced(increase_100_button_area.getHeight()*0.25));
+		decrease_100_button.setBounds(decrease_100_button_area.reduced(decrease_100_button_area.getHeight()*0.25));
+
+		change_10_label.setBounds(change_10_label_area);
+		increase_10_button.setBounds(increase_10_button_area.reduced(increase_10_button_area.getHeight()*0.25));
+		decrease_10_button.setBounds(decrease_10_button_area.reduced(decrease_10_button_area.getHeight()*0.25));
+
+		change_1_label.setBounds(change_1_label_area);
+		increase_1_button.setBounds(increase_1_button_area.reduced(increase_1_button_area.getHeight()*0.25));
+		decrease_1_button.setBounds(decrease_1_button_area.reduced(decrease_1_button_area.getHeight()*0.25));
+
+		reset_to_0_button.setBounds(control_area_right_column_row_1.reduced(padding_pix));
+		manual_delay_entry_box.setBounds(control_area_right_column_row_2.reduced(padding_pix));
+		set_delay_manual_button.setBounds(control_area_right_column_row_3.reduced(padding_pix));
+		delay_samples_label.setFont(delay_samples_label.getHeight()*0.9);
+		delay_msec_label.setFont(delay_msec_label.getHeight()*0.9);
+		control_area_label.setFont(control_area_label.getHeight()*0.9);
 
     }
 
 	void buttonClicked(Button* button) override {
 
-		if (button == &increase_1000)
+		if (button == &increase_1000_button)
 		{
 			adjust_delay(1000);
 		}
 
-		if (button == &decrease_1000)
+		if (button == &decrease_1000_button)
 		{
 			adjust_delay(-1000);
 		}
 
-		if (button == &increase_100)
+		if (button == &increase_100_button)
 		{
 			adjust_delay(100);
 		}
 
-		if (button == &decrease_100)
+		if (button == &decrease_100_button)
 		{
 			adjust_delay(-100);
 		}
 
-		if (button == &increase_10)
+		if (button == &increase_10_button)
 		{
 			adjust_delay(10);
 		}
 
-		if (button == &decrease_10)
+		if (button == &decrease_10_button)
 		{
 			adjust_delay(-10);
 		}
 
-		if (button == &increase_1)
+		if (button == &increase_1_button)
 		{
 			adjust_delay(1);
 		}
 
-		if (button == &decrease_1)
+		if (button == &decrease_1_button)
 		{
 			adjust_delay(-1);
 		}
 
-		if (button == &reset_to_0)
+		if (button == &reset_to_0_button)
 		{
 			delay_in_samples = 0;
+		}
+
+		if (button == &set_delay_manual_button)
+		{
+			int new_delay_samples = round(manual_delay_entry_box.getText(true).getFloatValue() * (constants::sample_rate / 1000.0));
+
+			adjust_delay(new_delay_samples - delay_in_samples);
 		}
 
 		sendActionMessage("cmd_update_supervisor");
@@ -261,7 +248,84 @@ public:
 		repaint();
 
 	}
+		
+	void try_repaint()
 
+	{
+
+		if (repaint_active == false) { //don't try to call repaint again if there's already a repaint cycle in progress
+
+			repaint();
+
+		}
+
+	}
+
+private:
+
+	float delay_in_milliseconds{ 0.0 };
+
+	bool repaint_active{ false };
+
+	int padding_pix{ 5 };
+
+	Rectangle<int> component_outline;
+
+	Rectangle<int> meter_area_outline;
+	Rectangle<int> meter_area_active;
+	Rectangle<int> meter_area_upper_label;
+	Rectangle<int> meter_area_lower_label;
+	
+	Rectangle<int> control_area_outline;
+	Rectangle<int> control_area_active;
+	Rectangle<int> control_area_top_label;
+	Rectangle<int> control_area_left_column;
+	Rectangle<int> control_area_left_column_row_1;
+	Rectangle<int> control_area_left_column_row_2;
+	Rectangle<int> control_area_left_column_row_3;
+	Rectangle<int> control_area_left_column_row_4;
+	Rectangle<int> control_area_right_column;
+	Rectangle<int> control_area_right_column_row_1;
+	Rectangle<int> control_area_right_column_row_2;
+	Rectangle<int> control_area_right_column_row_3;
+
+	Rectangle<int> change_1000_label_area;
+	Rectangle<int> increase_1000_button_area;
+	Rectangle<int> decrease_1000_button_area;
+
+	Rectangle<int> change_100_label_area;
+	Rectangle<int> increase_100_button_area;
+	Rectangle<int> decrease_100_button_area;
+
+	Rectangle<int> change_10_label_area;
+	Rectangle<int> increase_10_button_area;
+	Rectangle<int> decrease_10_button_area;
+
+	Rectangle<int> change_1_label_area;
+	Rectangle<int> increase_1_button_area;
+	Rectangle<int> decrease_1_button_area;
+	
+	ArrowButton increase_1000_button{"increase_1000", 0.75, Colours::white};
+	ArrowButton decrease_1000_button{ "decrease_1000", 0.25, Colours::white };
+	ArrowButton increase_100_button{ "increase_100", 0.75, Colours::white };
+	ArrowButton decrease_100_button{ "decrease_100", 0.25, Colours::white };
+	ArrowButton increase_10_button{ "increase_10", 0.75, Colours::white };
+	ArrowButton decrease_10_button{ "decrease_10", 0.25, Colours::white };
+	ArrowButton increase_1_button{ "increase_1", 0.75, Colours::white };
+	ArrowButton decrease_1_button{ "decrease_1", 0.25, Colours::white };
+
+	TextButton reset_to_0_button;
+	TextButton set_delay_manual_button;
+
+	Label change_1000_label;
+	Label change_100_label;
+	Label change_10_label;
+	Label change_1_label;
+	Label delay_samples_label;
+	Label delay_msec_label;
+	Label control_area_label;
+	Label manual_delay_entry_box;
+	
 	void adjust_delay(int delay_change) {
 
 		int requested_delay = delay_in_samples;
@@ -283,30 +347,6 @@ public:
 		delay_in_samples = requested_delay;
 
 	}
-
-	void try_repaint()
-
-	{
-
-		if (repaint_active == false) { //don't try to call repaint again if there's already a repaint cycle in progress
-
-			repaint();
-
-		}
-
-	}
-
-private:
-
-	ArrowButton increase_1000{"increase_1000", 0.75, Colours::white};
-	ArrowButton decrease_1000{ "decrease_1000", 0.25, Colours::white };
-	ArrowButton increase_100{ "increase_100", 0.75, Colours::white };
-	ArrowButton decrease_100{ "decrease_100", 0.25, Colours::white };
-	ArrowButton increase_10{ "increase_10", 0.75, Colours::white };
-	ArrowButton decrease_10{ "decrease_10", 0.25, Colours::white };
-	ArrowButton increase_1{ "increase_1", 0.75, Colours::white };
-	ArrowButton decrease_1{ "decrease_1", 0.25, Colours::white };
-	TextButton reset_to_0;
 		
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (delay_indicator)
 };
