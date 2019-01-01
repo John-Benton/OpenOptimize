@@ -874,7 +874,7 @@ public:
 
 				coh_smoothed_trace = coh_trace.createPathWithRoundedCorners(trace_path_smoothing_radius);
 
-				g.setColour(Colour(0, 0, 80));
+				g.setColour(Colour(0, 0, 127));
 
 				g.strokePath(coh_smoothed_trace, PathStrokeType(saved_trace_thickness));
 
