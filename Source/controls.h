@@ -135,6 +135,8 @@ public:
 		analysis_onoff_button.addListener(this);
 		analysis_onoff_button.setColour(analysis_onoff_button.buttonColourId, Colours::transparentBlack);
 		analysis_onoff_button.setColour(analysis_onoff_button.buttonOnColourId, Colour(160,79,0));
+		analysis_onoff_button.setToggleState(true, dontSendNotification);
+		analysis_status = 1;
 
 		addAndMakeVisible(mic_cal_filename_label);
 		mic_cal_filename_label.setColour(Label::backgroundColourId, Colours::black);
