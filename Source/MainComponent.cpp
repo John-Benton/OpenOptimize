@@ -40,44 +40,28 @@ MainContentComponent::~MainContentComponent()
 void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
 
-	this->deviceManager.setCurrentAudioDeviceType("DirectSound", true);
-		
-	this->deviceManager.getAudioDeviceSetup(audio_device_setup);
-
-	audio_device_setup.sampleRate = 48000;
-
-	this->deviceManager.setAudioDeviceSetup(audio_device_setup, true);
-
 }
 
 void MainContentComponent::getNextAudioBlock(const AudioSourceChannelInfo& audio_device_buffer)
 {
 	const float* ref_in_buffer = audio_device_buffer.buffer->getReadPointer(0);
 	const float* system_in_buffer = audio_device_buffer.buffer->getReadPointer(1);
-	double ref_sample_value = 0;
-	double system_sample_value = 0;
-		
-	if (audio_device_setup.inputChannels.toInteger() == 3) {
 
-		supervisor1->audio_buffer_mtx_supervisor.lock();
+	supervisor1->audio_buffer_mtx_supervisor.lock();
 
-		for (int sample = 0; sample < audio_device_buffer.numSamples; ++sample) {
+	for (int sample = 0; sample < audio_device_buffer.numSamples; ++sample) {
 
-			supervisor1->buffer_ref_samples.push_front(ref_in_buffer[sample]);
-			supervisor1->buffer_ref_samples.pop_back();
+		supervisor1->buffer_ref_samples.push_front(ref_in_buffer[sample]);
+		supervisor1->buffer_ref_samples.pop_back();
 
-			supervisor1->buffer_system_samples.push_front(system_in_buffer[sample]);
-			supervisor1->buffer_system_samples.pop_back();
+		supervisor1->buffer_system_samples.push_front(system_in_buffer[sample]);
+		supervisor1->buffer_system_samples.pop_back();
 
-			num_samples_stored++;
-
-		}
-
-		supervisor1->audio_buffer_mtx_supervisor.unlock();
+		num_samples_stored++;
 
 	}
 
-	else {}; //there must be exactly two input channels (JUCE thinks there are 3 on Focusrite 2i2) for this audio callback to run correctly
+	supervisor1->audio_buffer_mtx_supervisor.unlock();
 
 }
 	

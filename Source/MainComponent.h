@@ -73,7 +73,7 @@ private:
 
 	level_meters main_level_meters;
 
-	AudioDeviceManager::AudioDeviceSetup audio_device_setup;
+	//AudioDeviceManager::AudioDeviceSetup audio_device_setup;
 
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
