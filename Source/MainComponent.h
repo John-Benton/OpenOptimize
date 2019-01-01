@@ -73,7 +73,7 @@ private:
 
 	level_meters main_level_meters;
 
-	//AudioDeviceManager::AudioDeviceSetup audio_device_setup;
+	AudioDeviceManager::AudioDeviceSetup current_audio_device_setup; //only used when checking sample rate
 
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
@@ -83,7 +83,7 @@ private:
 
 	DialogWindow::LaunchOptions ir_window_config;
 
-	bool data_update_active{ false };
+	bool data_update_active{ false }, sample_rate_correct{ true };
 
 	OpenGLContext gl_renderer;
 

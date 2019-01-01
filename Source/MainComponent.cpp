@@ -38,15 +38,23 @@ MainContentComponent::~MainContentComponent()
 
 //==============================================================================
 void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
-{
-
-}
+{}
 
 void MainContentComponent::getNextAudioBlock(const AudioSourceChannelInfo& audio_device_buffer)
 {
+	this->deviceManager.getAudioDeviceSetup(current_audio_device_setup);
+
+	if (current_audio_device_setup.sampleRate == 48000) {
+
+		sample_rate_correct = true;
+
+	}
+
+	else { sample_rate_correct = false; }
+	
 	const float* ref_in_buffer = audio_device_buffer.buffer->getReadPointer(0);
 	const float* system_in_buffer = audio_device_buffer.buffer->getReadPointer(1);
-
+	
 	supervisor1->audio_buffer_mtx_supervisor.lock();
 
 	for (int sample = 0; sample < audio_device_buffer.numSamples; ++sample) {
@@ -121,6 +129,8 @@ void MainContentComponent::update_current_plot_data() {
 	supervisor1->plot_data_mtx_supervisor.unlock();
 
 	ir_window.update_ir_plot_data(supervisor1->impulse_response_time_samples);
+
+	main_plot.sample_rate_incorrect_warning = !sample_rate_correct;
 
 }
 

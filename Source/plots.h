@@ -144,6 +144,8 @@ public:
 	String coherence_mod_value_string;
 	String spectrum_mod_value_string;
 	
+	bool sample_rate_incorrect_warning{ false };
+	
     plots()
     {
 		current_composite_fft_bin_frequencies.resize(composite_fft_bins);
@@ -188,6 +190,12 @@ public:
 		addAndMakeVisible(phase_mod);
 		addAndMakeVisible(coherence_mod);
 		addAndMakeVisible(spectrum_mod);
+
+		addAndMakeVisible(sample_rate_incorrect_warning_label);
+		sample_rate_incorrect_warning_label.setJustificationType(Justification::centred);
+		sample_rate_incorrect_warning_label.setText(
+			"SAMPLE RATE INCORRECT. PLEASE SET SAMPLE RATE TO 48000 Hz USING AUDIO INPUT SETUP WINDOW.", 
+			dontSendNotification);
 
 		frequency_mod.setJustificationType(Justification::centred);
 		magnitude_mod.setJustificationType(Justification::centred);
@@ -301,7 +309,7 @@ public:
     void paint (Graphics& g) override
 	{
 		repaint_active = true;
-		
+				
 		calc_display_values(display_composite_xfer_function_mag_dB, current_composite_xfer_function_mag_dB, 0);
 
 		calc_display_values(display_composite_xfer_function_phase_deg, current_composite_xfer_function_phase_deg, 1);
@@ -392,10 +400,20 @@ public:
 		
 		g.fillRect(plot_actual_region);
 
+		g.setColour(Colours::white);
+
 		g.restoreState();
 
-		g.setColour(Colours::white);
-		
+		if (sample_rate_incorrect_warning == true) {
+
+			sample_rate_incorrect_warning_label.setVisible(true);
+
+			goto endofpaint;
+
+		}
+
+		else { sample_rate_incorrect_warning_label.setVisible(false); }
+				
 		//==============================================================================
 
 		g.saveState();
@@ -886,6 +904,8 @@ public:
 
 		//==============================================================================
 
+		endofpaint: //painting will jump to here if sample rate is incorrect
+
 		repaint_active = false;
 
 	}
@@ -897,6 +917,9 @@ public:
 		plot_clip_region.setBounds(plot_outline.getWidth()*0.1, plot_outline.getHeight()*0.1, 
 			
 			plot_outline.getWidth()*0.85, plot_outline.getHeight()*0.8);
+
+		sample_rate_incorrect_warning_label.setBounds(plot_clip_region.reduced(plot_clip_region.getHeight()*0.25));
+		sample_rate_incorrect_warning_label.setFont(plot_clip_region.getHeight()*0.075);
 		
 		top_title_region.setBounds(0, 0, plot_outline.getWidth(), plot_outline.getHeight()*0.05);
 
@@ -1156,6 +1179,8 @@ private:
 	Label spectrum_mod;
 
 	Point<int> mouse_current_position;
+
+	Label sample_rate_incorrect_warning_label;
 
 	void calc_display_values(std::vector<double> &display_value_vector, std::vector<double> &current_value_vector, int plot_type) {
 
