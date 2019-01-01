@@ -190,7 +190,7 @@ void MainContentComponent::open_audio_io_window() {
 		
 	OptionalScopedPointer<Component> audio_io_config_window_content_ptr{ &audio_device_selector_component, 0 };
 
-	audio_io_config_window.dialogTitle = "Audio I/O Configuration";
+	audio_io_config_window.dialogTitle = "Audio Input Setup";
 
 	audio_io_config_window.dialogBackgroundColour = Colours::darkgrey;
 

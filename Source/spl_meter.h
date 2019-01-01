@@ -36,9 +36,9 @@ public:
 
 	const double meter_snap_range = 0.1;
 
-	const double spl_meter_fast_rate_of_change = 0.05;
+	const double spl_meter_fast_rate_of_change = 0.10;
 
-	const double spl_meter_slow_rate_of_change = 0.25;
+	const double spl_meter_slow_rate_of_change = 0.01;
 
 	double spl_meter_rate_of_change;
 
@@ -148,13 +148,13 @@ public:
 
 		if (fast_time_button.getToggleState() == true) {
 
-			spl_meter_rate_of_change = 0.05;
+			spl_meter_rate_of_change = spl_meter_fast_rate_of_change;
 
 		}
 
 		else {
 
-			spl_meter_rate_of_change = 0.25;
+			spl_meter_rate_of_change = spl_meter_slow_rate_of_change;
 
 		}
 		
