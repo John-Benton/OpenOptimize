@@ -22,7 +22,7 @@ public:
 
 		decimated_ir_data_avg.resize(num_decimated_ir_data_points);
 
-		ir_plot.set_plot_properties(0.0, 500.0, -1.0, 1.0, 50, 0.2, "", "");
+		ir_plot.set_plot_properties(0.0, 500.0, -1.2, 1.2, 50, 0.2, "", "");
 		ir_plot.set_plot_max_zooms(10, 10);
 		ir_plot.add_data_set(&ir_data);
 
@@ -59,12 +59,13 @@ public:
 			raw_data_point += constants::sample_rate / 1000; //this skips over samples between each whole milisecond
 
 		}
-
-		ir_data_history.add_latest_values(decimated_ir_data);
-
-		ir_data_history.get_data_average(decimated_ir_data_avg);
 		
+		ir_data_history.add_latest_values(decimated_ir_data);
+		ir_data_history.get_data_average(decimated_ir_data_avg);
 		ir_data.clear_data();
+
+		float max_ir_data_avg_amplitude = *std::max_element(decimated_ir_data_avg.begin(), decimated_ir_data_avg.end());
+		FloatVectorOperations::multiply(&decimated_ir_data_avg[0], 1.0 / max_ir_data_avg_amplitude, decimated_ir_data_avg.size());
 
 		for (int data_point = 0; data_point < decimated_ir_data_avg.size(); data_point++) {
 
