@@ -15,7 +15,7 @@ public:
 
 	}
 
-	void add_single_data_point(float x_value, float y_value) //adds a single data point to end of data set
+	void append_single_data_point(float x_value, float y_value) //appends a single data point to end of data set
 	{
 
 		data_x_cord.push_back(x_value), data_y_cord.push_back(y_value);
@@ -140,46 +140,24 @@ public:
 		g.drawFittedText(y_min_fixed_label_text, y_min_fixed_label_outline, Justification::centredBottom, 1, 0.0);
 		g.drawFittedText(y_max_fixed_label_text, y_max_fixed_label_outline, Justification::centredTop, 1, 0.0);
 
-		g.setColour(Colour(50, 50, 50));
-
-		for (int line = 0; line < x_grid_cord.size(); line++) {
-
-			g.fillRect(
-				data_cord_to_plot_screen_cord(x_grid_cord[line], 0).first,
-				plot_screen_y_min,
-				gridline_thickness_pix,
-				plot_screen_y_max - plot_screen_y_min);
-		}
-
-		for (int line = 0; line < y_grid_cord.size(); line++) {
-
-			g.fillRect(
-				plot_screen_x_min,
-				data_cord_to_plot_screen_cord(0, y_grid_cord[line]).second,
-				plot_screen_x_max - plot_screen_x_min,
-				gridline_thickness_pix);
-		}
-
-		g.setColour(Colours::white);
-
 		g.saveState();
 
 		g.reduceClipRegion(bottom_label_area);
 
-		for (int label = 0; label < x_floating_label_strings.size(); label++) {
+			for (int label = 0; label < x_floating_label_strings.size(); label++) {
 
-			int x_label_width_pix{ 100 };
+				int x_label_width_pix{ 100 };
 
-			g.drawText(
-				x_floating_label_strings[label],
-				data_cord_to_plot_screen_cord(x_grid_cord[label], 0.0).first - (x_label_width_pix/2),
-				bottom_label_area.getY(),
-				x_label_width_pix,
-				bottom_label_area.getHeight(),
-				Justification::centred,
-				false);
+				g.drawText(
+					x_floating_label_strings[label],
+					data_cord_to_plot_screen_cord(x_grid_cord[label], 0.0).first - (x_label_width_pix/2),
+					bottom_label_area.getY(),
+					x_label_width_pix,
+					bottom_label_area.getHeight(),
+					Justification::centred,
+					false);
 
-		}
+			}
 
 		g.restoreState();
 
@@ -187,20 +165,20 @@ public:
 
 		g.reduceClipRegion(left_label_area);
 
-		for (int label = 0; label < y_floating_label_strings.size(); label++) {
+			for (int label = 0; label < y_floating_label_strings.size(); label++) {
 
-			int y_label_height_pix{ 50 };
+				int y_label_height_pix{ 50 };
 
-			g.drawText(
-				y_floating_label_strings[label],
-				left_label_area.getX(),
-				data_cord_to_plot_screen_cord(0.0, y_grid_cord[label]).second - (y_label_height_pix / 2),
-				left_label_area.getWidth(),
-				y_label_height_pix,
-				Justification::centred,
-				false);
+				g.drawText(
+					y_floating_label_strings[label],
+					left_label_area.getX(),
+					data_cord_to_plot_screen_cord(0.0, y_grid_cord[label]).second - (y_label_height_pix / 2),
+					left_label_area.getWidth(),
+					y_label_height_pix,
+					Justification::centred,
+					false);
 
-		}
+			}
 
 		g.restoreState();
 
@@ -208,30 +186,52 @@ public:
 
 		g.reduceClipRegion(plot_area);
 
-		for (int data_set = 0; data_set < data_sets.size(); data_set++) {
+			g.setColour(Colour(50, 50, 50));
 
-			for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points() - 1; coordinate++) {
+			for (int line = 0; line < x_grid_cord.size(); line++) {
 
-				float x_value = data_sets[data_set]->return_x_data_point(coordinate);
-				float y_value = data_sets[data_set]->return_y_data_point(coordinate);
-				float next_x_value = data_sets[data_set]->return_x_data_point(coordinate + 1);
-				float next_y_value = data_sets[data_set]->return_y_data_point(coordinate + 1);
-
-				std::pair<int, int> current_point_screen_coord;
-				std::pair<int, int> next_point_screen_coord;
-
-				current_point_screen_coord = data_cord_to_plot_screen_cord(x_value, y_value);
-				next_point_screen_coord = data_cord_to_plot_screen_cord(next_x_value, next_y_value);
-
-				g.drawLine(	current_point_screen_coord.first, 
-							current_point_screen_coord.second,
-							next_point_screen_coord.first, 
-							next_point_screen_coord.second,
-							trace_thickness_pix);
-
+				g.fillRect(
+					data_cord_to_plot_screen_cord(x_grid_cord[line], 0).first,
+					plot_screen_y_min,
+					gridline_thickness_pix,
+					plot_screen_y_max - plot_screen_y_min);
 			}
 
-		}
+			for (int line = 0; line < y_grid_cord.size(); line++) {
+
+				g.fillRect(
+					plot_screen_x_min,
+					data_cord_to_plot_screen_cord(0, y_grid_cord[line]).second,
+					plot_screen_x_max - plot_screen_x_min,
+					gridline_thickness_pix);
+			}
+
+			g.setColour(Colours::white);
+
+			for (int data_set = 0; data_set < data_sets.size(); data_set++) {
+
+				for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points() - 1; coordinate++) {
+
+					float x_value = data_sets[data_set]->return_x_data_point(coordinate);
+					float y_value = data_sets[data_set]->return_y_data_point(coordinate);
+					float next_x_value = data_sets[data_set]->return_x_data_point(coordinate + 1);
+					float next_y_value = data_sets[data_set]->return_y_data_point(coordinate + 1);
+
+					std::pair<int, int> current_point_screen_coord;
+					std::pair<int, int> next_point_screen_coord;
+
+					current_point_screen_coord = data_cord_to_plot_screen_cord(x_value, y_value);
+					next_point_screen_coord = data_cord_to_plot_screen_cord(next_x_value, next_y_value);
+
+					g.drawLine(	current_point_screen_coord.first, 
+								current_point_screen_coord.second,
+								next_point_screen_coord.first, 
+								next_point_screen_coord.second,
+								trace_thickness_pix);
+
+				}
+
+			}
 
 		g.restoreState();
 

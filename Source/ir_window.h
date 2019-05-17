@@ -72,7 +72,7 @@ public:
 			float x_value = data_point;
 			float y_value = decimated_ir_data_avg[data_point];
 
-			ir_data.add_single_data_point(x_value, y_value);
+			ir_data.append_single_data_point(x_value, y_value);
 
 		}
 
