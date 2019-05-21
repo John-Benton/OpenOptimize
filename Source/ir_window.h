@@ -4,6 +4,36 @@
 #include "flexplot.h"
 #include "constants.h"
 
+class ir_plot : public flexplot
+{
+public:
+
+	ir_plot() {};
+	~ir_plot() {};
+
+	void draw_custom_overlay(Graphics& g) override 
+	{
+		g.saveState();
+
+		Rectangle<int> ir_max_indicator_outline(plot_area.getX(),
+			plot_area.getY(),
+			plot_area.getWidth()*0.20,
+			plot_area.getHeight()*0.05);
+
+		g.setColour(Colours::black);
+		g.fillRect(ir_max_indicator_outline);
+
+		g.setColour(Colours::white);
+		g.setFont(ir_max_indicator_outline.getHeight()*0.8);
+		g.drawFittedText("IR Peak: " + String(ir_max_index), ir_max_indicator_outline, Justification::centred, 1);
+
+		g.restoreState();
+	}
+
+	int ir_max_index{ 0 };
+
+};
+
 class ir_window    : public Component
 {
 public:
@@ -22,11 +52,11 @@ public:
 
 		decimated_ir_data_avg.resize(num_decimated_ir_data_points);
 
-		ir_plot.set_plot_properties(0.0, 500.0, -1.2, 1.2, 50, 0.2, "", "");
-		ir_plot.set_plot_max_zooms(10, 10);
-		ir_plot.add_data_set(&ir_data);
+		main_ir_plot.set_plot_properties(0.0, 500.0, -1.2, 1.2, 50, 0.2, "", "");
+		main_ir_plot.set_plot_max_zooms(10, 10);
+		main_ir_plot.add_data_set(&ir_data);
 
-		addAndMakeVisible(ir_plot);
+		addAndMakeVisible(main_ir_plot);
 
     }
 
@@ -37,15 +67,15 @@ public:
     void paint (Graphics& g) override
     {
 
-		ir_plot.repaint();
+		main_ir_plot.repaint();
 
     }
 
     void resized() override
     {
 
-		ir_plot.setBounds(getLocalBounds());
-        
+		main_ir_plot.setBounds(getLocalBounds());
+		
     }
 
 	void update_ir_plot_data(std::vector<float> &new_ir_data) {
@@ -64,8 +94,9 @@ public:
 		ir_data_history.get_data_average(decimated_ir_data_avg);
 		ir_data.clear_data();
 
-		float max_ir_data_avg_amplitude = *std::max_element(decimated_ir_data_avg.begin(), decimated_ir_data_avg.end());
-		FloatVectorOperations::multiply(&decimated_ir_data_avg[0], 1.0 / max_ir_data_avg_amplitude, decimated_ir_data_avg.size());
+		auto decimated_ir_data_avg_max_it = std::max_element(decimated_ir_data_avg.begin(), decimated_ir_data_avg.end());
+		main_ir_plot.ir_max_index = std::distance(decimated_ir_data_avg.begin(), decimated_ir_data_avg_max_it);
+		FloatVectorOperations::multiply(&decimated_ir_data_avg[0], 1.0 / *decimated_ir_data_avg_max_it, decimated_ir_data_avg.size());
 
 		for (int data_point = 0; data_point < decimated_ir_data_avg.size(); data_point++) {
 
@@ -77,7 +108,7 @@ public:
 		}
 
 	}
-
+	
 private:
 
 	int num_decimated_ir_data_points = 500; //data points will be at 1 msec intervals.
@@ -86,7 +117,7 @@ private:
 
 	std::vector<float> decimated_ir_data_avg;
 
-	flexplot ir_plot;
+	ir_plot main_ir_plot;
 
 	data_history ir_data_history{ num_decimated_ir_data_points };
 

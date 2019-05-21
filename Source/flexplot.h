@@ -104,6 +104,12 @@ public:
     ~flexplot()
     {
     }
+	
+	virtual void draw_custom_overlay(Graphics& g) {
+
+
+
+	}
 
     void paint (Graphics& g) override
     {
@@ -235,6 +241,8 @@ public:
 
 		g.restoreState();
 
+		draw_custom_overlay(g);
+
     }
 
     void resized() override
@@ -320,7 +328,7 @@ public:
 
 	}
 
-private:
+protected:
 
 	Rectangle<int>	component_outline,
 					top_region,
