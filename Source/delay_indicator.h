@@ -253,9 +253,9 @@ public:
 
 		if (button == &set_delay_auto_button)
 		{
-			int ir_reported_delay = round(*ir_peak_msec_ptr * (constants::sample_rate / 1000.0));
+			int ir_peak_samples = round(*ir_peak_msec_ptr * (constants::sample_rate / 1000.0));
 
-			adjust_delay(ir_reported_delay);
+			adjust_delay(ir_peak_samples - delay_in_samples);
 		}
 
 		sendActionMessage("cmd_update_supervisor");

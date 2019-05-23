@@ -66,7 +66,7 @@ public:
 
 	std::deque<double> buffer_ref_samples, buffer_system_samples;
 
-	std::vector<double> current_ref_samples, current_system_samples;
+	std::vector<double> current_ref_samples, undelayed_ref_samples, current_system_samples;
 	
 	std::vector<double> current_ref_samples_squared;
 	double current_ref_samples_squared_sum;
@@ -153,6 +153,7 @@ public:
 		buffer_system_samples.resize(largest_fft_size);
 
 		current_ref_samples.resize(largest_fft_size);
+		undelayed_ref_samples.resize(largest_fft_size);
 		current_system_samples.resize(largest_fft_size);
 
 		current_ref_samples_squared.resize(largest_fft_size);
@@ -213,6 +214,8 @@ public:
 		refresh_supervisor_buffer();
 
 		update_mic_system_curves();
+
+		fft_32k_ir->run_fft_analysis(undelayed_ref_samples, current_system_samples);
 		
 		fft_32k->run_fft_analysis(current_ref_samples, current_system_samples);
 		fft_8k->run_fft_analysis(current_ref_samples, current_system_samples);
@@ -255,6 +258,10 @@ public:
 		std::copy(buffer_ref_samples.begin() + delay_in_samples, 
 			buffer_ref_samples.begin() + current_ref_samples.size() + delay_in_samples, 
 			current_ref_samples.begin());
+
+		std::copy(buffer_ref_samples.begin(),
+			buffer_ref_samples.begin() + undelayed_ref_samples.size(),
+			undelayed_ref_samples.begin());
 
 		std::copy(buffer_system_samples.begin(), 
 			buffer_system_samples.begin() + current_system_samples.size(), 
@@ -300,6 +307,8 @@ public:
 	}
 
 private:
+
+	fft * fft_32k_ir = new fft(largest_fft_size);
 	
 	fft * fft_32k = new fft(largest_fft_size);
 	fft * fft_8k = new fft(largest_fft_size / 4);
@@ -530,7 +539,7 @@ private:
 
 	void calculate_impulse_response() {
 
-		impulse_reponse_transfer_func.run_xfer_func(fft_32k->fftw_complex_out_ref_vector, fft_32k->fftw_complex_out_system_vector, impulse_response_complex_freq_samples);
+		impulse_reponse_transfer_func.run_xfer_func(fft_32k_ir->fftw_complex_out_ref_vector, fft_32k_ir->fftw_complex_out_system_vector, impulse_response_complex_freq_samples);
 
 		impulse_response_calculator.set_freq_response_data(impulse_response_complex_freq_samples);
 
