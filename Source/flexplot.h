@@ -2,12 +2,12 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-class flexplot_data_object //holds a single set of x-y coordinate pairs
+class flexplot_trace //holds the data and properties for a single trace that can be rendered in a flexplot
 {
 public:
 
-	flexplot_data_object() {};
-	~flexplot_data_object() {};
+	flexplot_trace() {};
+	~flexplot_trace() {};
 
 	void clear_data() {
 
@@ -34,12 +34,8 @@ public:
 
 		data_x_cord.resize(data_size), data_y_cord.resize(data_size);
 
-		for (int index = 0; index < data_size; index++) {
-
-			data_x_cord[index] = x_values[index];
-			data_y_cord[index] = y_values[index];
-
-		}
+		std::copy(x_values.begin(), x_values.begin() + data_size, data_x_cord.begin());
+		std::copy(y_values.begin(), y_values.begin() + data_size, data_y_cord.begin());
 
 	}
 
@@ -316,7 +312,7 @@ public:
 
 	}
 
-	void add_data_set(flexplot_data_object* new_data_set) { //adds a flexplot_data_object to the plot
+	void add_data_set(flexplot_trace* new_data_set) { //adds a flexplot_trace to the plot
 
 		data_sets.push_back(new_data_set);
 
@@ -367,7 +363,7 @@ protected:
 	std::vector<String> x_floating_label_strings;
 	std::vector<String> y_floating_label_strings;
 
-	std::vector<flexplot_data_object*> data_sets; //holds pointers to all data sets that have been added to the plot;
+	std::vector<flexplot_trace*> data_sets; //holds pointers to all data sets that have been added to the plot;
 
 	float set_x_min, set_x_max, set_y_min, set_y_max; //as configured by set_plot_properties() - data coordinates, not screen coordinates
 

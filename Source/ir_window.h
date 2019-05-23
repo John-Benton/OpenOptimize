@@ -15,8 +15,8 @@ public:
 	{
 		g.saveState();
 
-		Rectangle<int> ir_max_indicator_outline(plot_area.getX(),
-			plot_area.getY(),
+		Rectangle<int> ir_max_indicator_outline(plot_area.getX() + 5,
+			plot_area.getY() + 5,
 			plot_area.getWidth()*0.20,
 			plot_area.getHeight()*0.05);
 
@@ -25,12 +25,12 @@ public:
 
 		g.setColour(Colours::white);
 		g.setFont(ir_max_indicator_outline.getHeight()*0.8);
-		g.drawFittedText("IR Peak: " + String(ir_max_index), ir_max_indicator_outline, Justification::centred, 1);
+		g.drawFittedText("IR Peak: " + String(ir_max_time_msec), ir_max_indicator_outline, Justification::centred, 1);
 
 		g.restoreState();
 	}
 
-	int ir_max_index{ 0 };
+	float ir_max_time_msec{ 0.0 };
 
 };
 
@@ -48,9 +48,8 @@ public:
 
 		ir_data_history.set_num_histories(10);
 
-		decimated_ir_data.resize(num_decimated_ir_data_points);
-
-		decimated_ir_data_avg.resize(num_decimated_ir_data_points);
+		original_ir_data.resize(num_ir_samples);
+		original_ir_data_avg.resize(num_ir_samples);
 
 		main_ir_plot.set_plot_properties(0.0, 500.0, -1.2, 1.2, 50, 0.2, "", "");
 		main_ir_plot.set_plot_max_zooms(10, 10);
@@ -80,48 +79,78 @@ public:
 
 	void update_ir_plot_data(std::vector<float> &new_ir_data) {
 
-		int raw_data_point{ 0 };
-
-		for (int decimated_data_point = 0; decimated_data_point < num_decimated_ir_data_points; decimated_data_point++) {
-
-			decimated_ir_data[decimated_data_point] = new_ir_data[raw_data_point];
-
-			raw_data_point += constants::sample_rate / 1000; //this skips over samples between each whole milisecond
-
-		}
+		std::copy(new_ir_data.begin(), new_ir_data.begin() + num_ir_samples, original_ir_data.begin());
 		
-		ir_data_history.add_latest_values(decimated_ir_data);
-		ir_data_history.get_data_average(decimated_ir_data_avg);
+		ir_data_history.add_latest_values(original_ir_data);
+		ir_data_history.get_data_average(original_ir_data_avg);
 		ir_data.clear_data();
 
-		auto decimated_ir_data_avg_max_it = std::max_element(decimated_ir_data_avg.begin(), decimated_ir_data_avg.end());
-		main_ir_plot.ir_max_index = std::distance(decimated_ir_data_avg.begin(), decimated_ir_data_avg_max_it);
-		FloatVectorOperations::multiply(&decimated_ir_data_avg[0], 1.0 / *decimated_ir_data_avg_max_it, decimated_ir_data_avg.size());
+		auto original_ir_data_avg_max_it = std::max_element(original_ir_data_avg.begin(), original_ir_data_avg.end());
+		original_ir_data_avg_max_index = std::distance(original_ir_data_avg.begin(), original_ir_data_avg_max_it);
+		main_ir_plot.ir_max_time_msec = (original_ir_data_avg_max_index * 1.0 / constants::sample_rate * 1.0) * 1000.0;
+		
+		int skipped_data_points{ 0 };
+		int peaks_detected{ 0 };
+		bool excessive_peaks{ false };
+		decimated_avg_ir_sample_amplitudes.clear();
+		decimated_avg_ir_sample_times_msec.clear();
+		
+		for (int index = 0; index < original_ir_data_avg.size(); index++) {
 
-		for (int data_point = 0; data_point < decimated_ir_data_avg.size(); data_point++) {
+			if (peaks_detected >= 100) {
 
-			float x_value = data_point;
-			float y_value = decimated_ir_data_avg[data_point];
+				excessive_peaks = true;
 
-			ir_data.append_single_data_point(x_value, y_value);
+			}
+
+			if (original_ir_data_avg[index] > 0.5 && excessive_peaks == false) {
+
+				decimated_avg_ir_sample_amplitudes.push_back(original_ir_data_avg[index]);
+				decimated_avg_ir_sample_times_msec.push_back((1000.0 / constants::sample_rate*1.0) * index);
+				peaks_detected++;
+				skipped_data_points = 0;
+				continue;
+
+			}
+
+			if (skipped_data_points >= 20) {
+
+				decimated_avg_ir_sample_amplitudes.push_back(original_ir_data_avg[index]);
+				decimated_avg_ir_sample_times_msec.push_back((1000.0 / constants::sample_rate*1.0) * index);
+				skipped_data_points = 0;
+				continue;
+
+			}
+
+			skipped_data_points++;
 
 		}
 
+		auto decimated_avg_ir_samples_max = std::max_element(decimated_avg_ir_sample_amplitudes.begin(), decimated_avg_ir_sample_amplitudes.end());
+		FloatVectorOperations::multiply(&decimated_avg_ir_sample_amplitudes[0], 1.0 / *decimated_avg_ir_samples_max, decimated_avg_ir_sample_amplitudes.size());
+
+		ir_data.set_data(decimated_avg_ir_sample_times_msec, decimated_avg_ir_sample_amplitudes);
+
 	}
-	
+
 private:
+	
+	int num_ir_samples = constants::sample_rate * (500.0 / 1000.0); //for 500 msec of samples
+	
+	std::vector<float> original_ir_data;
+	std::vector<float> original_ir_data_avg;
 
-	int num_decimated_ir_data_points = 500; //data points will be at 1 msec intervals.
+	std::vector<float> decimated_avg_ir_sample_amplitudes;
+	std::vector<float> decimated_avg_ir_sample_times_msec;
 
-	std::vector<float> decimated_ir_data;
-
-	std::vector<float> decimated_ir_data_avg;
+	int original_ir_data_avg_max_index{ 0 };
 
 	ir_plot main_ir_plot;
 
-	data_history ir_data_history{ num_decimated_ir_data_points };
+	data_history ir_data_history{ num_ir_samples };
 
-	flexplot_data_object ir_data;
+	flexplot_trace ir_data;
 	
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ir_window)
+
 };
