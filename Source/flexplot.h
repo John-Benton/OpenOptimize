@@ -9,6 +9,15 @@ public:
 	flexplot_trace() {};
 	~flexplot_trace() {};
 
+	void set_trace_appearance(bool is_visible, int trace_thickness_pix, Colour trace_color)
+	{
+
+		trace_visible = is_visible;
+		trace_line_thickess_pix = trace_thickness_pix;
+		trace_line_color = trace_color;
+
+	}
+
 	void clear_data() {
 
 		data_x_cord.clear(), data_y_cord.clear();
@@ -57,7 +66,13 @@ public:
 
 	}
 
-private:
+protected:
+
+	friend class flexplot;
+	
+	bool trace_visible{ true };
+	int trace_line_thickess_pix{ 1 };
+	Colour trace_line_color{ Colours::white };
 
 	std::vector<float> data_x_cord, data_y_cord; //the x and y data
 	
@@ -208,39 +223,42 @@ public:
 					gridline_thickness_pix);
 			}
 
-			g.setColour(Colours::white);
-
 			for (int data_set = 0; data_set < data_sets.size(); data_set++) {
 
-				Path current_trace;
-				std::pair<int, int> x_axis;
-				x_axis = data_cord_to_plot_screen_cord(0.0, 0.0);
+				if (data_sets[data_set]->trace_visible == true) {
 
-				for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points()-1; coordinate++) {
+					Path current_trace;
+					std::pair<int, int> x_axis;
+					x_axis = data_cord_to_plot_screen_cord(0.0, 0.0);
 
-					float current_x_value = data_sets[data_set]->return_x_data_point(coordinate);
-					float current_y_value = data_sets[data_set]->return_y_data_point(coordinate);
+					for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points() - 1; coordinate++) {
 
-					std::pair<int, int> current_point_screen_coord;
+						float current_x_value = data_sets[data_set]->return_x_data_point(coordinate);
+						float current_y_value = data_sets[data_set]->return_y_data_point(coordinate);
 
-					current_point_screen_coord = data_cord_to_plot_screen_cord(current_x_value, current_y_value);
+						std::pair<int, int> current_point_screen_coord;
 
-					if (coordinate == 0) {
+						current_point_screen_coord = data_cord_to_plot_screen_cord(current_x_value, current_y_value);
 
-						current_trace.startNewSubPath(current_point_screen_coord.first, current_point_screen_coord.second);
+						if (coordinate == 0) {
+
+							current_trace.startNewSubPath(current_point_screen_coord.first, current_point_screen_coord.second);
+
+						}
+
+						if (coordinate > 0) {
+
+							current_trace.lineTo(current_point_screen_coord.first, current_point_screen_coord.second);
+
+						}
 
 					}
 
-					if (coordinate > 0) {
-
-						current_trace.lineTo(current_point_screen_coord.first, current_point_screen_coord.second);
-
-					}
+					g.setColour(data_sets[data_set]->trace_line_color);
+					current_trace = current_trace.createPathWithRoundedCorners(5.0);
+					g.strokePath(current_trace, PathStrokeType(data_sets[data_set]->trace_line_thickess_pix));
 
 				}
-
-				current_trace = current_trace.createPathWithRoundedCorners(5.0);
-				g.strokePath(current_trace, PathStrokeType(1.0));
 
 			}
 

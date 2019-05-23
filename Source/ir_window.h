@@ -58,6 +58,8 @@ public:
 		main_ir_plot.set_plot_max_zooms(10, 10);
 		main_ir_plot.add_data_set(&ir_data);
 
+		ir_data.set_trace_appearance(true, 2, Colours::white);
+
 		addAndMakeVisible(main_ir_plot);
 		main_ir_plot.setOpaque(true);
 
