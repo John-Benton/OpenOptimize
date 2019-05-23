@@ -22,6 +22,7 @@ class delay_indicator    : public Component, public constants, public Button::Li
 public:
 	
 	int delay_in_samples{ 0 };
+	float* ir_peak_msec_ptr;
 
     delay_indicator()
     {
@@ -46,6 +47,7 @@ public:
 
 		addAndMakeVisible(manual_delay_entry_box);
 		addAndMakeVisible(set_delay_manual_button);
+		addAndMakeVisible(set_delay_auto_button);
 
 		reset_to_0_button.setButtonText("Reset to 0");
 		reset_to_0_button.setColour(reset_to_0_button.buttonColourId, Colours::transparentBlack);
@@ -63,7 +65,10 @@ public:
 		manual_delay_entry_box.setEditable(true, false, false);
 		
 		set_delay_manual_button.setColour(set_delay_manual_button.buttonColourId, Colours::transparentBlack);
-		set_delay_manual_button.setButtonText("Set Delay");
+		set_delay_manual_button.setButtonText("S");
+
+		set_delay_auto_button.setColour(set_delay_auto_button.buttonColourId, Colours::transparentBlack);
+		set_delay_auto_button.setButtonText("A");
 
 		change_1000_label.setText("x1000", dontSendNotification);
 
@@ -83,6 +88,7 @@ public:
 		decrease_1_button.addListener(this);
 		reset_to_0_button.addListener(this);
 		set_delay_manual_button.addListener(this);
+		set_delay_auto_button.addListener(this);
 
     }
 
@@ -94,19 +100,19 @@ public:
     {
 		repaint_active = true;
 		
-		delay_in_milliseconds = ((delay_in_samples*1.0) / (sample_rate*1.0))*1000.0;
+		selected_delay_in_milliseconds = ((delay_in_samples*1.0) / (sample_rate*1.0))*1000.0;
 
-		std::string delay_in_milliseconds_str = std::to_string(delay_in_milliseconds);
+		std::string delay_in_milliseconds_str = std::to_string(selected_delay_in_milliseconds);
 		
-		if (delay_in_milliseconds < 10.0) {
+		if (selected_delay_in_milliseconds < 10.0) {
 			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 4);
 		}
 
-		if (delay_in_milliseconds >= 10.0 && delay_in_milliseconds < 100.0) {
+		if (selected_delay_in_milliseconds >= 10.0 && selected_delay_in_milliseconds < 100.0) {
 			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 5);
 		}
 
-		if (delay_in_milliseconds >= 100.0) {
+		if (selected_delay_in_milliseconds >= 100.0) {
 			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 6);
 		}
 
@@ -158,7 +164,8 @@ public:
 
 		control_area_right_column_row_1 = control_area_right_column.removeFromTop(control_area_right_column_height / 3);
 		control_area_right_column_row_2 = control_area_right_column.removeFromTop(control_area_right_column_height / 3);
-		control_area_right_column_row_3 = control_area_right_column;
+		control_area_right_column_row_3_left = control_area_right_column.removeFromLeft(control_area_right_column.getWidth() * 0.5);
+		control_area_right_column_row_3_right = control_area_right_column;
 
 		delay_samples_label.setBounds(meter_area_upper_label);
 		delay_msec_label.setBounds(meter_area_lower_label);
@@ -182,7 +189,8 @@ public:
 
 		reset_to_0_button.setBounds(control_area_right_column_row_1.reduced(padding_pix));
 		manual_delay_entry_box.setBounds(control_area_right_column_row_2.reduced(padding_pix));
-		set_delay_manual_button.setBounds(control_area_right_column_row_3.reduced(padding_pix));
+		set_delay_manual_button.setBounds(control_area_right_column_row_3_left.reduced(padding_pix));
+		set_delay_auto_button.setBounds(control_area_right_column_row_3_right.reduced(padding_pix));
 		delay_samples_label.setFont(delay_samples_label.getHeight()*0.9);
 		delay_msec_label.setFont(delay_msec_label.getHeight()*0.9);
 		control_area_label.setFont(control_area_label.getHeight()*0.9);
@@ -243,6 +251,13 @@ public:
 			adjust_delay(new_delay_samples - delay_in_samples);
 		}
 
+		if (button == &set_delay_auto_button)
+		{
+			int ir_reported_delay = round(*ir_peak_msec_ptr * (constants::sample_rate / 1000.0));
+
+			adjust_delay(ir_reported_delay);
+		}
+
 		sendActionMessage("cmd_update_supervisor");
 
 		repaint();
@@ -262,8 +277,8 @@ public:
 	}
 
 private:
-
-	float delay_in_milliseconds{ 0.0 };
+	
+	float selected_delay_in_milliseconds{ 0.0 };
 
 	bool repaint_active{ false };
 
@@ -287,7 +302,8 @@ private:
 	Rectangle<int> control_area_right_column;
 	Rectangle<int> control_area_right_column_row_1;
 	Rectangle<int> control_area_right_column_row_2;
-	Rectangle<int> control_area_right_column_row_3;
+	Rectangle<int> control_area_right_column_row_3_left;
+	Rectangle<int> control_area_right_column_row_3_right;
 
 	Rectangle<int> change_1000_label_area;
 	Rectangle<int> increase_1000_button_area;
@@ -316,6 +332,7 @@ private:
 
 	TextButton reset_to_0_button;
 	TextButton set_delay_manual_button;
+	TextButton set_delay_auto_button;
 
 	Label change_1000_label;
 	Label change_100_label;

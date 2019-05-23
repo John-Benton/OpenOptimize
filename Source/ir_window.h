@@ -37,6 +37,9 @@ public:
 class ir_window    : public Component
 {
 public:
+
+	ir_plot main_ir_plot;
+
     ir_window()
     {
 		
@@ -147,9 +150,7 @@ private:
 	std::vector<float> decimated_avg_ir_sample_times_msec;
 
 	int original_ir_data_avg_max_index{ 0 };
-
-	ir_plot main_ir_plot;
-
+	
 	data_history ir_data_history{ num_ir_samples };
 
 	flexplot_trace ir_data;

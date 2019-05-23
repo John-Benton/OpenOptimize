@@ -175,6 +175,8 @@ public:
 	};
 
 	~supervisor() {
+
+
 		
 		delete fft_32k;
 		delete fft_8k;
