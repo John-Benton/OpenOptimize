@@ -176,7 +176,9 @@ public:
 
 	~supervisor() {
 
-
+		this->signalThreadShouldExit();
+		this->notify();
+		this->waitForThreadToExit(5000);
 		
 		delete fft_32k;
 		delete fft_8k;
