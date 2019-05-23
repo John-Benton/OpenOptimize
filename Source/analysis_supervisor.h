@@ -175,7 +175,7 @@ public:
 	};
 
 	~supervisor() {
-
+		
 		delete fft_32k;
 		delete fft_8k;
 		delete fft_4k;
@@ -185,9 +185,7 @@ public:
 		delete fft_256;
 		delete fft_128;
 		delete fft_64;
-
-		stopThread(5000);
-
+		
 	};
 
 	void run() override
@@ -198,7 +196,7 @@ public:
 
 			run_analysis();
 
-			wait(-1); //thread will stop here until notify() is called from the timer callback
+			wait(-1); //thread will stop here until notify() is called
 
 		}
 

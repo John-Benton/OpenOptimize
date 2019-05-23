@@ -1,10 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
 
 #include "MainComponent.h"
 	
@@ -25,14 +18,14 @@ MainContentComponent::MainContentComponent()
 	main_settings_bar.main_controls.addActionListener(this);
 	main_settings_bar.main_delay_indicator.addActionListener(this);
 	supervisor1->addActionListener(this);
-
-	//gl_renderer.attachTo(*this); //this switches OpenGL rendering on and off
 							
 }
 
 MainContentComponent::~MainContentComponent()
 {
-    shutdownAudio();
+	supervisor1->signalThreadShouldExit();
+	supervisor1->notify();
+	shutdownAudio();
 	delete supervisor1;
 }
 
@@ -70,6 +63,8 @@ void MainContentComponent::getNextAudioBlock(const AudioSourceChannelInfo& audio
 	}
 
 	supervisor1->audio_buffer_mtx_supervisor.unlock();
+
+	reported_xruns = this->deviceManager.getXRunCount();
 
 }
 	

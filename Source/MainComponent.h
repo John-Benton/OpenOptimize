@@ -77,6 +77,8 @@ private:
 
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
+	int reported_xruns{ 0 };
+
 	DialogWindow::LaunchOptions audio_io_config_window;
 
 	ir_window ir_window;
