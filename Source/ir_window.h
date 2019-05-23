@@ -56,6 +56,7 @@ public:
 		main_ir_plot.add_data_set(&ir_data);
 
 		addAndMakeVisible(main_ir_plot);
+		main_ir_plot.setOpaque(true);
 
     }
 
@@ -130,6 +131,8 @@ public:
 		FloatVectorOperations::multiply(&decimated_avg_ir_sample_amplitudes[0], 1.0 / *decimated_avg_ir_samples_max, decimated_avg_ir_sample_amplitudes.size());
 
 		ir_data.set_data(decimated_avg_ir_sample_times_msec, decimated_avg_ir_sample_amplitudes);
+
+		main_ir_plot.repaint();
 
 	}
 

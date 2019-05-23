@@ -212,26 +212,35 @@ public:
 
 			for (int data_set = 0; data_set < data_sets.size(); data_set++) {
 
-				for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points() - 1; coordinate++) {
+				Path current_trace;
+				std::pair<int, int> x_axis;
+				x_axis = data_cord_to_plot_screen_cord(0.0, 0.0);
 
-					float x_value = data_sets[data_set]->return_x_data_point(coordinate);
-					float y_value = data_sets[data_set]->return_y_data_point(coordinate);
-					float next_x_value = data_sets[data_set]->return_x_data_point(coordinate + 1);
-					float next_y_value = data_sets[data_set]->return_y_data_point(coordinate + 1);
+				for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points()-1; coordinate++) {
+
+					float current_x_value = data_sets[data_set]->return_x_data_point(coordinate);
+					float current_y_value = data_sets[data_set]->return_y_data_point(coordinate);
 
 					std::pair<int, int> current_point_screen_coord;
-					std::pair<int, int> next_point_screen_coord;
 
-					current_point_screen_coord = data_cord_to_plot_screen_cord(x_value, y_value);
-					next_point_screen_coord = data_cord_to_plot_screen_cord(next_x_value, next_y_value);
+					current_point_screen_coord = data_cord_to_plot_screen_cord(current_x_value, current_y_value);
 
-					g.drawLine(	current_point_screen_coord.first, 
-								current_point_screen_coord.second,
-								next_point_screen_coord.first, 
-								next_point_screen_coord.second,
-								trace_thickness_pix);
+					if (coordinate == 0) {
+
+						current_trace.startNewSubPath(current_point_screen_coord.first, current_point_screen_coord.second);
+
+					}
+
+					if (coordinate > 0) {
+
+						current_trace.lineTo(current_point_screen_coord.first, current_point_screen_coord.second);
+
+					}
 
 				}
+
+				current_trace = current_trace.createPathWithRoundedCorners(5.0);
+				g.strokePath(current_trace, PathStrokeType(1.0));
 
 			}
 

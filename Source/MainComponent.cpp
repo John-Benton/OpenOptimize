@@ -217,8 +217,6 @@ void MainContentComponent::open_ir_window()
 
 	ir_window_config.dialogTitle = "System Impulse Response";
 
-	ir_window_config.dialogBackgroundColour = Colours::darkgrey;
-
 	ir_window_config.content = ir_window_content_ptr;
 
 	ir_window_config.componentToCentreAround = NULL;
