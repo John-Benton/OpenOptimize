@@ -18,16 +18,32 @@ public:
 
 	}
 
+	void set_trace_geometry(float plotted_x_min, float plotted_x_max, float plotted_y_min, float plotted_y_max) {
+
+		trace_plotted_x_min_value = plotted_x_min;
+		trace_plotted_x_max_value = plotted_x_max;
+		trace_plotted_y_min_value = plotted_y_min;
+		trace_plotted_y_max_value = plotted_y_max;
+
+	}
+
+	void set_trace_gridlines(std::vector<float> & x_gridlines, std::vector<float> & y_gridlines) {
+
+		trace_x_gridline_coord = x_gridlines;
+		trace_y_gridline_coord = y_gridlines;
+
+	}
+
 	void clear_data() {
 
-		data_x_cord.clear(), data_y_cord.clear();
+		data_x_coord.clear(), data_y_coord.clear();
 
 	}
 
 	void append_single_data_point(float x_value, float y_value) //appends a single data point to end of data set
 	{
 
-		data_x_cord.push_back(x_value), data_y_cord.push_back(y_value);
+		data_x_coord.push_back(x_value), data_y_coord.push_back(y_value);
 
 	}
 
@@ -41,40 +57,68 @@ public:
 
 		int data_size = std::min(x_values.size(), y_values.size());
 
-		data_x_cord.resize(data_size), data_y_cord.resize(data_size);
+		data_x_coord.resize(data_size), data_y_coord.resize(data_size);
 
-		std::copy(x_values.begin(), x_values.begin() + data_size, data_x_cord.begin());
-		std::copy(y_values.begin(), y_values.begin() + data_size, data_y_cord.begin());
+		std::copy(x_values.begin(), x_values.begin() + data_size, data_x_coord.begin());
+		std::copy(y_values.begin(), y_values.begin() + data_size, data_y_coord.begin());
 
 	}
 
 	int number_data_points() {
 
-		return std::max(data_x_cord.size(), data_y_cord.size());
+		return std::max(data_x_coord.size(), data_y_coord.size());
 
 	}
 
 	float return_x_data_point(int index) {
 
-		return data_x_cord[index];
+		return data_x_coord[index];
+
+	}
+
+	std::vector<float> return_x_data() {
+
+		return data_x_coord;
 
 	}
 
 	float return_y_data_point(int index) {
 
-		return data_y_cord[index];
+		return data_y_coord[index];
+
+	}
+
+	std::vector<float> return_y_data() {
+
+		return data_y_coord;
+
+	}
+
+	std::vector<float> return_data_extremes() {
+				
+		auto x_minmax = std::minmax_element(data_x_coord.begin(), data_x_coord.end());
+		auto y_minmax = std::minmax_element(data_y_coord.begin(), data_y_coord.end());
+
+		std::vector<float> data_extremes{ *x_minmax.first, *x_minmax.second, *y_minmax.first, *y_minmax.second };
+		return data_extremes;
 
 	}
 
 protected:
 
 	friend class flexplot;
+
+	bool master_trace{ true };
 	
 	bool trace_visible{ true };
 	int trace_line_thickess_pix{ 1 };
 	Colour trace_line_color{ Colours::white };
 
-	std::vector<float> data_x_cord, data_y_cord; //the x and y data
+	float trace_plotted_x_min_value{ 0 }, trace_plotted_x_max_value{ 1 }, trace_plotted_y_min_value{ 0 }, trace_plotted_y_max_value{ 0 };
+
+	std::vector<float> trace_x_gridline_coord, trace_y_gridline_coord;
+
+	std::vector<float> data_x_coord, data_y_coord; //the x and y data
 	
 };
 
@@ -130,8 +174,7 @@ public:
 
 		g.fillRect(plot_area);
 
-		g.setColour(Colours::white);
-
+		//g.setColour(Colours::white);
 		//g.drawRect(top_region, 1.0);
 		//g.drawRect(left_region, 1.0);
 		//g.drawRect(left_slider_area, 1.0);
@@ -152,72 +195,110 @@ public:
 		//g.drawRect(bottom_left_corner, 1.0);
 		//g.drawRect(bottom_right_corner, 1.0);
 
-		g.drawFittedText(x_min_fixed_label_text, x_min_fixed_label_outline, Justification::left, 1, 0.0);
-		g.drawFittedText(x_max_fixed_label_text, x_max_fixed_label_outline, Justification::right, 1, 0.0);
-		g.drawFittedText(y_min_fixed_label_text, y_min_fixed_label_outline, Justification::centredBottom, 1, 0.0);
-		g.drawFittedText(y_max_fixed_label_text, y_max_fixed_label_outline, Justification::centredTop, 1, 0.0);
-
-		for (int label = 0; label < x_floating_label_strings.size(); label++) {
-
-			int x_label_width_pix{ 100 };
-
-			g.drawText(
-				x_floating_label_strings[label],
-				data_cord_to_plot_screen_cord(x_grid_cord[label], 0.0).first - (x_label_width_pix/2),
-				bottom_label_area.getY(),
-				x_label_width_pix,
-				bottom_label_area.getHeight(),
-				Justification::centred,
-				false);
-
-		}
-
-		for (int label = 0; label < y_floating_label_strings.size(); label++) {
-
-			int y_label_height_pix{ 50 };
-
-			g.drawText(
-				y_floating_label_strings[label],
-				left_label_area.getX(),
-				data_cord_to_plot_screen_cord(0.0, y_grid_cord[label]).second - (y_label_height_pix / 2),
-				left_label_area.getWidth(),
-				y_label_height_pix,
-				Justification::centred,
-				false);
-
-		}
-
-		g.setColour(Colour(50, 50, 50));
-
-		for (int line = 0; line < x_grid_cord.size(); line++) {
-
-			if (x_grid_cord[line] >= actual_x_min && x_grid_cord[line] <= actual_x_max) {
-
-				g.fillRect(
-					data_cord_to_plot_screen_cord(x_grid_cord[line], 0).first,
-					plot_screen_y_min,
-					gridline_thickness_pix,
-					plot_screen_y_max - plot_screen_y_min);
-
-			}
-
-		}
-
-		for (int line = 0; line < y_grid_cord.size(); line++) {
-
-			if (y_grid_cord[line] >= actual_y_min && y_grid_cord[line] <= actual_y_max) {
-
-				g.fillRect(
-					plot_screen_x_min,
-					data_cord_to_plot_screen_cord(0, y_grid_cord[line]).second,
-					plot_screen_x_max - plot_screen_x_min,
-					gridline_thickness_pix);
-
-			}
-
-		}
-
 		for (int data_set = 0; data_set < data_sets.size(); data_set++) {
+
+			//Get the extremes of plotting from current data set.
+
+			original_plotted_x_min = data_sets[data_set]->trace_plotted_x_min_value;
+			original_plotted_x_max = data_sets[data_set]->trace_plotted_x_max_value;
+			original_plotted_y_min = data_sets[data_set]->trace_plotted_y_min_value;
+			original_plotted_y_max = data_sets[data_set]->trace_plotted_y_max_value;
+
+			calculate_actual_min_max(); //Transform the original plotting extremes to new ones based on zoom and pan controls
+			bool render_gridlines_labels{ false };
+
+			if (data_sets[data_set]->master_trace == true) { //The master trace defines the gridlines and axis labeling
+
+				plot_x_grid_coord = data_sets[data_set]->trace_x_gridline_coord;
+				plot_y_grid_coord = data_sets[data_set]->trace_y_gridline_coord;
+				calculate_floating_label_strings();
+				set_fixed_label_text();
+				render_gridlines_labels = true; //Only render the gridlines and labels once, when the master trace is reached
+
+			}
+			
+			if (render_gridlines_labels == true) {
+
+				for (int x_index = 0; x_index < plot_x_grid_coord.size(); x_index++) {
+										
+					if (plot_x_grid_coord[x_index] >= actual_plotted_x_min && plot_x_grid_coord[x_index] <= actual_plotted_x_max) {
+
+						g.setColour(Colour(50, 50, 50));
+
+						g.fillRect(
+							data_cord_to_plot_screen_cord(plot_x_grid_coord[x_index], 0).first,
+							plot_screen_y_min,
+							gridline_thickness_pix,
+							plot_screen_y_max - plot_screen_y_min);
+
+						g.setColour(Colours::white);
+						int x_label_width_pix{ 100 };
+
+						Rectangle<int> x_floating_label_outline{
+							data_cord_to_plot_screen_cord(plot_x_grid_coord[x_index], 0.0).first - (x_label_width_pix / 2),
+							bottom_label_area.getY(),
+							x_label_width_pix,
+							bottom_label_area.getHeight()
+						};
+
+						if (x_floating_label_outline.intersects(x_min_fixed_label_outline) == false &&
+							x_floating_label_outline.intersects(x_max_fixed_label_outline) == false) {
+
+							g.drawText(
+								x_floating_label_strings[x_index],
+								x_floating_label_outline,
+								Justification::centred,
+								false);
+
+						}
+
+					}
+
+				}
+
+				for (int y_index = 0; y_index < plot_y_grid_coord.size(); y_index++) {
+
+					if (plot_y_grid_coord[y_index] >= actual_plotted_y_min && plot_y_grid_coord[y_index] <= actual_plotted_y_max) {
+
+						g.setColour(Colour(50, 50, 50));
+
+						g.fillRect(
+							plot_screen_x_min,
+							data_cord_to_plot_screen_cord(0, plot_y_grid_coord[y_index]).second,
+							plot_screen_x_max - plot_screen_x_min,
+							gridline_thickness_pix);
+
+						g.setColour(Colours::white);
+						int y_label_height_pix{ 50 };
+
+						Rectangle<int> y_floating_label_outline{
+							left_label_area.getX(),
+							data_cord_to_plot_screen_cord(0.0, plot_y_grid_coord[y_index]).second - (y_label_height_pix / 2),
+							left_label_area.getWidth(),
+							y_label_height_pix
+						};
+
+						if (y_floating_label_outline.intersects(y_min_fixed_label_outline) == false &&
+							y_floating_label_outline.intersects(y_max_fixed_label_outline) == false) {
+
+							g.drawText(
+								y_floating_label_strings[y_index],
+								y_floating_label_outline,
+								Justification::centred,
+								false);
+
+						}
+
+					}
+
+				}
+
+				g.drawFittedText(x_min_fixed_label_text, x_min_fixed_label_outline, Justification::left, 1, 0.0);
+				g.drawFittedText(x_max_fixed_label_text, x_max_fixed_label_outline, Justification::right, 1, 0.0);
+				g.drawFittedText(y_min_fixed_label_text, y_min_fixed_label_outline, Justification::centredBottom, 1, 0.0);
+				g.drawFittedText(y_max_fixed_label_text, y_max_fixed_label_outline, Justification::centredTop, 1, 0.0);
+				
+			}
 
 			if (data_sets[data_set]->trace_visible == true) {
 
@@ -228,7 +309,7 @@ public:
 
 					float current_x_value = data_sets[data_set]->return_x_data_point(coordinate);
 
-					if (current_x_value < actual_x_min || current_x_value > actual_x_max) { continue; }
+					if (current_x_value < actual_plotted_x_min || current_x_value > actual_plotted_x_max) { continue; }
 
 					float current_y_value = data_sets[data_set]->return_y_data_point(coordinate);
 
@@ -258,7 +339,7 @@ public:
 			}
 
 		}
-
+				
 		draw_custom_overlay(g);
 
     }
@@ -300,27 +381,7 @@ public:
 		right_slider.setBounds(right_slider_area);
 		bottom_slider.setBounds(bottom_slider_area);
 
-		recalc_plot_layout();
-
     }
-
-	void set_plot_properties(float plot_x_min, float plot_x_max, float plot_y_min, float plot_y_max, float x_gridline_spacing, float y_gridline_spacing, String x_unit, String y_unit) {
-
-		set_x_min = plot_x_min;
-		set_x_max = plot_x_max;
-		set_y_min = plot_y_min;
-		set_y_max = plot_y_max;
-
-		x_grid_spacing = x_gridline_spacing;
-		y_grid_spacing = y_gridline_spacing;
-
-		unit_x = x_unit;
-
-		unit_y = y_unit;
-		
-		recalc_plot_layout();
-
-	}
 
 	void set_plot_max_zooms(int horizontal_max, int vertical_max) {
 
@@ -329,8 +390,6 @@ public:
 
 		left_slider.setRange(1.0, max_vert_zoom, 0.0);
 		bottom_slider.setRange(1.0, max_hor_zoom, 0.0);
-
-		recalc_plot_layout();
 
 	}
 
@@ -387,17 +446,17 @@ protected:
 
 	std::vector<flexplot_trace*> data_sets; //holds pointers to all data sets that have been added to the plot;
 
-	float set_x_min, set_x_max, set_y_min, set_y_max; //as configured by set_plot_properties() - data coordinates, not screen coordinates
+	float original_plotted_x_min, original_plotted_x_max, original_plotted_y_min, original_plotted_y_max; //as configured by set_plot_properties() - data coordinates, not screen coordinates
 
 	int plot_screen_x_min, plot_screen_x_max, plot_screen_y_min, plot_screen_y_max; //screen cordinates
 
-	float actual_x_min, actual_x_max, actual_y_min, actual_y_max; //boundary of zoomed in area of plot, data coordinates
+	float actual_plotted_x_min, actual_plotted_x_max, actual_plotted_y_min, actual_plotted_y_max; //boundary of zoomed in area of plot, data coordinates
 	
 	int max_hor_zoom{ 2 }, max_vert_zoom{ 2 };
 
 	float x_grid_spacing, y_grid_spacing;
 
-	std::vector<float> x_grid_cord, y_grid_cord; //data coordinates
+	std::vector<float> plot_x_grid_coord, plot_y_grid_coord; //position of x and y gridlines, in data coordinates
 
 	int gridline_thickness_pix{ 2 };
 
@@ -435,130 +494,116 @@ protected:
 
 		else {}
 
-		recalc_plot_layout();
-
-	}
-
-	void recalc_plot_layout() {
-
-		calculate_actual_min_max();
-
-		calculate_gridlines();
-
-		calculate_floating_label_strings();
-
-		set_fixed_label_text();
-
 		repaint();
 
 	}
 
 	void calculate_actual_min_max() {
 
-		float set_x_span = set_x_max - set_x_min;
+		float original_plotted_x_span = original_plotted_x_max - original_plotted_x_min;
 
-		float zoomed_x_span = set_x_span / x_zoom;
+		float zoomed_plotted_x_span = original_plotted_x_span / x_zoom;
 
-		float zoomed_x_span_total_buffer = set_x_span - zoomed_x_span;
+		float zoomed_plotted_x_span_total_buffer = original_plotted_x_span - zoomed_plotted_x_span;
 
 		float right_buffer_proportion = 0.5 - (x_offset*0.5);
 
 		float left_buffer_proportion = 1 - right_buffer_proportion;
 
-		float right_buffer = zoomed_x_span_total_buffer * right_buffer_proportion;
+		float right_buffer = zoomed_plotted_x_span_total_buffer * right_buffer_proportion;
 
-		float left_buffer = zoomed_x_span_total_buffer - right_buffer;
+		float left_buffer = zoomed_plotted_x_span_total_buffer - right_buffer;
 
-		actual_x_min = set_x_min + left_buffer;
-		actual_x_max = actual_x_min + zoomed_x_span;
+		actual_plotted_x_min = original_plotted_x_min + left_buffer;
+		actual_plotted_x_max = actual_plotted_x_min + zoomed_plotted_x_span;
 
 		//
 
-		float set_y_span = set_y_max - set_y_min;
+		float original_plotted_y_span = original_plotted_y_max - original_plotted_y_min;
 
-		float zoomed_y_span = set_y_span / y_zoom;
+		float zoomed_plotted_y_span = original_plotted_y_span / y_zoom;
 
-		float zoomed_y_span_total_buffer = set_y_span - zoomed_y_span;
+		float zoomed_plotted_y_span_total_buffer = original_plotted_y_span - zoomed_plotted_y_span;
 
 		float top_buffer_proportion = 0.5 - (y_offset*0.5);
 
 		float bottom_buffer_proportion = 1 - top_buffer_proportion;
 
-		float top_buffer = zoomed_y_span_total_buffer * top_buffer_proportion;
+		float top_buffer = zoomed_plotted_y_span_total_buffer * top_buffer_proportion;
 
-		float bottom_buffer = zoomed_y_span_total_buffer - top_buffer;
+		float bottom_buffer = zoomed_plotted_y_span_total_buffer - top_buffer;
 
-		actual_y_min = set_y_min + bottom_buffer;
-		actual_y_max = actual_y_min + zoomed_y_span;
+		actual_plotted_y_min = original_plotted_y_min + bottom_buffer;
+		actual_plotted_y_max = actual_plotted_y_min + zoomed_plotted_y_span;
 
 	}
 
 	void set_fixed_label_text() {
 
-		x_min_fixed_label_text = String(int(actual_x_min)) + " " + unit_x;
-		x_max_fixed_label_text = String(int(actual_x_max)) + " " + unit_x;
-		y_min_fixed_label_text = String(actual_y_min) + " " + unit_y;
-		y_max_fixed_label_text = String(actual_y_max) + " " + unit_y;
+		x_min_fixed_label_text = String(int(actual_plotted_x_min)) + " " + unit_x;
+		x_max_fixed_label_text = String(int(actual_plotted_x_max)) + " " + unit_x;
+		y_min_fixed_label_text = String(actual_plotted_y_min) + " " + unit_y;
+		y_max_fixed_label_text = String(actual_plotted_y_max) + " " + unit_y;
 		
 	}
 
-	void calculate_gridlines() {
+	//void calculate_gridlines() {
 
-		x_grid_cord.clear();
+	//	plot_x_grid_coord.clear();
 
-		x_grid_cord.push_back(set_x_min);
+	//	plot_x_grid_coord.push_back(original_plotted_x_min);
 
-		int set_x_span = set_x_max - set_x_min;
+	//	int original_plotted_x_span = original_plotted_x_max - original_plotted_x_min;
 
-		int remaining_x_gridlines = floor(set_x_span / x_grid_spacing);
+	//	int remaining_x_gridlines = floor(original_plotted_x_span / x_grid_spacing);
 
-		for (int x = 1; x <= remaining_x_gridlines; x++) {
+	//	for (int x = 1; x <= remaining_x_gridlines; x++) {
 
-			int possible_gridline = set_x_min + (x_grid_spacing*x);
+	//		int possible_gridline = original_plotted_x_min + (x_grid_spacing*x);
 
-			if (possible_gridline >= actual_x_min && possible_gridline <= actual_x_max) {
+	//		if (possible_gridline >= actual_plotted_x_min && possible_gridline <= actual_plotted_x_max) {
 
-				x_grid_cord.push_back(possible_gridline);
+	//			plot_x_grid_coord.push_back(possible_gridline);
 
-			}
+	//		}
 
-			else {};
+	//		else {};
 
-		}
+	//	}
 
-		//
+	//	//
 
-		y_grid_cord.clear();
+	//	plot_y_grid_coord.clear();
 
-		y_grid_cord.push_back(set_y_min);
+	//	plot_y_grid_coord.push_back(original_plotted_y_min);
 
-		float set_y_span = set_y_max - set_y_min;
+	//	float original_plotted_y_span = original_plotted_y_max - original_plotted_y_min;
 
-		int remaining_y_gridlines = floor(set_y_span / y_grid_spacing);
+	//	int remaining_y_gridlines = floor(original_plotted_y_span / y_grid_spacing);
 
-		for (int y = 1; y <= remaining_y_gridlines; y++) {
+	//	for (int y = 1; y <= remaining_y_gridlines; y++) {
 
-			float possible_gridline = set_y_min + (y_grid_spacing*y);
+	//		float possible_gridline = original_plotted_y_min + (y_grid_spacing*y);
 
-			if (possible_gridline >= actual_y_min && possible_gridline <= actual_y_max) {
+	//		if (possible_gridline >= actual_plotted_y_min && possible_gridline <= actual_plotted_y_max) {
 
-				y_grid_cord.push_back(possible_gridline);
+	//			plot_y_grid_coord.push_back(possible_gridline);
 
-			}
+	//		}
 
-			else {};
+	//		else {};
 
-		}
+	//	}
 
-	}
+	//}
 
 	void calculate_floating_label_strings() {
 
 		x_floating_label_strings.clear();
 
-		for (int label = 0; label < x_grid_cord.size(); label++) {
+		for (int label = 0; label < plot_x_grid_coord.size(); label++) {
 
-			x_floating_label_strings.push_back(String(x_grid_cord[label]) + " "+ unit_x);
+			x_floating_label_strings.push_back(String(plot_x_grid_coord[label]) + " "+ unit_x);
 
 		}
 
@@ -566,9 +611,9 @@ protected:
 
 		y_floating_label_strings.clear();
 
-		for (int label = 0; label < y_grid_cord.size(); label++) {
+		for (int label = 0; label < plot_y_grid_coord.size(); label++) {
 
-			y_floating_label_strings.push_back(String(y_grid_cord[label]) + unit_y);
+			y_floating_label_strings.push_back(String(plot_y_grid_coord[label]) + unit_y);
 
 		}
 
@@ -576,8 +621,8 @@ protected:
 
 	std::pair<int,int> data_cord_to_plot_screen_cord(float x_data_cord, float y_data_cord) {
 
-		float x_position = (x_data_cord - actual_x_min) / (actual_x_max - actual_x_min);
-		float y_position = (y_data_cord - actual_y_min) / (actual_y_max - actual_y_min);
+		float x_position = (x_data_cord - actual_plotted_x_min) / (actual_plotted_x_max - actual_plotted_x_min);
+		float y_position = (y_data_cord - actual_plotted_y_min) / (actual_plotted_y_max - actual_plotted_y_min);
 
 		int plot_screen_x_span = plot_screen_x_max - plot_screen_x_min;
 

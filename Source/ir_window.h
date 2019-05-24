@@ -53,12 +53,15 @@ public:
 
 		original_ir_data.resize(num_ir_samples);
 		original_ir_data_avg.resize(num_ir_samples);
-
-		main_ir_plot.set_plot_properties(0.0, 500.0, -1.2, 1.2, 50, 0.2, "", "");
+				
 		main_ir_plot.set_plot_max_zooms(10, 10);
 		main_ir_plot.add_data_set(&ir_data);
 
 		ir_data.set_trace_appearance(true, 2, Colours::white);
+		ir_data.set_trace_geometry(0, 500, -1.2, 1.2);
+		std::vector<float> ir_x_gridlines{ 0.0f,100.0f,200.0f,300.0f,400.0f,500.0f };
+		std::vector<float> ir_y_gridlines{-1.2f,-1.0f,-0.8f,-0.6f,-0.4f,-0.2f,0.0f,0.2f,0.4f,0.6f,0.8f,1.0f,1.2f};
+		ir_data.set_trace_gridlines(ir_x_gridlines, ir_y_gridlines);
 
 		addAndMakeVisible(main_ir_plot);
 		main_ir_plot.setOpaque(true);
