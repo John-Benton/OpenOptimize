@@ -18,7 +18,7 @@ public:
 
 	}
 
-	void set_trace_geometry(float plotted_x_min, float plotted_x_max, float plotted_y_min, float plotted_y_max) {
+	void set_trace_plotting_boundaries(float plotted_x_min, float plotted_x_max, float plotted_y_min, float plotted_y_max) {
 
 		trace_plotted_x_min_value = plotted_x_min;
 		trace_plotted_x_max_value = plotted_x_max;
@@ -181,6 +181,8 @@ public:
 
 		g.fillRect(plot_area);
 
+		g.setColour(Colours::white);
+
 		//g.setColour(Colours::white);
 		//g.drawRect(top_region, 1.0);
 		//g.drawRect(left_region, 1.0);
@@ -226,6 +228,9 @@ public:
 			
 			if (render_gridlines_labels == true) {
 
+				int floating_label_height_pix = bottom_label_area.getHeight()*0.6;
+				g.setFont(floating_label_height_pix);
+				
 				for (int x_index = 0; x_index < plot_x_grid_coord.size(); x_index++) {
 										
 					if (plot_x_grid_coord[x_index] >= actual_plotted_x_min && plot_x_grid_coord[x_index] <= actual_plotted_x_max) {
@@ -239,13 +244,13 @@ public:
 							plot_screen_y_max - plot_screen_y_min);
 
 						g.setColour(Colours::white);
-						int x_label_width_pix{ 100 };
-
+						int x_floating_label_width_pix = floating_label_height_pix * (x_floating_label_strings[x_index].length()-1);
+						
 						Rectangle<int> x_floating_label_outline{
-							data_cord_to_plot_screen_cord(plot_x_grid_coord[x_index], 0.0).first - (x_label_width_pix / 2),
-							bottom_label_area.getY(),
-							x_label_width_pix,
-							bottom_label_area.getHeight()
+							data_cord_to_plot_screen_cord(plot_x_grid_coord[x_index], 0.0).first - (x_floating_label_width_pix / 2),
+							bottom_label_area.getCentreY() - (floating_label_height_pix / 2),
+							x_floating_label_width_pix,
+							floating_label_height_pix
 						};
 
 						if (x_floating_label_outline.intersects(x_min_fixed_label_outline) == false &&
@@ -256,6 +261,8 @@ public:
 								x_floating_label_outline,
 								Justification::centred,
 								false);
+
+							//g.drawRect(x_floating_label_outline, 1.0);
 
 						}
 
@@ -276,13 +283,13 @@ public:
 							gridline_thickness_pix);
 
 						g.setColour(Colours::white);
-						int y_label_height_pix{ 50 };
+						int y_floating_label_width_pix = floating_label_height_pix * (y_floating_label_strings[y_index].length() - 1);
 
 						Rectangle<int> y_floating_label_outline{
-							left_label_area.getX(),
-							data_cord_to_plot_screen_cord(0.0, plot_y_grid_coord[y_index]).second - (y_label_height_pix / 2),
-							left_label_area.getWidth(),
-							y_label_height_pix
+							left_label_area.getCentreX() - (y_floating_label_width_pix / 2),
+							data_cord_to_plot_screen_cord(0.0, plot_y_grid_coord[y_index]).second - (floating_label_height_pix / 2),
+							y_floating_label_width_pix,
+							floating_label_height_pix
 						};
 
 						if (y_floating_label_outline.intersects(y_min_fixed_label_outline) == false &&
@@ -294,6 +301,8 @@ public:
 								Justification::centred,
 								false);
 
+							//g.drawRect(y_floating_label_outline, 1.0);
+
 						}
 
 					}
@@ -302,36 +311,48 @@ public:
 
 				g.drawFittedText(x_min_fixed_label_text, x_min_fixed_label_outline, Justification::left, 1, 0.0);
 				g.drawFittedText(x_max_fixed_label_text, x_max_fixed_label_outline, Justification::right, 1, 0.0);
-				g.drawFittedText(y_min_fixed_label_text, y_min_fixed_label_outline, Justification::centredBottom, 1, 0.0);
-				g.drawFittedText(y_max_fixed_label_text, y_max_fixed_label_outline, Justification::centredTop, 1, 0.0);
+				g.drawFittedText(y_min_fixed_label_text, y_min_fixed_label_outline, Justification::centredTop, 1, 0.0);
+				g.drawFittedText(y_max_fixed_label_text, y_max_fixed_label_outline, Justification::centredBottom, 1, 0.0);
 				
 			}
 
 			if (data_sets[data_set]->trace_visible == true) {
 
 				Path current_trace;
-				bool path_beginning_set{ false };
+				bool first_plotted_datapoint{ false };
 
 				for (int coordinate = 0; coordinate < data_sets[data_set]->number_data_points() - 1; coordinate++) {
 
 					float current_x_value = data_sets[data_set]->return_x_data_point(coordinate);
 
 					if (current_x_value < actual_plotted_x_min || current_x_value > actual_plotted_x_max) { continue; }
-
+					
 					float current_y_value = data_sets[data_set]->return_y_data_point(coordinate);
+
+					if (current_y_value < actual_plotted_y_min) {
+
+						current_y_value = actual_plotted_y_min;
+
+					}
+
+					if (current_y_value > actual_plotted_y_max) {
+
+						current_y_value = actual_plotted_y_max;
+
+					}
 
 					std::pair<int, int> current_point_screen_coord;
 
 					current_point_screen_coord = data_cord_to_plot_screen_cord(current_x_value, current_y_value);
 
-					if (path_beginning_set == false) {
+					if (first_plotted_datapoint == false) {
 
 						current_trace.startNewSubPath(current_point_screen_coord.first, current_point_screen_coord.second);
-						path_beginning_set = true;
+						first_plotted_datapoint = true;
 
 					}
 
-					if (path_beginning_set == true) {
+					if (first_plotted_datapoint == true) {
 
 						current_trace.lineTo(current_point_screen_coord.first, current_point_screen_coord.second);
 
@@ -613,7 +634,7 @@ protected:
 
 		for (int label = 0; label < plot_x_grid_coord.size(); label++) {
 
-			x_floating_label_strings.push_back(String(plot_x_grid_coord[label]) + " "+ unit_x);
+			x_floating_label_strings.push_back(String(plot_x_grid_coord[label]) + " " + unit_x);
 
 		}
 
@@ -623,7 +644,7 @@ protected:
 
 		for (int label = 0; label < plot_y_grid_coord.size(); label++) {
 
-			y_floating_label_strings.push_back(String(plot_y_grid_coord[label]) + unit_y);
+			y_floating_label_strings.push_back(String(plot_y_grid_coord[label]) + " " + unit_y);
 
 		}
 
