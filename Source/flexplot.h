@@ -166,6 +166,13 @@ public:
 
 	}
 
+	void set_axis_modes(bool linear_x_axis, bool linear_y_axis) {
+
+		plot_x_axis_linear = linear_x_axis;
+		plot_y_axis_linear = linear_y_axis;
+
+	}
+
     void paint (Graphics& g) override
     {
 		g.fillAll(Colour(20, 20, 20));
@@ -464,7 +471,10 @@ protected:
 
 	float x_zoom{ 1.0 }, x_offset{ 0.0 }, y_zoom{ 1.0 }, y_offset{ 0.0 };
 
-	int plot_x_mode{ 0 }; //0 is linear, 1 is base-10 logarithmic
+	bool plot_x_axis_linear{ true }; //if false, then the x-axis will be base-10 logarithmic
+	bool plot_y_axis_linear{ true }; //if false, then the y-axis will be base-10 logarithmic
+
+	//========================================//
 
 	void sliderValueChanged(Slider* slider) override {
 
@@ -619,18 +629,65 @@ protected:
 
 	}
 
-	std::pair<int,int> data_cord_to_plot_screen_cord(float x_data_cord, float y_data_cord) {
+	std::pair<int,int> data_cord_to_plot_screen_cord(float x_data_coord, float y_data_coord) {
 
-		float x_position = (x_data_cord - actual_plotted_x_min) / (actual_plotted_x_max - actual_plotted_x_min);
-		float y_position = (y_data_cord - actual_plotted_y_min) / (actual_plotted_y_max - actual_plotted_y_min);
+		float x_position_proportion{ 0.0 };
+		float y_position_proportion{ 0.0 };
 
+		if (plot_x_axis_linear == true) {
+
+			//the following line calculates the position of the input data x coordinate as a proportion from 0 to 1,
+			//where 0 is the left edge of the visible plot region and 1 is the right edge, for a linear x-axis
+			x_position_proportion = (x_data_coord - actual_plotted_x_min) / (actual_plotted_x_max - actual_plotted_x_min);
+
+		}
+
+		if (plot_y_axis_linear == true) {
+
+			//the following line calculates the position of the input data y coordinate as a proportion from 0 to 1,
+			//where 0 is the lower edge of the visible plot region and 1 is the upper edge.
+			y_position_proportion = (y_data_coord - actual_plotted_y_min) / (actual_plotted_y_max - actual_plotted_y_min);
+
+		}
+
+		if (plot_x_axis_linear == false) {
+
+			jassert(actual_plotted_x_min > 0.0); //the values of logarithmic x-axis must be greater than 0
+			jassert(actual_plotted_x_max > 0.0); //the values of logarithmic x-axis must be greater than 0
+			jassert(x_data_coord > 0.0); //the value of the x-coordinate must be greater than 0 on a logarithmic x-axis
+			
+			//the following lines calculate the position of the input data x coordinate as a proportion from 0 to 1,
+			//where 0 is the left edge of the visible plot region and 1 is the right edge, for a base10 log x-axis
+			float x_axis_max_log = log10(actual_plotted_x_max);
+			float x_axis_min_log = log10(actual_plotted_x_min);
+			float x_data_coord_log = log10(x_data_coord);
+
+			x_position_proportion = (x_data_coord_log - x_axis_min_log) / (x_axis_max_log - x_axis_min_log);
+
+		}
+
+		if (plot_y_axis_linear == false) {
+
+			jassert(actual_plotted_y_min > 0.0); //the values of logarithmic y-axis must be greater than 0
+			jassert(actual_plotted_y_max > 0.0); //the values of logarithmic y-axis must be greater than 0
+			jassert(y_data_coord > 0.0); //the value of the y-coordinate must be greater than 0 on a logarithmic y-axis
+
+			//the following lines calculate the position of the input data y coordinate as a proportion from 0 to 1,
+			//where 0 is the bottom edge of the visible plot region and 1 is the top edge, for a base10 log y-axis
+			float y_axis_max_log = log10(actual_plotted_y_max);
+			float y_axis_min_log = log10(actual_plotted_y_min);
+			float y_data_coord_log = log10(y_data_coord);
+
+			y_position_proportion = (y_data_coord_log - y_axis_min_log) / (y_axis_max_log - y_axis_min_log);
+
+		}
+		
+		//the following two lines calculate the width, in pixels, of the x and y axes of the visible plot region. 
 		int plot_screen_x_span = plot_screen_x_max - plot_screen_x_min;
-
-		int x_screen_cord = plot_screen_x_min + (x_position * plot_screen_x_span);
-
 		int plot_screen_y_span = plot_screen_y_max - plot_screen_y_min;
 
-		int y_screen_cord = plot_screen_y_max - (y_position * plot_screen_y_span);
+		int x_screen_cord = plot_screen_x_min + (x_position_proportion * plot_screen_x_span);
+		int y_screen_cord = plot_screen_y_max - (y_position_proportion * plot_screen_y_span);
 
 		std::pair<int,int> screen_cord;
 

@@ -8,8 +8,10 @@ class ir_plot : public flexplot
 {
 public:
 
-	ir_plot() {};
-	~ir_plot() {};
+	ir_plot()
+	{};
+	~ir_plot() 
+	{};
 
 	void draw_custom_overlay(Graphics& g) override 
 	{
@@ -58,13 +60,14 @@ public:
 		main_ir_plot.add_data_set(&ir_data);
 
 		ir_data.set_trace_appearance(true, 2, Colours::white);
-		ir_data.set_trace_geometry(0, 500, -1.2, 1.2);
-		std::vector<float> ir_x_gridlines{ 0.0f,100.0f,200.0f,300.0f,400.0f,500.0f };
+		ir_data.set_trace_geometry(1, 1000, -1.2, 1.2);
+		std::vector<float> ir_x_gridlines{100.0f,200.0f,300.0f,400.0f,500.0f,1000.0f };
 		std::vector<float> ir_y_gridlines{-1.2f,-1.0f,-0.8f,-0.6f,-0.4f,-0.2f,0.0f,0.2f,0.4f,0.6f,0.8f,1.0f,1.2f};
 		ir_data.set_trace_gridlines(ir_x_gridlines, ir_y_gridlines);
 
 		addAndMakeVisible(main_ir_plot);
 		main_ir_plot.setOpaque(true);
+		main_ir_plot.set_axis_modes(false, true);
 
     }
 
