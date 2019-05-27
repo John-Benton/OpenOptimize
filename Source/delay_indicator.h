@@ -98,7 +98,6 @@ public:
 
     void paint (Graphics& g) override
     {
-		repaint_active = true;
 		
 		selected_delay_in_milliseconds = ((delay_in_samples*1.0) / (sample_rate*1.0))*1000.0;
 
@@ -119,7 +118,6 @@ public:
 		delay_samples_label.setText(std::to_string(delay_in_samples), dontSendNotification);
 		delay_msec_label.setText(delay_in_milliseconds_str, dontSendNotification);
 
-		repaint_active = false;
     }
 
     void resized() override
@@ -263,24 +261,10 @@ public:
 		repaint();
 
 	}
-		
-	void try_repaint()
-
-	{
-
-		if (repaint_active == false) { //don't try to call repaint again if there's already a repaint cycle in progress
-
-			repaint();
-
-		}
-
-	}
-
+	
 private:
 	
 	float selected_delay_in_milliseconds{ 0.0 };
-
-	bool repaint_active{ false };
 
 	int padding_pix{ 5 };
 

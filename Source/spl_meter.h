@@ -54,8 +54,6 @@ public:
 	Rectangle<int> right_column_row_4;
 	Rectangle<int> right_column_row_4_active;
 
-	bool repaint_active = false;
-
 	int horizontal_padding_pixels = 5;
 
 	int vertical_padding_pixels = 5;
@@ -143,8 +141,6 @@ public:
 
     void paint (Graphics& g) override
     {
-		
-		repaint_active = true;
 
 		if (fast_time_button.getToggleState() == true) {
 
@@ -196,8 +192,6 @@ public:
 
 		g.setColour(Colours::black);
 		g.drawRect(getLocalBounds(), 1.0);
-
-		repaint_active = false;
 
     }
 
@@ -329,18 +323,6 @@ public:
 
 		}
 	
-	}
-
-	void try_repaint()
-	
-	{
-
-		if (repaint_active == false) { //don't try to call repaint again if there's already a repaint cycle in progress
-
-			repaint();
-
-		}
-		
 	}
 
 	void open_spl_cal_window() {

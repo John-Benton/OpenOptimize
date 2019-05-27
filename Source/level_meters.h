@@ -50,8 +50,6 @@ public:
 
 	double meter_rate_of_change = 0.1;
 
-	bool repaint_active = false;
-
 	level_meters()
 	{
 	}
@@ -62,8 +60,6 @@ public:
 
 	void paint(Graphics& g) override
 	{
-
-		repaint_active = true;
 		
 		calc_input_levels();
 		
@@ -125,8 +121,6 @@ public:
 		g.fillRect(system_meter_graphic_mask);
 
 		g.restoreState();
-
-		repaint_active = false;
 
 	}
 
@@ -212,19 +206,7 @@ public:
 		}
 
 	}
-
-	void try_repaint()
-
-	{
-
-		if (repaint_active == false) { //don't try to call repaint again if there's already a repaint cycle in progress
-
-			repaint();
-
-		}
-
-	}
-
+	
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(level_meters)
 

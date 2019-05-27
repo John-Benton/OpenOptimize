@@ -59,11 +59,14 @@ public:
 		main_ir_plot.set_plot_max_zooms(10, 10);
 		main_ir_plot.add_data_set(&ir_data);
 
-		ir_data.set_trace_appearance(true, 2, Colours::white);
+		ir_data.set_trace_appearance(2, Colours::white);
+		ir_data.set_trace_visible(true);
 		ir_data.set_trace_plotting_boundaries(0.0, 500.0, -0.2, 1.2);
 		std::vector<float> ir_x_gridlines{0.0f,50.0f,100.0f,150.0f,200.0f,250.0f,300.0f,350.0f,400.0f,450.0f,500.0f};
+		std::vector<String> ir_x_gridline_labels{ "0.0","50.0","100","150","200","250","300","350","400","450","500.0" };
 		std::vector<float> ir_y_gridlines{-0.2f,0.0f,0.2f,0.4f,0.6f,0.8f,1.0f,1.2f};
-		ir_data.set_trace_gridlines(ir_x_gridlines, ir_y_gridlines);
+		std::vector<String> ir_y_gridline_labels{ "-0.2","0.0","0.2","0.4","0.6","0.8","1.0","1.2" };
+		ir_data.set_trace_gridlines(ir_x_gridlines, ir_x_gridline_labels, ir_y_gridlines, ir_y_gridline_labels);
 
 		addAndMakeVisible(main_ir_plot);
 		main_ir_plot.setOpaque(true);

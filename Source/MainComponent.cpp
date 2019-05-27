@@ -88,15 +88,14 @@ void MainContentComponent::resized()
 {
 		
 	Rectangle<int> main_window(getLocalBounds());
+	int main_window_height = main_window.getHeight();
 
-	int settings_bar_height = getHeight()*0.14;
-	main_settings_bar.setBounds(main_window.removeFromTop(settings_bar_height));
+	main_settings_bar.setBounds(main_window.removeFromTop(main_window_height * 0.15));
 
-	int level_meters_height = getHeight()*0.05;
-	main_level_meters.setBounds(main_window.removeFromBottom(level_meters_height));
-
-	main_plot.setBounds(main_window);
-
+	main_plot.setBounds(main_window.removeFromTop(main_window_height * 0.80));
+	
+	main_level_meters.setBounds(main_window);
+	
 }
 
 void MainContentComponent::update_current_plot_data() {
@@ -149,7 +148,7 @@ void MainContentComponent::update_loaded_plot_data() {
 		main_settings_bar.main_controls.loaded_composite_coherence_value.end(),
 		main_plot.loaded_composite_coherence_value.begin());
 
-	main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
+	//main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
 
 }
 
@@ -243,11 +242,11 @@ void MainContentComponent::update_supervisor_parameters() {
 void MainContentComponent::timerCallback()
 {
 				
-	main_settings_bar.main_spl_meter.try_repaint();
+	main_settings_bar.main_spl_meter.repaint();
 
-	main_plot.try_repaint();
+	main_plot.repaint();
 
-	main_level_meters.try_repaint();
+	main_level_meters.repaint();
 		
 }
 
