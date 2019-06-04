@@ -202,7 +202,7 @@ public:
 		xfer_function_traces.push_back(live_phase_trace);
 		
 		flexplot_trace live_coherence_trace;
-		live_coherence_trace.set_trace_appearance(live_trace_thickness, Colours::blue);
+		live_coherence_trace.set_trace_appearance(live_trace_thickness, Colours::cyan);
 		live_coherence_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", coherence_gridline_coord, coherence_gridline_labels, "");
 		live_coherence_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, 0.0f, 1.0f);
 		xfer_function_traces.push_back(live_coherence_trace);
