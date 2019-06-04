@@ -374,20 +374,13 @@ public:
 				for (int y_index = 0; y_index < plot_y_gridline_coord.size(); y_index++) {
 
 					if (plot_y_gridline_coord[y_index] >= actual_plotted_y_min && plot_y_gridline_coord[y_index] <= actual_plotted_y_max) {
-												
-						g.setColour(Colour(50, 50, 50));
+						
+						if(plot_y_gridline_coord[y_index] != 0.0){ g.setColour(Colour(50, 50, 50)); }
+						if (plot_y_gridline_coord[y_index] == 0.0) { g.setColour(Colours::white); }
 
 						g.fillRect(
 							plot_screen_x_min,
 							data_coord_to_plot_screen_coord(0, plot_y_gridline_coord[y_index]).second,
-							plot_screen_x_max - plot_screen_x_min,
-							gridline_thickness_pix);
-
-						g.setColour(Colours::white);
-						
-						g.fillRect( //draw a white line at 0 on the y-axis
-							plot_screen_x_min,
-							data_coord_to_plot_screen_coord(0,0).second,
 							plot_screen_x_max - plot_screen_x_min,
 							gridline_thickness_pix);
 
