@@ -191,43 +191,43 @@ public:
 
 		flexplot_trace live_magnitude_trace;
 		live_magnitude_trace.set_trace_appearance(live_trace_thickness, Colours::green);
-		live_magnitude_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, magnitude_gridline_coord, magnitude_gridline_labels);
+		live_magnitude_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", magnitude_gridline_coord, magnitude_gridline_labels, "dB");
 		live_magnitude_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, -24.0f, 24.0f);
 		xfer_function_traces.push_back(live_magnitude_trace);
 		
 		flexplot_trace live_phase_trace;
 		live_phase_trace.set_trace_appearance(live_trace_thickness, Colours::red);
-		live_phase_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, phase_gridline_coord, phase_gridline_labels);
+		live_phase_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", phase_gridline_coord, phase_gridline_labels, "DEG");
 		live_phase_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, -180.0f, 180.0f);
 		xfer_function_traces.push_back(live_phase_trace);
 		
 		flexplot_trace live_coherence_trace;
 		live_coherence_trace.set_trace_appearance(live_trace_thickness, Colours::blue);
-		live_coherence_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, coherence_gridline_coord, coherence_gridline_labels);
+		live_coherence_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", coherence_gridline_coord, coherence_gridline_labels, "");
 		live_coherence_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, 0.0f, 1.0f);
 		xfer_function_traces.push_back(live_coherence_trace);
 
 		flexplot_trace live_spectrum_trace;
 		live_spectrum_trace.set_trace_appearance(live_trace_thickness, Colours::magenta);
-		live_spectrum_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, spectrum_gridline_coord, spectrum_gridline_labels);
+		live_spectrum_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", spectrum_gridline_coord, spectrum_gridline_labels, "dBFS");
 		live_spectrum_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, -96.0f, 0.0f);
 		xfer_function_traces.push_back(live_spectrum_trace);
 
 		flexplot_trace loaded_magnitude_trace;
 		loaded_magnitude_trace.set_trace_appearance(loaded_trace_thickness, Colours::darkgreen);
-		loaded_magnitude_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, magnitude_gridline_coord, magnitude_gridline_labels);
+		loaded_magnitude_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", magnitude_gridline_coord, magnitude_gridline_labels, "dB");
 		loaded_magnitude_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, -24.0f, 24.0f);
 		xfer_function_traces.push_back(loaded_magnitude_trace);
 
 		flexplot_trace loaded_phase_trace;
 		loaded_phase_trace.set_trace_appearance(loaded_trace_thickness, Colours::darkred);
-		loaded_phase_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, phase_gridline_coord, phase_gridline_labels);
+		loaded_phase_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", phase_gridline_coord, phase_gridline_labels, "DEG");
 		loaded_phase_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, -180.0f, 180.0f);
 		xfer_function_traces.push_back(loaded_phase_trace);
 
 		flexplot_trace loaded_coherence_trace;
 		loaded_coherence_trace.set_trace_appearance(loaded_trace_thickness, Colours::darkblue);
-		loaded_coherence_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, coherence_gridline_coord, coherence_gridline_labels);
+		loaded_coherence_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", coherence_gridline_coord, coherence_gridline_labels, "");
 		loaded_coherence_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, 0.0f, 1.0f);
 		xfer_function_traces.push_back(loaded_coherence_trace);
 
@@ -257,7 +257,6 @@ public:
 		xfer_function_traces[1].set_data(current_composite_fft_bin_frequencies, display_composite_xfer_function_phase_deg);
 		xfer_function_traces[2].set_data(current_composite_fft_bin_frequencies, display_composite_coherence_value);
 		xfer_function_traces[3].set_data(current_composite_fft_bin_frequencies, display_composite_system_spectrum_mag_dB);
-
 		xfer_function_traces[4].set_data(loaded_composite_fft_bin_frequencies, loaded_composite_xfer_function_mag_dB_avg_cal);
 		xfer_function_traces[5].set_data(loaded_composite_fft_bin_frequencies, loaded_composite_xfer_function_phase_deg_avg);
 		xfer_function_traces[6].set_data(loaded_composite_fft_bin_frequencies, loaded_composite_coherence_value);
@@ -400,16 +399,16 @@ private:
 		"10k", "20k" };
 
 	std::vector<float> magnitude_gridline_coord{ 24.0f,18.0f,12.0f,6.0f,0.0f,-6.0f,-12.0f,-18.0f,-24.0f };
-	std::vector<String> magnitude_gridline_labels{ "+24", "+18", "+12", "+6", "0 dB", "-6", "-12", "-18", "-24" };
+	std::vector<String> magnitude_gridline_labels{ "+24", "+18", "+12", "+6", "0", "-6", "-12", "-18", "-24" };
 
 	std::vector<float> phase_gridline_coord{ 180.0f,135.0f,90.0f,45.0f,0.0f,-45.0f,-90.0f,-135.0f,-180.0f };
-	std::vector<String> phase_gridline_labels{ "+180", "+135", "+90", "+45", "0 DEG", "-45", "-90", "-135", "-180" };
+	std::vector<String> phase_gridline_labels{ "+180", "+135", "+90", "+45", "0", "-45", "-90", "-135", "-180" };
 
 	std::vector<float> coherence_gridline_coord{ 1.0f,0.9f,0.8f,0.7f,0.6f,0.5f,0.4f,0.3f,0.2f,0.1f,0.0f };
 	std::vector<String> coherence_gridline_labels{ "1.0", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4", "0.3", "0.2", "0.1", "0.0" };
 
 	std::vector<float> spectrum_gridline_coord{ 0.0f,-12.0f,-24.0f,-36.0f,-48.0f,-60.0f,-72.0f,-84.0f,-96.0f };
-	std::vector<String> spectrum_gridline_labels{ "0 dBFS", "-12", "-24", "-36", "-48", "-60", "-72", "-84", "-96" };
+	std::vector<String> spectrum_gridline_labels{ "0", "-12", "-24", "-36", "-48", "-60", "-72", "-84", "-96" };
 
 	std::vector<float> display_composite_xfer_function_mag_dB;
 	std::vector<float> display_composite_xfer_function_phase_deg;

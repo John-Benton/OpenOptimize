@@ -66,13 +66,15 @@ public:
 
 	}
 
-	void set_trace_gridlines(std::vector<float> & x_gridlines, std::vector<String> & x_gridline_labels, 
-		std::vector<float> & y_gridlines, std::vector<String> & y_gridline_labels) {
+	void set_trace_gridlines(std::vector<float> & x_gridlines, std::vector<String> & x_gridline_labels, String x_unit, 
+		std::vector<float> & y_gridlines, std::vector<String> & y_gridline_labels, String y_unit) {
 
 		trace_x_gridline_coord = x_gridlines;
 		trace_x_gridline_labels = x_gridline_labels;
+		trace_x_unit = x_unit;
 		trace_y_gridline_coord = y_gridlines;
 		trace_y_gridline_labels = y_gridline_labels;
+		trace_y_unit = y_unit;
 
 	}
 
@@ -160,6 +162,7 @@ protected:
 
 	std::vector<float> trace_x_gridline_coord, trace_y_gridline_coord;
 	std::vector<String> trace_x_gridline_labels, trace_y_gridline_labels;
+	String trace_x_unit, trace_y_unit;
 
 	std::vector<float> data_x_coord, data_y_coord; //the x and y data
 	
@@ -282,6 +285,9 @@ public:
 				plot_x_gridline_labels = data_sets[data_set]->trace_x_gridline_labels;
 				plot_y_gridline_coord = data_sets[data_set]->trace_y_gridline_coord;
 				plot_y_gridline_labels = data_sets[data_set]->trace_y_gridline_labels;
+
+				unit_x_string = data_sets[data_set]->trace_x_unit;
+				unit_y_string = data_sets[data_set]->trace_y_unit;
 
 				set_fixed_label_text();
 				render_gridlines_labels = true; //Only render the gridlines and labels once, when the master trace is reached
@@ -564,7 +570,7 @@ protected:
 			y_center_slider,
 			x_zoom_slider;
 
-	String unit_x, unit_y;
+	String unit_x_string, unit_y_string;
 
 	String 	x_min_fixed_label_text,
 			x_max_fixed_label_text,
@@ -697,85 +703,18 @@ protected:
 
 	void set_fixed_label_text() {
 
-		x_min_fixed_label_text = String(int(actual_plotted_x_min)) + " " + unit_x;
-		x_max_fixed_label_text = String(int(actual_plotted_x_max)) + " " + unit_x;
-		y_min_fixed_label_text = String(actual_plotted_y_min) + " " + unit_y;
-		y_max_fixed_label_text = String(actual_plotted_y_max) + " " + unit_y;
+		x_min_fixed_label_text = String(int(actual_plotted_x_min)) + " " + unit_x_string;
+		x_max_fixed_label_text = String(int(actual_plotted_x_max)) + " " + unit_x_string;
+		y_min_fixed_label_text = String(actual_plotted_y_min) + " " + unit_y_string;
+		y_max_fixed_label_text = String(actual_plotted_y_max) + " " + unit_y_string;
+
+		if (actual_plotted_x_min > 0.0) { x_min_fixed_label_text = "+" + x_min_fixed_label_text;}
+		if (actual_plotted_x_max > 0.0) { x_max_fixed_label_text = "+" + x_max_fixed_label_text;}
+		if (actual_plotted_y_min > 0.0) { y_min_fixed_label_text = "+" + y_min_fixed_label_text;}
+		if (actual_plotted_y_max > 0.0) { y_max_fixed_label_text = "+" + y_max_fixed_label_text;}
 		
 	}
-
-	//void calculate_gridlines() {
-
-	//	plot_x_gridline_coord.clear();
-
-	//	plot_x_gridline_coord.push_back(original_plotted_x_min);
-
-	//	int original_plotted_x_span = original_plotted_x_max - original_plotted_x_min;
-
-	//	int remaining_x_gridlines = floor(original_plotted_x_span / x_grid_spacing);
-
-	//	for (int x = 1; x <= remaining_x_gridlines; x++) {
-
-	//		int possible_gridline = original_plotted_x_min + (x_grid_spacing*x);
-
-	//		if (possible_gridline >= actual_plotted_x_min && possible_gridline <= actual_plotted_x_max) {
-
-	//			plot_x_gridline_coord.push_back(possible_gridline);
-
-	//		}
-
-	//		else {};
-
-	//	}
-
-	//	//
-
-	//	plot_y_gridline_coord.clear();
-
-	//	plot_y_gridline_coord.push_back(original_plotted_y_min);
-
-	//	float original_plotted_y_span = original_plotted_y_max - original_plotted_y_min;
-
-	//	int remaining_y_gridlines = floor(original_plotted_y_span / y_grid_spacing);
-
-	//	for (int y = 1; y <= remaining_y_gridlines; y++) {
-
-	//		float possible_gridline = original_plotted_y_min + (y_grid_spacing*y);
-
-	//		if (possible_gridline >= actual_plotted_y_min && possible_gridline <= actual_plotted_y_max) {
-
-	//			plot_y_gridline_coord.push_back(possible_gridline);
-
-	//		}
-
-	//		else {};
-
-	//	}
-
-	//}
-
-	//void calculate_floating_label_strings() {
-
-	//	x_floating_label_strings.clear();
-
-	//	for (int label = 0; label < plot_x_gridline_coord.size(); label++) {
-
-	//		x_floating_label_strings.push_back(String(plot_x_gridline_coord[label]) + " " + unit_x);
-
-	//	}
-
-	//	//
-
-	//	y_floating_label_strings.clear();
-
-	//	for (int label = 0; label < plot_y_gridline_coord.size(); label++) {
-
-	//		y_floating_label_strings.push_back(String(plot_y_gridline_coord[label]) + " " + unit_y);
-
-	//	}
-
-	//}
-
+	
 	std::pair<int,int> data_coord_to_plot_screen_coord(float x_data_coord, float y_data_coord) {
 
 		float x_position_proportion{ 0.0 };

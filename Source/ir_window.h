@@ -66,7 +66,7 @@ public:
 		std::vector<String> ir_x_gridline_labels{ "0.0","50.0","100","150","200","250","300","350","400","450","500.0" };
 		std::vector<float> ir_y_gridlines{-0.2f,0.0f,0.2f,0.4f,0.6f,0.8f,1.0f,1.2f};
 		std::vector<String> ir_y_gridline_labels{ "-0.2","0.0","0.2","0.4","0.6","0.8","1.0","1.2" };
-		ir_data.set_trace_gridlines(ir_x_gridlines, ir_x_gridline_labels, ir_y_gridlines, ir_y_gridline_labels);
+		ir_data.set_trace_gridlines(ir_x_gridlines, ir_x_gridline_labels, "", ir_y_gridlines, ir_y_gridline_labels, "");
 
 		addAndMakeVisible(main_ir_plot);
 		main_ir_plot.setOpaque(true);
@@ -118,7 +118,7 @@ public:
 
 			}
 
-			if (original_ir_data_avg[index] > 0.5 && excessive_peaks == false) {
+			if (original_ir_data_avg[index] > 0.1 && excessive_peaks == false) {
 
 				decimated_avg_ir_sample_amplitudes.push_back(original_ir_data_avg[index]);
 				decimated_avg_ir_sample_times_msec.push_back((1000.0 / constants::sample_rate*1.0) * index);
