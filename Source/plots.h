@@ -317,13 +317,13 @@ public:
 		g.setFont(frequency_mod_outline.getHeight() * 0.8);
 		g.setColour(Colours::white);
 		g.drawText(frequency_mod_value_string, frequency_mod_outline, Justification::centred);
-		g.setColour(Colours::darkgreen);
+		g.setColour(Colours::green);
 		g.drawText(magnitude_mod_value_string, magnitude_mod_outline, Justification::centred);
-		g.setColour(Colours::darkred);
+		g.setColour(Colours::red);
 		g.drawText(phase_mod_value_string, phase_mod_outline, Justification::centred);
-		g.setColour(Colours::darkcyan);
+		g.setColour(Colours::cyan);
 		g.drawText(coherence_mod_value_string, coherence_mod_outline, Justification::centred);
-		g.setColour(Colours::darkmagenta);
+		g.setColour(Colours::magenta);
 		g.drawText(spectrum_mod_value_string, spectrum_mod_outline, Justification::centred);
 		
 	}
@@ -570,7 +570,7 @@ private:
 		
 		std::vector<std::pair<float, float>> screen_to_data_pairs = xfer_function_plot.get_screen_to_data_pairs();
 
-		if (screen_to_data_pairs.size() == 4) {
+		if (screen_to_data_pairs.size() >= 4) {
 
 			frequency_mod_value = screen_to_data_pairs[0].first;
 			magnitude_mod_value = screen_to_data_pairs[0].second;
