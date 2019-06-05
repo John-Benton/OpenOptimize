@@ -148,7 +148,7 @@ void MainContentComponent::update_loaded_plot_data() {
 		main_settings_bar.main_controls.loaded_composite_coherence_value.end(),
 		main_plot.loaded_composite_coherence_value.begin());
 
-	//main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
+	main_plot.saved_traces_visible = main_settings_bar.main_controls.saved_traces_visible;
 
 }
 

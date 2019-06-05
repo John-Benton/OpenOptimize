@@ -101,7 +101,7 @@ public:
 	std::vector<float> loaded_composite_xfer_function_phase_deg_avg;
 	std::vector<float> loaded_composite_coherence_value;
 
-	bool sample_rate_incorrect_warning{ false };
+	bool sample_rate_incorrect_warning{ false }, saved_traces_visible{ false };
 	
     plots()
     {
@@ -226,7 +226,7 @@ public:
 		xfer_function_traces.push_back(loaded_phase_trace);
 
 		flexplot_trace loaded_coherence_trace;
-		loaded_coherence_trace.set_trace_appearance(loaded_trace_thickness, Colours::darkblue);
+		loaded_coherence_trace.set_trace_appearance(loaded_trace_thickness, Colours::darkcyan);
 		loaded_coherence_trace.set_trace_gridlines(x_gridline_coord, x_gridline_labels, "", coherence_gridline_coord, coherence_gridline_labels, "");
 		loaded_coherence_trace.set_trace_plotting_boundaries(20.0f, 20000.0f, 0.0f, 1.0f);
 		xfer_function_traces.push_back(loaded_coherence_trace);
@@ -265,9 +265,9 @@ public:
 		xfer_function_traces[1].set_trace_visible(phase_visible_button.getToggleState());
 		xfer_function_traces[2].set_trace_visible(coherence_visible_button.getToggleState());
 		xfer_function_traces[3].set_trace_visible(spectrum_visible_button.getToggleState());
-		xfer_function_traces[4].set_trace_visible(magnitude_visible_button.getToggleState());
-		xfer_function_traces[5].set_trace_visible(phase_visible_button.getToggleState());
-		xfer_function_traces[6].set_trace_visible(coherence_visible_button.getToggleState());
+		xfer_function_traces[4].set_trace_visible(magnitude_visible_button.getToggleState() && saved_traces_visible);
+		xfer_function_traces[5].set_trace_visible(phase_visible_button.getToggleState() && saved_traces_visible);
+		xfer_function_traces[6].set_trace_visible(coherence_visible_button.getToggleState() && saved_traces_visible);
 
 		for (int trace = 0; trace < xfer_function_traces.size(); trace++) {
 
@@ -310,7 +310,6 @@ public:
 		
 		xfer_function_plot.sample_rate_incorrect = sample_rate_incorrect_warning;
 		xfer_function_plot.repaint();
-
 		fetch_screen_to_data_values();
 		update_mod_strings();
 		
@@ -574,7 +573,9 @@ private:
 
 			frequency_mod_value = screen_to_data_pairs[0].first;
 			magnitude_mod_value = screen_to_data_pairs[0].second;
+			if (magnitude_mod_value < 0.1 && magnitude_mod_value > -0.1) { magnitude_mod_value = 0.0; }
 			phase_mod_value = screen_to_data_pairs[1].second;
+			if (phase_mod_value < 0.1 && phase_mod_value > -0.1) { phase_mod_value = 0.0; }
 			coherence_mod_value = screen_to_data_pairs[2].second;
 			spectrum_mod_value = screen_to_data_pairs[3].second;
 
@@ -592,7 +593,7 @@ private:
 		magnitude_mod_value_string += " dB";
 				
 		phase_mod_value_string = String(phase_mod_value);
-		phase_mod_value_string = phase_mod_value_string.substring(0, phase_mod_value_string.indexOfChar('.'));
+		phase_mod_value_string = phase_mod_value_string.substring(0, phase_mod_value_string.indexOfChar('.') + 2);
 		phase_mod_value_string += " Deg";
 				
 		coherence_mod_value_string = String(coherence_mod_value);
