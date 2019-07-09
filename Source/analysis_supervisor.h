@@ -32,7 +32,7 @@ class supervisor : public constants, public Timer, public Thread, public ActionB
 
 public:
 
-	//Complex vectors use the following format: [0][Re], [1][Imag]
+	//Complex vectors use the following format: [0][Real Values], [1][Imaginary Values]
 
 	/*---------------------------------------------------*/
 
@@ -42,13 +42,18 @@ public:
 
 	std::vector<double> composite_cross_spectrum_magnitude;
 
-	std::vector<std::vector<double>> composite_xfer_function_complex;
+	std::vector<std::vector<double>> composite_cross_spectrum_complex;
 
 	std::vector<double> composite_ref_autospectrum_avg, composite_system_autospectrum_avg;
 
-	std::vector<double> composite_cross_spectrum_mag_avg;
+	std::vector<double> composite_ref_system_cross_spectrum_mag_avg;
 
-	std::vector<double> composite_xfer_function_real_data_avg, composite_xfer_function_imag_data_avg;
+	std::vector<double> composite_ref_system_cross_spectrum_real_data_avg;
+	std::vector<double> composite_ref_system_cross_spectrum_imag_data_avg;
+
+	std::vector<std::vector<double>> composite_ref_system_cross_spectrum_complex_data_avg;
+
+	std::vector<std::vector<double>> composite_xfer_function_complex;
 	
 	std::vector<double> composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal;
 	
@@ -112,7 +117,7 @@ public:
 
 	bool curves_only{ false };
 
-	int num_averages{ 2 };
+	int num_averages{ 4 };
 
 	supervisor(): Thread("Supervisor_Thread",0)
 	
@@ -121,7 +126,6 @@ public:
 		composite_ref_complex_vector.resize(2, std::vector<double>(composite_fft_bins)); //two rows, each row has as many columns as there are composite fft bins
 		composite_system_complex_vector.resize(2, std::vector<double>(composite_fft_bins));
 
-		composite_xfer_function_complex.resize(2, std::vector<double>(composite_fft_bins));
 		composite_xfer_function_mag_dB_uncal.resize(composite_fft_bins);
 		composite_xfer_function_mag_dB_cal.resize(composite_fft_bins);
 		composite_xfer_function_phase_deg.resize(composite_fft_bins);
@@ -129,11 +133,17 @@ public:
 		composite_ref_autospectrum_avg.resize(composite_fft_bins);
 
 		composite_system_autospectrum_avg.resize(composite_fft_bins);
+		
+		composite_cross_spectrum_complex.resize(2, std::vector<double> (composite_fft_bins));
 
-		composite_cross_spectrum_mag_avg.resize(composite_fft_bins);
+		composite_ref_system_cross_spectrum_mag_avg.resize(composite_fft_bins);
+		
+		composite_ref_system_cross_spectrum_real_data_avg.resize(composite_fft_bins);
+		composite_ref_system_cross_spectrum_imag_data_avg.resize(composite_fft_bins);
 
-		composite_xfer_function_real_data_avg.resize(composite_fft_bins);
-		composite_xfer_function_imag_data_avg.resize(composite_fft_bins);
+		composite_ref_system_cross_spectrum_complex_data_avg.resize(2, std::vector<double>(composite_fft_bins));
+
+		composite_xfer_function_complex.resize(2, std::vector<double>(composite_fft_bins));
 
 		composite_coherence_value.resize(composite_fft_bins);
 
@@ -167,11 +177,10 @@ public:
 
 		composite_system_autospectrum_data_history.set_num_histories(num_averages);
 
-		composite_xfer_function_real_data_history.set_num_histories(num_averages);
+		composite_ref_system_cross_spectrum_mag_data_history.set_num_histories(num_averages);
 
-		composite_xfer_function_imag_data_history.set_num_histories(num_averages);
-
-		composite_cross_spectrum_mag_data_history.set_num_histories(num_averages);
+		composite_ref_system_cross_spectrum_real_data_history.set_num_histories(num_averages);
+		composite_ref_system_cross_spectrum_imag_data_history.set_num_histories(num_averages);
 		
 	};
 
@@ -320,11 +329,7 @@ private:
 	fft * fft_128 = new fft(largest_fft_size / 256);
 	fft * fft_64 = new fft(largest_fft_size / 512);
 
-	xfer_func composite_xfer_func{ composite_fft_bins };
-
-	xfer_func impulse_reponse_transfer_func{ (largest_fft_size / 2) + 1 };
-
-	ifft impulse_response_calculator{ largest_fft_size };
+	ifft impulse_response_ifft{ largest_fft_size };
 
 	MovingAverage1DVector composite_data_smoother;
 
@@ -334,11 +339,10 @@ private:
 
 	data_history composite_system_autospectrum_data_history{ composite_fft_bins };
 
-	data_history composite_xfer_function_real_data_history{ composite_fft_bins };
+	data_history composite_ref_system_cross_spectrum_mag_data_history{ composite_fft_bins };
 
-	data_history composite_xfer_function_imag_data_history{ composite_fft_bins };
-
-	data_history composite_cross_spectrum_mag_data_history{ composite_fft_bins };
+	data_history composite_ref_system_cross_spectrum_real_data_history{ composite_fft_bins };
+	data_history composite_ref_system_cross_spectrum_imag_data_history{ composite_fft_bins };
 
 	void assemble_composite_complex_vectors() {
 
@@ -524,13 +528,11 @@ private:
 
 	void process_fft_data() {
 
-		composite_xfer_func.run_xfer_func(	composite_ref_complex_vector, 
-											composite_system_complex_vector, 
-											composite_xfer_function_complex);
-
 		update_histories();
 		update_averages();
 		
+		xfer_func::calc_xfer_func(composite_ref_system_cross_spectrum_complex_data_avg, composite_ref_autospectrum_avg, composite_xfer_function_complex);
+				
 		process_xfer_function_data();
 		
 		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
@@ -539,13 +541,26 @@ private:
 
 	void calculate_impulse_response() {
 
-		impulse_reponse_transfer_func.run_xfer_func(fft_32k_ir->fftw_complex_out_ref_vector, fft_32k_ir->fftw_complex_out_system_vector, impulse_response_complex_freq_samples);
+		int ir_fft_bins = (largest_fft_size / 2) + 1;
+		
+		std::vector<double> ir_ref_autospectrum(ir_fft_bins);
+		std::vector<double> ir_system_autospectrum(ir_fft_bins);
+		std::vector<double> ir_cross_spectrum_mag(ir_fft_bins);
+		std::vector<std::vector<double>> ir_cross_spectrum_complex(2, std::vector<double>(ir_fft_bins));
+		std::vector<std::vector<double>> ir_xfer_function_complex(2, std::vector<double>(ir_fft_bins));
 
-		impulse_response_calculator.set_freq_response_data(impulse_response_complex_freq_samples);
+		xfer_func::calc_autospectrum(fft_32k_ir->fftw_complex_out_ref_vector, ir_ref_autospectrum);
+		xfer_func::calc_autospectrum(fft_32k_ir->fftw_complex_out_system_vector, ir_system_autospectrum);
 
-		impulse_response_calculator.run_ifft();
+		xfer_func::calc_cross_spectrum(fft_32k_ir->fftw_complex_out_ref_vector, fft_32k_ir->fftw_complex_out_system_vector, ir_cross_spectrum_complex, ir_cross_spectrum_mag);
+		
+		xfer_func::calc_xfer_func(ir_cross_spectrum_complex, ir_ref_autospectrum, ir_xfer_function_complex);
 
-		impulse_response_calculator.get_output_samples(impulse_response_time_samples);
+		impulse_response_ifft.set_freq_response_data(ir_xfer_function_complex);
+
+		impulse_response_ifft.run_ifft();
+
+		impulse_response_ifft.get_output_samples(impulse_response_time_samples);
 
 	}
 
@@ -559,10 +574,10 @@ private:
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 			
-			xfer_function_magnitude_linear = sqrt(pow(composite_xfer_function_real_data_avg[col], 2) + pow(composite_xfer_function_imag_data_avg[col], 2));
+			xfer_function_magnitude_linear = sqrt(pow(composite_xfer_function_complex[0][col], 2) + pow(composite_xfer_function_complex[1][col], 2));
 			composite_xfer_function_mag_dB_uncal[col] = 20 * log10(xfer_function_magnitude_linear);
 
-			xfer_function_phase_radians = -atan2(composite_xfer_function_imag_data_avg[col], composite_xfer_function_real_data_avg[col]);
+			xfer_function_phase_radians = -atan2(composite_xfer_function_complex[1][col], composite_xfer_function_complex[0][col]);
 			composite_xfer_function_phase_deg[col] = xfer_function_phase_radians / 0.0174533;
 		}
 
@@ -570,29 +585,33 @@ private:
 
 	void update_histories() {
 
-		composite_ref_autospectrum_data_history.add_latest_values(composite_xfer_func.ref_autospectrum);
+		std::vector<double> composite_ref_autospectrum(composite_fft_bins);
+		std::vector<double> composite_system_autospectrum(composite_fft_bins);
+		std::vector<double> composite_ref_system_cross_spectrum_mag(composite_fft_bins);
+		std::vector<std::vector<double>> composite_ref_system_cross_spectrum_complex(2, std::vector<double>(composite_fft_bins));
 
-		composite_system_autospectrum_data_history.add_latest_values(composite_xfer_func.system_autospectum);
+		xfer_func::calc_autospectrum(composite_ref_complex_vector, composite_ref_autospectrum);
+		xfer_func::calc_autospectrum(composite_system_complex_vector, composite_system_autospectrum);
+		xfer_func::calc_cross_spectrum(composite_ref_complex_vector, composite_system_complex_vector, composite_ref_system_cross_spectrum_complex, composite_ref_system_cross_spectrum_mag);
 
-		composite_xfer_function_real_data_history.add_latest_values(composite_xfer_function_complex[0]);
-
-		composite_xfer_function_imag_data_history.add_latest_values(composite_xfer_function_complex[1]);
-
-		composite_cross_spectrum_mag_data_history.add_latest_values(composite_xfer_func.ref_system_cross_spectrum_magnitude);
+		composite_ref_autospectrum_data_history.add_latest_values(composite_ref_autospectrum);
+		composite_system_autospectrum_data_history.add_latest_values(composite_system_autospectrum);
+		composite_ref_system_cross_spectrum_mag_data_history.add_latest_values(composite_ref_system_cross_spectrum_mag);
+		composite_ref_system_cross_spectrum_real_data_history.add_latest_values(composite_ref_system_cross_spectrum_complex[0]);
+		composite_ref_system_cross_spectrum_imag_data_history.add_latest_values(composite_ref_system_cross_spectrum_complex[1]);
 
 	}
 
 	void update_averages() {
 
 		composite_ref_autospectrum_data_history.get_data_average(composite_ref_autospectrum_avg);
-
 		composite_system_autospectrum_data_history.get_data_average(composite_system_autospectrum_avg);
+		composite_ref_system_cross_spectrum_mag_data_history.get_data_average(composite_ref_system_cross_spectrum_mag_avg);
 
-		composite_cross_spectrum_mag_data_history.get_data_average(composite_cross_spectrum_mag_avg);
-
-		composite_xfer_function_real_data_history.get_data_average(composite_xfer_function_real_data_avg);
-
-		composite_xfer_function_imag_data_history.get_data_average(composite_xfer_function_imag_data_avg);
+		composite_ref_system_cross_spectrum_real_data_history.get_data_average(composite_ref_system_cross_spectrum_real_data_avg);
+		composite_ref_system_cross_spectrum_imag_data_history.get_data_average(composite_ref_system_cross_spectrum_imag_data_avg);
+		composite_ref_system_cross_spectrum_complex_data_avg[0] = composite_ref_system_cross_spectrum_real_data_avg;
+		composite_ref_system_cross_spectrum_complex_data_avg[1] = composite_ref_system_cross_spectrum_imag_data_avg;
 
 	}
 
@@ -600,7 +619,7 @@ private:
 
 		for (int col = 0; col < composite_fft_bins; col++) {
 
-			composite_coherence_value[col] = (pow(composite_cross_spectrum_mag_avg[col], 2)) /
+			composite_coherence_value[col] = (pow(composite_ref_system_cross_spectrum_mag_avg[col], 2)) /
 				((composite_ref_autospectrum_avg[col])*(composite_system_autospectrum_avg[col]));
 
 		}
@@ -661,13 +680,17 @@ private:
 		if (smoothing_passes > 0) {
 
 			composite_data_smoother.configure(composite_fft_bins, smoothing_average_size);
+			complex_data_smoother.configure(composite_fft_bins, smoothing_average_size);
 
 			for (int x = 0; x < smoothing_passes; x++) {
 
-				composite_data_smoother.process(composite_xfer_function_real_data_avg);
-				composite_data_smoother.process(composite_xfer_function_imag_data_avg);
+				complex_data_smoother.process(composite_xfer_function_complex);
+				
+				//the following lines smooth the data used by the coherence calculation
 
-				//composite_data_smoother.process(composite_xfer_function_mag_dB_cal);
+				composite_data_smoother.process(composite_ref_autospectrum_avg);
+				composite_data_smoother.process(composite_system_autospectrum_avg);
+				composite_data_smoother.process(composite_ref_system_cross_spectrum_mag_avg);
 
 			}
 
