@@ -21,7 +21,8 @@ struct xfer_func
 
 		for (int value = 0; value < output_autospectrum.size(); value++) {
 
-			output_autospectrum[value] = (pow(input_complex_freq[0][value], 2.0) + pow(input_complex_freq[1][value], 2.0)) * 2.0;
+			output_autospectrum[value] = 
+				((input_complex_freq[0][value] * input_complex_freq[0][value]) + (input_complex_freq[1][value] * input_complex_freq[1][value])) * 2.0;
 
 		}
 

@@ -57,7 +57,7 @@ public:
 		
 	std::vector<double> composite_coherence_value;
 
-	std::vector<double> composite_system_spectrum_mag_linear, composite_system_spectrum_mag_dB;
+	std::vector<double> composite_system_spectrum_mag_linear, composite_system_spectrum_mag_dB_uncal, composite_system_spectrum_mag_dB_cal;
 
 	std::vector<std::vector<double>> impulse_response_complex_freq_samples;
 
@@ -144,8 +144,9 @@ public:
 		composite_fft_bin_frequencies.resize(composite_fft_bins);
 
 		composite_system_spectrum_mag_linear.resize(composite_fft_bins);
-		composite_system_spectrum_mag_dB.resize(composite_fft_bins);
-
+		composite_system_spectrum_mag_dB_uncal.resize(composite_fft_bins);
+		composite_system_spectrum_mag_dB_cal.resize(composite_fft_bins);
+		
 		impulse_response_complex_freq_samples.resize(2, std::vector<double>((largest_fft_size / 2) + 1));
 		impulse_response_time_samples.resize(largest_fft_size);
 
@@ -243,8 +244,6 @@ public:
 		smooth_coherence_data();
 		
 		calc_system_spectrum();
-
-		smooth_spectrum_data();
 		
 		plot_data_mtx_supervisor.unlock();
 			
@@ -488,7 +487,7 @@ private:
 
 	}
 
-	void apply_mic_and_system_curves(std::vector<double> & source_vector, std::vector<double> & destination_vector) {
+	void apply_mic_and_system_curves(std::vector<double> & source_vector, std::vector<double> & destination_vector, bool apply_mic_curve, bool apply_system_curve) {
 
 		if (curves_only == 0) {
 
@@ -498,9 +497,9 @@ private:
 
 					source_vector[x] -
 
-					interpolated_mic_cal_amplitudes[x] -
+					(interpolated_mic_cal_amplitudes[x] * apply_mic_curve) -
 
-					interpolated_system_curve_amplitudes[x];
+					(interpolated_system_curve_amplitudes[x] * apply_system_curve);
 
 			}
 
@@ -512,9 +511,9 @@ private:
 
 				destination_vector[x] =
 					
-					interpolated_mic_cal_amplitudes[x] +
+					(interpolated_mic_cal_amplitudes[x] * apply_mic_curve) +
 
-					interpolated_system_curve_amplitudes[x];
+					(interpolated_system_curve_amplitudes[x] * apply_system_curve);
 
 			}
 
@@ -531,7 +530,7 @@ private:
 				
 		process_xfer_function_data();
 		
-		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal);
+		apply_mic_and_system_curves(composite_xfer_function_mag_dB_uncal, composite_xfer_function_mag_dB_cal, true, true);
 
 	}
 
@@ -540,13 +539,11 @@ private:
 		int ir_fft_bins = (largest_fft_size / 2) + 1;
 		
 		std::vector<double> ir_ref_autospectrum(ir_fft_bins);
-		std::vector<double> ir_system_autospectrum(ir_fft_bins);
 		std::vector<std::vector<double>> ir_cross_spectrum_complex(2, std::vector<double>(ir_fft_bins));
 		std::vector<std::vector<double>> ir_xfer_function_complex(2, std::vector<double>(ir_fft_bins));
 
 		xfer_func::calc_autospectrum(fft_32k_ir->fftw_complex_out_ref_vector, ir_ref_autospectrum);
-		xfer_func::calc_autospectrum(fft_32k_ir->fftw_complex_out_system_vector, ir_system_autospectrum);
-
+		
 		xfer_func::calc_cross_spectrum(fft_32k_ir->fftw_complex_out_ref_vector, fft_32k_ir->fftw_complex_out_system_vector, ir_cross_spectrum_complex);
 		
 		xfer_func::calc_xfer_func(ir_cross_spectrum_complex, ir_ref_autospectrum, ir_xfer_function_complex);
@@ -668,7 +665,17 @@ private:
 		
 		for (int index = 0; index < composite_fft_bins; index++) {
 
-			composite_system_spectrum_mag_dB[index] = 20 * log10(composite_system_spectrum_mag_linear[index]) - 62.0;
+			composite_system_spectrum_mag_dB_uncal[index] = 20 * log10(composite_system_spectrum_mag_linear[index]) - 62.0;
+
+		}
+
+		smooth_spectrum_data();
+
+		apply_mic_and_system_curves(composite_system_spectrum_mag_dB_uncal, composite_system_spectrum_mag_dB_cal, true, false);
+
+		if (curves_only == 1) {
+
+			FloatVectorOperations::add(&composite_system_spectrum_mag_dB_cal.front(), -48.0, composite_system_spectrum_mag_dB_cal.size());
 
 		}
 
@@ -718,7 +725,7 @@ private:
 
 			for (int x = 0; x < smoothing_passes; x++) {
 
-				composite_data_smoother.process(composite_system_spectrum_mag_dB);
+				composite_data_smoother.process(composite_system_spectrum_mag_dB_uncal);
 
 			}
 
