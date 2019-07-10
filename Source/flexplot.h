@@ -522,6 +522,13 @@ public:
 
 	}
 
+	void set_y_center_slider_default(double new_value) {
+
+		y_center_slider.setValue(new_value);
+		y_center_slider.setDoubleClickReturnValue(true, new_value);
+
+	}
+
 	void add_data_set(flexplot_trace* new_data_set) { //adds a flexplot_trace to the plot
 
 		data_sets.push_back(new_data_set);

@@ -56,7 +56,8 @@ public:
 		original_ir_data.resize(num_ir_samples);
 		original_ir_data_avg.resize(num_ir_samples);
 				
-		main_ir_plot.set_plot_max_zooms(10, 10);
+		main_ir_plot.set_plot_max_zooms(10, 25);
+		main_ir_plot.set_y_center_slider_default(1.0/7.0);
 		main_ir_plot.add_data_set(&ir_data);
 
 		ir_data.set_trace_appearance(2, Colours::white);
