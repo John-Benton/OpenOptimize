@@ -29,8 +29,7 @@ struct xfer_func
 
 	static void calc_cross_spectrum(	std::vector<std::vector<double>> & input_ref_complex_freq,
 										std::vector<std::vector<double>> & input_sytem_complex_freq,
-										std::vector<std::vector<double>> & output_ref_system_cross_spectrum_complex,
-										std::vector<double> &output_ref_system_cross_spectrum_magnitude)
+										std::vector<std::vector<double>> & output_ref_system_cross_spectrum_complex)
 	{
 
 		for (int value = 0; value < output_ref_system_cross_spectrum_complex[0].size(); value++) {
@@ -48,9 +47,6 @@ struct xfer_func
 
 			output_ref_system_cross_spectrum_complex[1][value] =((input_ref_complex_freq[0][value] * input_sytem_complex_freq[1][value]) +
 												((-input_ref_complex_freq[1][value]) * input_sytem_complex_freq[0][value])) * 2.0;
-
-			output_ref_system_cross_spectrum_magnitude[value] = sqrt(pow(output_ref_system_cross_spectrum_complex[0][value], 2) + 
-																pow(output_ref_system_cross_spectrum_complex[1][value], 2));
 
 		}
 
