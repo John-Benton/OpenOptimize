@@ -240,6 +240,8 @@ public:
 		
 		calculate_coherence();
 
+		smooth_coherence_data();
+		
 		calc_system_spectrum();
 
 		smooth_spectrum_data();
@@ -676,18 +678,29 @@ private:
 
 		if (smoothing_passes > 0) {
 
-			composite_data_smoother.configure(composite_fft_bins, smoothing_average_size);
 			complex_data_smoother.configure(composite_fft_bins, smoothing_average_size);
 
 			for (int x = 0; x < smoothing_passes; x++) {
 
 				complex_data_smoother.process(composite_xfer_function_complex);
-				complex_data_smoother.process(composite_cross_spectrum_complex);
-				
-				//the following lines smooth the data used by the coherence calculation
 
-				composite_data_smoother.process(composite_ref_autospectrum_avg);
-				composite_data_smoother.process(composite_system_autospectrum_avg);
+			}
+
+		}
+
+		else {};
+
+	}
+
+	void smooth_coherence_data() {
+
+		if (smoothing_passes > 0) {
+
+			composite_data_smoother.configure(composite_fft_bins, smoothing_average_size);
+
+			for (int x = 0; x < smoothing_passes; x++) {
+
+				composite_data_smoother.process(composite_coherence_value);
 
 			}
 
