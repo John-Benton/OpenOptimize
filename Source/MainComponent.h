@@ -18,6 +18,7 @@
 #include "constants.h"
 #include "analysis_supervisor.h"
 #include "ir_window.h"
+#include "utility.h"
 
 class MainContentComponent : public AudioAppComponent, public constants, public Timer, public ActionListener
 {
@@ -78,6 +79,13 @@ private:
 	AudioDeviceSelectorComponent audio_device_selector_component{ this->deviceManager, 2, 2, 0, 0, 0, 0, 0, 0 };
 
 	int reported_xruns{ 0 };
+
+	std::vector<float> ref_in_original_buffer, ref_in_resampled_buffer, system_in_original_buffer, system_in_resampled_buffer;
+	int device_input_buffer_size{ 0 };
+	int device_input_sample_rate{ 0 };
+
+	sample_rate_converter_r8 ref_src;
+	sample_rate_converter_r8 system_src;
 
 	DialogWindow::LaunchOptions audio_io_config_window;
 

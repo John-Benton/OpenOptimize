@@ -33,43 +33,57 @@ MainContentComponent::~MainContentComponent()
 
 //==============================================================================
 void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
-{}
+{
+	device_input_buffer_size = this->deviceManager.getAudioDeviceSetup().bufferSize;
+	device_input_sample_rate = this->deviceManager.getAudioDeviceSetup().sampleRate;
+	ref_in_original_buffer.resize(device_input_buffer_size);
+	system_in_original_buffer.resize(device_input_buffer_size);
+
+	ref_src.configure(device_input_sample_rate, &ref_in_original_buffer, 48000, &ref_in_resampled_buffer);
+
+	system_src.configure(device_input_sample_rate, &system_in_original_buffer, 48000, &system_in_resampled_buffer);
+}
 
 void MainContentComponent::getNextAudioBlock(const AudioSourceChannelInfo& audio_device_buffer)
 {
-	this->deviceManager.getAudioDeviceSetup(current_audio_device_setup);
-
-	if (current_audio_device_setup.sampleRate == 48000) {
-
-		sample_rate_correct = true;
-
-	}
-
-	else { sample_rate_correct = false; }
+	sample_rate_correct = true;
 	
-	const float* ref_in_buffer = audio_device_buffer.buffer->getReadPointer(0);
-	const float* system_in_buffer = audio_device_buffer.buffer->getReadPointer(1);
-	
-	supervisor1->audio_buffer_mtx_supervisor.lock();
+	const float* ref_in_device_buffer = audio_device_buffer.buffer->getReadPointer(0);
+	const float* system_in_device_buffer = audio_device_buffer.buffer->getReadPointer(1);
 
-	for (int sample = 0; sample < audio_device_buffer.numSamples; ++sample) {
+	for (int sample = 0; sample < device_input_buffer_size; ++sample) {
 
-		supervisor1->buffer_ref_samples.push_front(ref_in_buffer[sample]);
-		supervisor1->buffer_ref_samples.pop_back();
-
-		supervisor1->buffer_system_samples.push_front(system_in_buffer[sample]);
-		supervisor1->buffer_system_samples.pop_back();
+		ref_in_original_buffer[sample] = ref_in_device_buffer[sample];
+		system_in_original_buffer[sample] = system_in_device_buffer[sample];
 
 		num_samples_stored++;
 
 	}
 
+	ref_src.resample_samples();
+	system_src.resample_samples();
+
+	jassert(ref_in_resampled_buffer.size() == system_in_resampled_buffer.size());
+	
+	supervisor1->audio_buffer_mtx_supervisor.lock();
+
+	for (int sample = 0; sample < ref_in_resampled_buffer.size(); ++sample) {
+
+		supervisor1->buffer_ref_samples.push_front(ref_in_resampled_buffer[sample]);
+		supervisor1->buffer_ref_samples.pop_back();
+
+		supervisor1->buffer_system_samples.push_front(system_in_resampled_buffer[sample]);
+		supervisor1->buffer_system_samples.pop_back();
+
+	}
+
 	supervisor1->audio_buffer_mtx_supervisor.unlock();
+
 
 	reported_xruns = this->deviceManager.getXRunCount();
 
 }
-	
+
 void MainContentComponent::releaseResources()
 {
 }
@@ -87,7 +101,7 @@ void MainContentComponent::paint (Graphics& g)
 void MainContentComponent::resized()
 {
 		
-	Rectangle<int> main_window(getLocalBounds());
+	juce::Rectangle<int> main_window(getLocalBounds());
 	int main_window_height = main_window.getHeight();
 
 	main_settings_bar.setBounds(main_window.removeFromTop(main_window_height * 0.15));
