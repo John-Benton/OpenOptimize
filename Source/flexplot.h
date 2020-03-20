@@ -1,34 +1,6 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
-
-struct linear_interpolator
-{
-		
-	//This template assumes that the input coordinates are vectors which are presorted in ascending order with respect to x
-	//If the passed-in x value is outside the range of the x_coord vector, the closest y_value will be returned
-	template <typename V>
-	static V interpolate(std::vector<V> & x_coord, std::vector<V> & y_coord, double x) {
-
-		if (x <= x_coord.front()) {
-
-			return y_coord.front();
-
-		}
-
-		if (x >= x_coord.back()) {
-
-			return y_coord.back();
-
-		}
-
-		int x1_index = std::distance(x_coord.begin(), std::upper_bound(x_coord.begin(), x_coord.end(), x));
-		int x0_index = x1_index - 1;
-
-		return y_coord[x0_index] + (x - x_coord[x0_index])*((y_coord[x1_index] - y_coord[x0_index]) / (x_coord[x1_index] - x_coord[x0_index]));
-
-	}
-
-};
+#include "utility.h"
 
 class flexplot_trace //holds the data and properties for a single trace that can be rendered in a flexplot
 {

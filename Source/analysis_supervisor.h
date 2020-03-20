@@ -25,6 +25,7 @@
 #include "data_history.h"
 #include <algorithm>
 #include "xfer_func.h"
+#include "utility.h"
 
 class supervisor : public constants, public Timer, public Thread, public ActionBroadcaster
 
@@ -109,7 +110,7 @@ public:
 
 	int smoothing_average_size{ 3 }, smoothing_passes{ 0 };
 
-	float spectrum_offset_db{ 12.0 }, spectrum_scaling_coefficient{ 0.5 }, spectrum_slope_db_octave = -4.5;
+	float spectrum_offset_db{ 0.0 };
 
 	bool curves_only{ false };
 
@@ -621,53 +622,100 @@ private:
 		}
 	}
 
+	//void calc_system_spectrum() {
+
+	//	for (int index = 0; index < 70; index++) {
+
+	//		composite_system_spectrum_mag_linear[index] = sqrt(pow(composite_system_complex_vector[0][index], 2) + pow(composite_system_complex_vector[1][index], 2)) * 1.0; //from fft_32k
+
+	//	}
+
+	//	/* The final constants used on the right side of the equations in the following lines was calculated with the following equation:
+	//	
+	//	constant = sqrt(N1/N2), where N1 is the largest fft size (currently 32768), and N2 is the size of the fft used for that
+	//	region of the composite amplitude spectrum. 
+
+	//	The constants correct for the usage of different fft sizes when assembling a composite amplitude spectrum. The equation
+	//	used to calculate the constants was determined empirically.
+	//	
+	//	*/
+
+	//	for (int index = 0; index < 21; index++) {
+
+	//		composite_system_spectrum_mag_linear[index + 70] = sqrt(pow(composite_system_complex_vector[0][index + 70], 2) + pow(composite_system_complex_vector[1][index + 70], 2)) * 2.0; //from fft_8k
+	//		
+	//		composite_system_spectrum_mag_linear[index + 91] = sqrt(pow(composite_system_complex_vector[0][index + 91], 2) + pow(composite_system_complex_vector[1][index + 91], 2)) * 2.82842712474619; //from fft_4k
+	//		
+	//		composite_system_spectrum_mag_linear[index + 112] = sqrt(pow(composite_system_complex_vector[0][index + 112], 2) + pow(composite_system_complex_vector[1][index + 112], 2)) * 4.0; //from fft_2k
+
+	//		composite_system_spectrum_mag_linear[index + 133] = sqrt(pow(composite_system_complex_vector[0][index + 133], 2) + pow(composite_system_complex_vector[1][index + 133], 2)) * 5.65685424949238; //from fft_1k
+	//		
+	//		composite_system_spectrum_mag_linear[index + 154] = sqrt(pow(composite_system_complex_vector[0][index + 154], 2) + pow(composite_system_complex_vector[1][index + 154], 2)) * 8.0; //from fft_512
+
+	//		composite_system_spectrum_mag_linear[index + 175] = sqrt(pow(composite_system_complex_vector[0][index + 175], 2) + pow(composite_system_complex_vector[1][index + 175], 2)) * 11.31370849898476; //from fft_256
+
+	//		composite_system_spectrum_mag_linear[index + 196] = sqrt(pow(composite_system_complex_vector[0][index + 196], 2) + pow(composite_system_complex_vector[1][index + 196], 2)) * 16.0; //from fft_128
+
+	//	}
+
+	//	for (int index = 0; index < 7; index++) {
+
+	//		composite_system_spectrum_mag_linear[index + 217] = sqrt(pow(composite_system_complex_vector[0][index + 217], 2) + pow(composite_system_complex_vector[1][index + 217], 2)) * 22.62741699796952; //from fft_64
+
+	//	}
+	//	
+	//	for (int index = 0; index < composite_fft_bins; index++) {
+
+	//		composite_system_spectrum_mag_dB_uncal[index] = 20 * log10(composite_system_spectrum_mag_linear[index]) - 62.0;
+
+	//	}
+
+	//	smooth_spectrum_data();
+
+	//	apply_mic_and_system_curves(composite_system_spectrum_mag_dB_uncal, composite_system_spectrum_mag_dB_cal, true, false);
+
+	//	if (curves_only == 1) {
+
+	//		FloatVectorOperations::add(&composite_system_spectrum_mag_dB_cal.front(), -48.0, composite_system_spectrum_mag_dB_cal.size());
+
+	//	}
+
+	//}
+
 	void calc_system_spectrum() {
 
-		for (int index = 0; index < 70; index++) {
+		std::vector<double> fft_bin_frequencies;
+		std::vector<double> fft_bin_magnitudes_linear;
+		std::vector<double> fft_bin_magnitudes_linear_interpolated;
+		std::vector<double> fft_bin_magnitudes_dB_interpolated;
 
-			composite_system_spectrum_mag_linear[index] = sqrt(pow(composite_system_complex_vector[0][index], 2) + pow(composite_system_complex_vector[1][index], 2)) * 1.0; //from fft_32k
+		for (int bin = 0; bin < 16384; bin++) {
+
+			fft_bin_frequencies.push_back(bin * (double(sample_rate) / double(32768)));
 
 		}
 
-		/* The final constants used on the right side of the equations in the following lines was calculated with the following equation:
+		for (int index = 0; index < fft_32k->fftw_complex_out_system_vector[0].size(); index++) {
+
+			fft_bin_magnitudes_linear.push_back(sqrt(pow(fft_32k->fftw_complex_out_system_vector[0][index], 2) + pow(fft_32k->fftw_complex_out_system_vector[1][index], 2)));
+
+		}
+
+		for (int freq = 0; freq < composite_fft_bin_frequencies.size(); freq++) {
+
+			fft_bin_magnitudes_linear_interpolated.push_back(linear_interpolator::interpolate<double>(fft_bin_frequencies, fft_bin_magnitudes_linear, composite_fft_bin_frequencies[freq]));
 		
-		constant = sqrt(N1/N2), where N1 is the largest fft size (currently 32768), and N2 is the size of the fft used for that
-		region of the composite amplitude spectrum. 
+		}
 
-		The constants correct for the usage of different fft sizes when assembling a composite amplitude spectrum. The equation
-		used to calculate the constants was determined empirically.
-		
-		*/
+		for (int index = 0; index < fft_bin_magnitudes_linear_interpolated.size(); index++) {
 
-		for (int index = 0; index < 21; index++) {
-
-			composite_system_spectrum_mag_linear[index + 70] = sqrt(pow(composite_system_complex_vector[0][index + 70], 2) + pow(composite_system_complex_vector[1][index + 70], 2)) * 2.0; //from fft_8k
-			
-			composite_system_spectrum_mag_linear[index + 91] = sqrt(pow(composite_system_complex_vector[0][index + 91], 2) + pow(composite_system_complex_vector[1][index + 91], 2)) * 2.82842712474619; //from fft_4k
-			
-			composite_system_spectrum_mag_linear[index + 112] = sqrt(pow(composite_system_complex_vector[0][index + 112], 2) + pow(composite_system_complex_vector[1][index + 112], 2)) * 4.0; //from fft_2k
-
-			composite_system_spectrum_mag_linear[index + 133] = sqrt(pow(composite_system_complex_vector[0][index + 133], 2) + pow(composite_system_complex_vector[1][index + 133], 2)) * 5.65685424949238; //from fft_1k
-			
-			composite_system_spectrum_mag_linear[index + 154] = sqrt(pow(composite_system_complex_vector[0][index + 154], 2) + pow(composite_system_complex_vector[1][index + 154], 2)) * 8.0; //from fft_512
-
-			composite_system_spectrum_mag_linear[index + 175] = sqrt(pow(composite_system_complex_vector[0][index + 175], 2) + pow(composite_system_complex_vector[1][index + 175], 2)) * 11.31370849898476; //from fft_256
-
-			composite_system_spectrum_mag_linear[index + 196] = sqrt(pow(composite_system_complex_vector[0][index + 196], 2) + pow(composite_system_complex_vector[1][index + 196], 2)) * 16.0; //from fft_128
+			fft_bin_magnitudes_dB_interpolated.push_back((20 * log10(fft_bin_magnitudes_linear_interpolated[index])) + spectrum_offset_db);
 
 		}
 
-		for (int index = 0; index < 7; index++) {
+		jassert(fft_bin_magnitudes_dB_interpolated.size() == composite_system_spectrum_mag_dB_uncal.size());
 
-			composite_system_spectrum_mag_linear[index + 217] = sqrt(pow(composite_system_complex_vector[0][index + 217], 2) + pow(composite_system_complex_vector[1][index + 217], 2)) * 22.62741699796952; //from fft_64
-
-		}
-		
-		for (int index = 0; index < composite_fft_bins; index++) {
-
-			composite_system_spectrum_mag_dB_uncal[index] = 20 * log10(composite_system_spectrum_mag_linear[index]) - 62.0;
-
-		}
+		std::copy(fft_bin_magnitudes_dB_interpolated.begin(), fft_bin_magnitudes_dB_interpolated.end(), composite_system_spectrum_mag_dB_uncal.begin());
 
 		smooth_spectrum_data();
 

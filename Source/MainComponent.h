@@ -64,7 +64,6 @@ public:
 	void actionListenerCallback(const String &message) override;
 
 private:
-	//==============================================================================
 
 	supervisor * supervisor1 = new supervisor;
 
