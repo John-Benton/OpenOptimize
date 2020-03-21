@@ -186,6 +186,7 @@ public:
 		this->notify();
 		this->waitForThreadToExit(5000);
 		
+		delete fft_32k_ir;
 		delete fft_32k;
 		delete fft_8k;
 		delete fft_4k;
@@ -312,6 +313,8 @@ public:
 	}
 
 private:
+
+	JUCE_LEAK_DETECTOR(supervisor);
 
 	fft * fft_32k_ir = new fft(largest_fft_size);
 	

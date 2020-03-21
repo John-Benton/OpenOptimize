@@ -118,4 +118,6 @@ public:
 
 private:
 	
+	JUCE_LEAK_DETECTOR(data_history);
+
 };

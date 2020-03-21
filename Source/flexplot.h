@@ -206,6 +206,11 @@ public:
 
 	}
 
+	/*void paint(Graphics& g) override
+	{
+
+	};*/
+
     void paint (Graphics& g) override
     {
 		g.fillAll(Colour(20, 20, 20));
@@ -448,7 +453,7 @@ public:
 		draw_custom_overlay(g);
 
     }
-
+	
     void resized() override
     {
 		component_outline = getLocalBounds();

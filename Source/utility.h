@@ -84,6 +84,8 @@ public:
 
 private:
 
+	JUCE_LEAK_DETECTOR(sample_rate_converter_r8);
+
 	int source_sample_rate{ 0 };
 	int dest_sample_rate{ 0 };
 
@@ -153,6 +155,8 @@ public:
 	}
 
 private:
+
+	JUCE_LEAK_DETECTOR(sample_rate_converter);
 	
 	int source_sample_rate{ 0 };
 	int dest_sample_rate{ 0 };

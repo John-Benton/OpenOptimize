@@ -54,6 +54,8 @@ public:
 
 private:
 
+	JUCE_LEAK_DETECTOR(PhaseWrapUnwrap);
+
 	void unwrap_source_phase(std::vector<double> & source_phase) {
 
 		std::copy(source_phase.begin(), source_phase.end(), intermediate_phase.begin());

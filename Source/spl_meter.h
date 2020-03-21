@@ -366,6 +366,7 @@ private:
 	Label spl_uncal_label;
 	Label spl_weight_z_label;
 	String spl_display_value_string;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (spl_meter)
 
 };

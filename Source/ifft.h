@@ -77,6 +77,8 @@ public:
 
 private:
 
+	JUCE_LEAK_DETECTOR(ifft);
+
 	int local_ifft_size;
 	
 	int ifft_num_output_samples, ifft_num_input_bins;

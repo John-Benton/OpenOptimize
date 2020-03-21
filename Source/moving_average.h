@@ -60,6 +60,8 @@ public:
 
 private:
 
+	JUCE_LEAK_DETECTOR(MovingAverage1DVector);
+
 	void find_first_last_source(std::vector<double> & source) {
 
 		first_data_point_row0 = source.front();
@@ -165,6 +167,8 @@ public:
 	}
 
 private:
+
+	JUCE_LEAK_DETECTOR(MovingAverage2DVector);
 	
 	void find_first_last_source(std::vector<std::vector<double>> & source) {
 

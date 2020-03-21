@@ -14,6 +14,8 @@ class constants
 {
 public:
 
+	JUCE_LEAK_DETECTOR(constants);
+
 	static const int largest_fft_size = 32768;
 	static const int sample_rate = 48000;
 	static const int fft_bins = (largest_fft_size / 2) + 1; //the adddition of one accounts for the DC component bin

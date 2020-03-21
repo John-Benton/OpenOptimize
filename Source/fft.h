@@ -104,6 +104,8 @@ public:
 
 private:
 
+	JUCE_LEAK_DETECTOR(fft);
+
 	void generate_hann_window_weights_array() {
 
 		for (int n = 0; n < local_fft_size; n++) {
