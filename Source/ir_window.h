@@ -70,7 +70,6 @@ public:
 		ir_data.set_trace_gridlines(ir_x_gridlines, ir_x_gridline_labels, "", ir_y_gridlines, ir_y_gridline_labels, "");
 
 		addAndMakeVisible(main_ir_plot);
-		main_ir_plot.setOpaque(true);
 		main_ir_plot.set_axis_modes(true, true);
 
     }
@@ -82,6 +81,7 @@ public:
     void paint (Graphics& g) override
     {
 
+		g.fillAll(Colour(20, 20, 20));
 		main_ir_plot.repaint();
 
     }

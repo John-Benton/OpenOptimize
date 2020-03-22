@@ -213,10 +213,9 @@ public:
 
     void paint (Graphics& g) override
     {
-		g.fillAll(Colour(20, 20, 20));
+		//g.fillAll(Colour(20, 20, 20));
 
 		g.setColour(Colours::black);
-
 		g.fillRect(plot_area);
 
 		//g.setColour(Colours::white);
@@ -616,7 +615,7 @@ protected:
 
 		else {}
 
-		repaint();
+		//repaint();
 
 	}
 

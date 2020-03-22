@@ -184,7 +184,7 @@ public:
 		std::fill(loaded_composite_coherence_value.begin(), loaded_composite_coherence_value.end(), 0.0);
 
 		addAndMakeVisible(xfer_function_plot);
-		xfer_function_plot.setOpaque(true);
+		//xfer_function_plot.setOpaque(true);
 		xfer_function_plot.set_axis_modes(false, true);
 
 		//==================================================// set up all the traces for the plot
@@ -309,7 +309,7 @@ public:
 		}
 		
 		xfer_function_plot.sample_rate_incorrect = sample_rate_incorrect_warning;
-		xfer_function_plot.repaint();
+		//xfer_function_plot.repaint();
 		fetch_screen_to_data_values();
 		update_mod_strings();
 		

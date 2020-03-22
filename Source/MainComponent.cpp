@@ -91,10 +91,8 @@ void MainContentComponent::releaseResources()
     //==============================================================================
 void MainContentComponent::paint (Graphics& g)
 {
-		
-	Colour very_dark_grey(20, 20, 20);
 
-	g.fillAll(very_dark_grey);
+	g.fillAll(Colour(20,20,20));
 
 }
 
@@ -255,13 +253,13 @@ void MainContentComponent::update_supervisor_parameters() {
 
 void MainContentComponent::timerCallback()
 {
-				
+			
 	main_settings_bar.main_spl_meter.repaint();
 
 	main_plot.repaint();
 
 	main_level_meters.repaint();
-		
+
 }
 
 void MainContentComponent::actionListenerCallback(const String &message)

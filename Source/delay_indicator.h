@@ -258,8 +258,6 @@ public:
 
 		sendActionMessage("cmd_update_supervisor");
 
-		repaint();
-
 	}
 	
 private:
