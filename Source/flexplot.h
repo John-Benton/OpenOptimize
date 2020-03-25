@@ -783,19 +783,19 @@ protected:
 	//is the left side of the plot and 1 is the right
 	std::pair<float,float> visible_plot_screen_proportion_to_trace_coord(flexplot_trace* trace, float plot_x_visible_screen_proportion) {
 		
-		if (plot_x_axis_linear == true) {
-
-			float x_coord = ((actual_plotted_x_max - actual_plotted_x_min) * plot_x_visible_screen_proportion) + actual_plotted_x_min;
-			
-			return std::pair<float, float>{x_coord, linear_interpolator::interpolate(trace->data_x_coord, trace->data_y_coord, x_coord)};
-
-		}
-
 		if (plot_x_axis_linear == false) {
 
 			float x_coord_log = ((log10(actual_plotted_x_max) - log10(actual_plotted_x_min)) * plot_x_visible_screen_proportion)
 				+ log10(actual_plotted_x_min);
 			float x_coord = pow(10, x_coord_log);
+
+			return std::pair<float, float>{x_coord, linear_interpolator::interpolate(trace->data_x_coord, trace->data_y_coord, x_coord)};
+
+		}
+
+		else{
+
+			float x_coord = ((actual_plotted_x_max - actual_plotted_x_min) * plot_x_visible_screen_proportion) + actual_plotted_x_min;
 
 			return std::pair<float, float>{x_coord, linear_interpolator::interpolate(trace->data_x_coord, trace->data_y_coord, x_coord)};
 
