@@ -679,18 +679,20 @@ protected:
 
 	void set_fixed_label_text() {
 
-		x_min_fixed_label_text = String(int(actual_plotted_x_min)) + " " + unit_x_string;
-		x_max_fixed_label_text = String(int(actual_plotted_x_max)) + " " + unit_x_string;
-		y_min_fixed_label_text = String(actual_plotted_y_min) + " " + unit_y_string;
-		y_max_fixed_label_text = String(actual_plotted_y_max) + " " + unit_y_string;
+		x_min_fixed_label_text = String(actual_plotted_x_min,1,false) + " " + unit_x_string;
+		x_max_fixed_label_text = String(actual_plotted_x_max,1, false) + " " + unit_x_string;
+		
+		y_min_fixed_label_text = String(actual_plotted_y_min,1,false) + " " + unit_y_string;
+		y_max_fixed_label_text = String(actual_plotted_y_max,1,false) + " " + unit_y_string;
 
 		if (actual_plotted_x_min > 0.0) { x_min_fixed_label_text = "+" + x_min_fixed_label_text;}
 		if (actual_plotted_x_max > 0.0) { x_max_fixed_label_text = "+" + x_max_fixed_label_text;}
+		
 		if (actual_plotted_y_min > 0.0) { y_min_fixed_label_text = "+" + y_min_fixed_label_text;}
 		if (actual_plotted_y_max > 0.0) { y_max_fixed_label_text = "+" + y_max_fixed_label_text;}
 		
 	}
-	
+
 	std::pair<int,int> data_coord_to_plot_screen_coord(float x_data_coord, float y_data_coord) {
 
 		float x_position_proportion{ 0.0 };
