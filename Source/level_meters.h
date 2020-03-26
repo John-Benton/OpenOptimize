@@ -30,8 +30,10 @@ public:
 	Rectangle<int> system_meter_graphics_region;
 	Rectangle<int> ref_meter_graphic_background;
 	Rectangle<int> ref_meter_graphic_rms_level;
+	Rectangle<int> ref_meter_graphic_peak_level;
 	Rectangle<int> system_meter_graphic_background;
 	Rectangle<int> system_meter_graphic_rms_level;
+	Rectangle<int> system_meter_graphic_peak_level;
 	Rectangle<int> numeric_display_region;
 	Rectangle<int> ref_numeric_display_region;
 	Rectangle<int> system_numeric_display_region;
@@ -45,6 +47,8 @@ public:
 	double system_peak_input_level_linear = 0.0;
 	double current_system_rms_input_level_dBFS = -96.0;
 	double current_system_peak_input_level_dBFS = -96.0;
+
+	bool peak_bar_enabled = false;
 
 	level_meters()
 	{
@@ -95,6 +99,31 @@ public:
 		double system_rms_level_proportion = 1 - (current_system_rms_input_level_dBFS / -96.0);
 		system_meter_graphic_rms_level = system_meter_graphic_background.withWidth(system_meter_graphic_background.getWidth()*system_rms_level_proportion);
 		g.fillRect(system_meter_graphic_rms_level);
+
+		if (peak_bar_enabled) {
+
+			g.setColour(Colours::white);
+
+			double ref_peak_level_proportion = 1 - (current_ref_peak_input_level_dBFS / -96.0);
+			ref_meter_graphic_peak_level = ref_meter_graphic_background.withWidth(2);
+			ref_meter_graphic_peak_level.setX(
+				ref_meter_graphic_background.getX() +
+				(ref_meter_graphic_background.getWidth() * ref_peak_level_proportion) -
+				(ref_meter_graphic_peak_level.getWidth() / 2));
+			
+			g.fillRect(ref_meter_graphic_peak_level);
+
+			double system_peak_level_proportion = 1 - (current_system_peak_input_level_dBFS / -96.0);
+			system_meter_graphic_peak_level = system_meter_graphic_background.withWidth(2);
+			system_meter_graphic_peak_level.setX(
+				system_meter_graphic_background.getX() +
+				(system_meter_graphic_background.getWidth() * system_peak_level_proportion) -
+				(system_meter_graphic_peak_level.getWidth() / 2));
+			
+			g.fillRect(system_meter_graphic_peak_level);
+
+		}
+		
 	}
 
 	void resized() override
