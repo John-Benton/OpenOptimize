@@ -186,11 +186,12 @@ void MainContentComponent::update_controls_trace_arrays_for_saving(){
 
 void MainContentComponent::update_meters() {
 
-	main_settings_bar.main_spl_meter.raw_input_level = supervisor1->current_system_samples_RMS;
+	main_settings_bar.main_spl_meter.system_rms_input_level_linear = supervisor1->current_system_samples_RMS;
 
-	main_level_meters.raw_ref_input_level = supervisor1->current_ref_samples_RMS;
-
-	main_level_meters.raw_system_input_level = supervisor1->current_system_samples_RMS;
+	main_level_meters.ref_rms_input_level_linear = supervisor1->current_ref_samples_RMS;
+	main_level_meters.ref_peak_input_level_linear = supervisor1->current_ref_samples_peak;
+	main_level_meters.system_rms_input_level_linear = supervisor1->current_system_samples_RMS;
+	main_level_meters.system_peak_input_level_linear = supervisor1->current_system_samples_peak;
 
 }
 

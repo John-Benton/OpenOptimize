@@ -29,26 +29,22 @@ public:
 	Rectangle<int> ref_meter_graphics_region;
 	Rectangle<int> system_meter_graphics_region;
 	Rectangle<int> ref_meter_graphic_background;
-	Rectangle<int> ref_meter_graphic_mask;
+	Rectangle<int> ref_meter_graphic_rms_level;
 	Rectangle<int> system_meter_graphic_background;
-	Rectangle<int> system_meter_graphic_mask;
+	Rectangle<int> system_meter_graphic_rms_level;
 	Rectangle<int> numeric_display_region;
 	Rectangle<int> ref_numeric_display_region;
 	Rectangle<int> system_numeric_display_region;
 
-	double raw_ref_input_level = 0.0;
-	
-	double current_ref_input_level_dBFS = -96.0;
+	double ref_rms_input_level_linear = 0.0;
+	double ref_peak_input_level_linear = 0.0;
+	double current_ref_rms_input_level_dBFS = -96.0;
+	double current_ref_peak_input_level_dBFS = -96.0;
 
-	double display_ref_input_level_dBFS = -96.0;
-
-	double raw_system_input_level = 0.0;
-
-	double current_system_input_level_dBFS = -96.0;
-
-	double display_system_input_level_dBFS = -96.0;
-
-	double meter_rate_of_change = 0.1;
+	double system_rms_input_level_linear = 0.0;
+	double system_peak_input_level_linear = 0.0;
+	double current_system_rms_input_level_dBFS = -96.0;
+	double current_system_peak_input_level_dBFS = -96.0;
 
 	level_meters()
 	{
@@ -60,10 +56,8 @@ public:
 
 	void paint(Graphics& g) override
 	{
-		
+
 		calc_input_levels();
-		
-		update_display_levels();
 
 		g.fillAll(Colour(30, 30, 30));
 
@@ -75,9 +69,9 @@ public:
 
 		g.drawFittedText("System Input Level", system_meter_text_region, Justification::centred, 1);
 
-		std::string display_ref_input_level_str = std::to_string(display_ref_input_level_dBFS);
+		std::string display_ref_input_level_str = std::to_string(current_ref_rms_input_level_dBFS);
 
-		std::string display_system_input_level_str = std::to_string(display_system_input_level_dBFS);
+		std::string display_system_input_level_str = std::to_string(current_system_rms_input_level_dBFS);
 
 		display_ref_input_level_str = display_ref_input_level_str.substr(0, 5);
 
@@ -87,41 +81,20 @@ public:
 
 		g.drawFittedText(display_system_input_level_str, system_numeric_display_region, Justification::centred, 1);
 
-		//Two ways to draw these meters are below. Will investigate which is less expensive
-
-		ref_meter_graphic_mask = ref_meter_graphic_background.translated(ref_meter_graphic_background.getWidth() *
-			dbFS_to_mask_offset_percent(display_ref_input_level_dBFS),
-			0.0);
-
-		system_meter_graphic_mask.setX(
-			
-			system_meter_graphic_background.getX()
-			
-			+ system_meter_graphic_background.getWidth() * dbFS_to_mask_offset_percent(display_system_input_level_dBFS));
-
-		g.setColour(Colour(66, 162, 200));
+		g.setColour(Colour(38, 50, 56));
 
 		g.fillRect(ref_meter_graphic_background);
 		g.fillRect(system_meter_graphic_background);
 
-		g.setColour(Colour(38, 50, 56));
+		g.setColour(Colour(66, 162, 200));
+		
+		double ref_rms_level_proportion = 1 - (current_ref_rms_input_level_dBFS / -96.0);
+		ref_meter_graphic_rms_level = ref_meter_graphic_background.withWidth(ref_meter_graphic_background.getWidth()*ref_rms_level_proportion);
+		g.fillRect(ref_meter_graphic_rms_level);
 
-		g.saveState();
-
-		g.reduceClipRegion(ref_meter_graphic_background);
-
-		g.fillRect(ref_meter_graphic_mask);
-
-		g.restoreState();
-
-		g.saveState();
-
-		g.reduceClipRegion(system_meter_graphic_background);
-
-		g.fillRect(system_meter_graphic_mask);
-
-		g.restoreState();
-
+		double system_rms_level_proportion = 1 - (current_system_rms_input_level_dBFS / -96.0);
+		system_meter_graphic_rms_level = system_meter_graphic_background.withWidth(system_meter_graphic_background.getWidth()*system_rms_level_proportion);
+		g.fillRect(system_meter_graphic_rms_level);
 	}
 
 	void resized() override
@@ -149,10 +122,6 @@ public:
 			
 			system_meter_graphics_region.getHeight()*0.25);
 
-		ref_meter_graphic_mask = ref_meter_graphic_background;
-
-		system_meter_graphic_mask = system_meter_graphic_background;
-
 		numeric_display_region = component_outline;
 
 		ref_numeric_display_region = numeric_display_region.removeFromTop(numeric_display_region.getHeight()*0.5);
@@ -169,45 +138,16 @@ public:
 
 	void calc_input_levels() {
 
-		current_ref_input_level_dBFS = Decibels::gainToDecibels(raw_ref_input_level, -96.0);
+		current_ref_rms_input_level_dBFS = Decibels::gainToDecibels(ref_rms_input_level_linear, -96.0);
+		current_ref_peak_input_level_dBFS = Decibels::gainToDecibels(ref_peak_input_level_linear, -96.0);
 
-		current_system_input_level_dBFS = Decibels::gainToDecibels(raw_system_input_level, -96.0);
-
-	}
-
-	void update_display_levels() {
-
-		if (display_ref_input_level_dBFS > current_ref_input_level_dBFS) {
-
-			display_ref_input_level_dBFS = display_ref_input_level_dBFS - 
-				
-				(abs(display_ref_input_level_dBFS - current_ref_input_level_dBFS)*meter_rate_of_change);
-
-		}
-
-		if (display_ref_input_level_dBFS < current_ref_input_level_dBFS) {
-
-			display_ref_input_level_dBFS = current_ref_input_level_dBFS;
-
-		}
-
-		if (display_system_input_level_dBFS > current_system_input_level_dBFS) {
-
-			display_system_input_level_dBFS = display_system_input_level_dBFS - 
-				
-				(abs(display_system_input_level_dBFS - current_system_input_level_dBFS)*meter_rate_of_change);
-
-		}
-
-		if (display_system_input_level_dBFS < current_system_input_level_dBFS) {
-
-			display_system_input_level_dBFS = current_system_input_level_dBFS;
-
-		}
+		current_system_rms_input_level_dBFS = Decibels::gainToDecibels(system_rms_input_level_linear, -96.0);
+		current_system_peak_input_level_dBFS = Decibels::gainToDecibels(system_peak_input_level_linear, -96.0);
 
 	}
 	
 private:
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(level_meters)
 
 };

@@ -74,11 +74,13 @@ public:
 	double current_ref_samples_squared_sum;
 	double current_ref_samples_squared_mean;
 	double current_ref_samples_RMS;
+	double current_ref_samples_peak;
 
 	std::vector<double> current_system_samples_squared;
 	double current_system_samples_squared_sum;
 	double current_system_samples_squared_mean;
 	double current_system_samples_RMS;
+	double current_system_samples_peak;
 
 	/*---------------------------------------------------*/
 
@@ -952,13 +954,14 @@ private:
 		current_ref_samples_squared_sum = std::accumulate(current_ref_samples_squared.begin(), current_ref_samples_squared.end(), 0.0);
 		current_system_samples_squared_sum = std::accumulate(current_system_samples_squared.begin(), current_system_samples_squared.end(), 0.0);
 
-
 		current_system_samples_squared_mean = current_system_samples_squared_sum / current_system_samples_squared.size();
 		current_ref_samples_squared_mean = current_ref_samples_squared_sum / current_ref_samples_squared.size();
 
 		current_ref_samples_RMS = std::sqrt(current_ref_samples_squared_mean);
 		current_system_samples_RMS = std::sqrt(current_system_samples_squared_mean);
 
+		current_ref_samples_peak = *std::max_element(current_ref_samples.begin(), current_ref_samples.end());
+		current_system_samples_peak = *std::max_element(current_system_samples.begin(), current_system_samples.end());
 	}
 
 };

@@ -22,7 +22,7 @@ public:
 
 	int spl_meter_weighting = 0; //0 is Z, 1 is C, 2 is A,
 	
-	double raw_input_level = 0.0;
+	double system_rms_input_level_linear = 0.0;
 
 	double raw_spl_dB = 0.0;
 
@@ -293,7 +293,7 @@ public:
 
 	void calc_uncalibrated_spl() {
 
-		raw_spl_dB = Decibels::gainToDecibels(raw_input_level, -96.0) + dBFS_offset;
+		raw_spl_dB = Decibels::gainToDecibels(system_rms_input_level_linear, -96.0) + dBFS_offset;
 
 	}
 
