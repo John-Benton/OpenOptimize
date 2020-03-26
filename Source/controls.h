@@ -306,11 +306,14 @@ public:
 		left_column_row_2 = left_column.removeFromTop(controls_height * 0.25);
 		left_column_row_2_active = left_column_row_2.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
 		left_column_row_2_active_left = left_column_row_2_active.removeFromLeft(left_column_row_2_active.getWidth() * 0.6);
+		left_column_row_2_active.setLeft(left_column_row_2_active.getX() + left_column_row_2_active.getWidth()*0.05);
 		left_column_row_2_active_right = left_column_row_2_active;
+
 		
 		left_column_row_3 = left_column.removeFromTop(controls_height * 0.25);
 		left_column_row_3_active = left_column_row_3.reduced(active_horizontal_padding_pixels, active_vertical_padding_pixels);
 		left_column_row_3_active_left = left_column_row_3_active.removeFromLeft(left_column_row_3_active.getWidth() * 0.6);
+		left_column_row_3_active.setLeft(left_column_row_3_active.getX() + left_column_row_3_active.getWidth()*0.05);
 		left_column_row_3_active_right = left_column_row_3_active;
 
 		left_column_row_4 = left_column.removeFromTop(controls_height * 0.25);
