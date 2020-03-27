@@ -30,21 +30,7 @@ public:
 
 	void draw_custom_overlay(Graphics& g) override
 	{
-		if (sample_rate_incorrect == true) {
-
-			g.setColour(Colours::black);
-			g.fillRect(plot_area);
-
-			g.setColour(Colours::white);
-			g.setFont(plot_area.getHeight()*0.05);
-			g.drawFittedText(
-				"SAMPLE RATE INCORRECT. PLEASE SET SAMPLE RATE TO 48000 Hz USING AUDIO INPUT SETUP WINDOW.",
-				plot_area.reduced(plot_area.getWidth()*0.10),
-				Justification::centred,
-				2);
-
-		}
-
+		
 		if (mod_line_visible == true) {
 
 			Rectangle<int> mod_rect{
@@ -76,8 +62,6 @@ public:
 
 		return std::vector<int> {left_edge_x, right_edge_x, bottom_edge_y, top_edge_y};
 	}
-	
-	bool sample_rate_incorrect{ true };
 
 	bool mod_line_visible{ false };
 
@@ -101,7 +85,7 @@ public:
 	std::vector<float> loaded_composite_xfer_function_phase_deg_avg;
 	std::vector<float> loaded_composite_coherence_value;
 
-	bool sample_rate_incorrect_warning{ false }, saved_traces_visible{ false };
+	bool saved_traces_visible{ false };
 	
     plots()
     {
@@ -307,9 +291,7 @@ public:
 			xfer_function_plot.mod_line_visible = false;
 
 		}
-		
-		xfer_function_plot.sample_rate_incorrect = sample_rate_incorrect_warning;
-		//xfer_function_plot.repaint();
+
 		fetch_screen_to_data_values();
 		update_mod_strings();
 		

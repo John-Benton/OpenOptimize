@@ -168,7 +168,7 @@ public:
 		current_system_samples_squared.resize(largest_fft_size);
 
 		assemble_composite_fft_bin_frequencies();
-				
+	
 		startTimer(1000/analyser_update_rate_hz);
 
 		composite_ref_autospectrum_data_history.set_num_histories(num_averages);
@@ -626,6 +626,8 @@ private:
 		
 		}
 	}
+	
+	//below is the old method for calculating the system spectrum, which used a composite of the different fft sizes
 
 	//void calc_system_spectrum() {
 
@@ -859,84 +861,13 @@ private:
 
 	void interpolate_curve(
 		
-		std::vector<double> & original_frequencies, 
-		std::vector<double> & original_amplitudes, 
-		std::vector<double> & interpolated_amplitudes) {
+		std::vector<double> &original_frequencies, 
+		std::vector<double> &original_amplitudes, 
+		std::vector<double> &interpolated_amplitudes) {
 
-		for (int x = 0; x < composite_fft_bins; x++) {
+		for (int point = 0; point < interpolated_amplitudes.size(); point++) {
 
-			if (composite_fft_bin_frequencies[x] < original_frequencies[0]) {
-
-				interpolated_amplitudes[x] = original_amplitudes[0];
-
-			}
-
-			if (composite_fft_bin_frequencies[x] > original_frequencies[original_frequencies.size() - 1]) {
-
-				interpolated_amplitudes[x] = original_amplitudes[original_amplitudes.size() - 1];
-
-			}
-
-			if (composite_fft_bin_frequencies[x] >= original_frequencies[0] &&
-				composite_fft_bin_frequencies[x] <= original_frequencies[original_frequencies.size() - 1]) {
-
-				int composite_fft_bin_frequency = composite_fft_bin_frequencies[x];
-
-				int current_pos = 0;
-				int x0_pos = 0;
-				int x1_pos = 0;
-
-				while (1) {
-
-					current_pos++;
-
-					if (original_frequencies[current_pos] > composite_fft_bin_frequency) {
-
-						x1_pos = current_pos;
-
-						break;
-
-					}
-					
-					if (current_pos >= original_frequencies.size() - 1) {
-
-						x1_pos = original_frequencies.size() - 1;
-
-						break;
-
-					}
-					
-				}
-
-				while (1) {
-
-					current_pos--;
-
-					if (original_frequencies[current_pos] < composite_fft_bin_frequency) {
-
-						x0_pos = current_pos;
-
-						break;
-
-					}
-
-					if (current_pos <= 0) {
-
-						x0_pos = 0;
-
-						break;
-
-					}
-					
-				}
-
-				interpolated_amplitudes[x] = original_amplitudes[x0_pos] +
-
-					(composite_fft_bin_frequency - original_frequencies[x0_pos])*
-
-					((original_amplitudes[x1_pos] - original_amplitudes[x0_pos]) / (original_frequencies[x1_pos] - original_frequencies[x0_pos]));
-
-			}
+			interpolated_amplitudes[point] = linear_interpolator::interpolate<double>(original_frequencies, original_amplitudes, composite_fft_bin_frequencies[point]);
 
 		}
 

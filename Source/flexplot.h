@@ -615,8 +615,6 @@ protected:
 
 		else {}
 
-		//repaint();
-
 	}
 
 	void calculate_actual_min_max() {

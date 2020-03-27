@@ -39,8 +39,8 @@ public:
 		
 		for (int bin = 0; bin < ifft_num_input_bins; bin++) {
 
-			input_freq_response[bin][0] = complex_freq_response_data[0][bin]; //real data
-			input_freq_response[bin][1] = complex_freq_response_data[1][bin]; //imag data
+			input_freq_response[bin][0] = complex_freq_response_data[0][bin]; //real part
+			input_freq_response[bin][1] = complex_freq_response_data[1][bin]; //imaginary part
 
 		}
 

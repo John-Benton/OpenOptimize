@@ -99,24 +99,10 @@ public:
     void paint (Graphics& g) override
     {
 		
-		selected_delay_in_milliseconds = ((delay_in_samples*1.0) / (sample_rate*1.0))*1000.0;
+		double delay_in_milliseconds = ((delay_in_samples*1.0) / (sample_rate*1.0))*1000.0;
 
-		std::string delay_in_milliseconds_str = std::to_string(selected_delay_in_milliseconds);
-		
-		if (selected_delay_in_milliseconds < 10.0) {
-			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 4);
-		}
-
-		if (selected_delay_in_milliseconds >= 10.0 && selected_delay_in_milliseconds < 100.0) {
-			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 5);
-		}
-
-		if (selected_delay_in_milliseconds >= 100.0) {
-			delay_in_milliseconds_str = delay_in_milliseconds_str.substr(0, 6);
-		}
-
-		delay_samples_label.setText(std::to_string(delay_in_samples), dontSendNotification);
-		delay_msec_label.setText(delay_in_milliseconds_str, dontSendNotification);
+		delay_samples_label.setText(String(int(delay_in_samples)), dontSendNotification);
+		delay_msec_label.setText(String(delay_in_milliseconds,2,false), dontSendNotification);
 
     }
 
@@ -261,8 +247,6 @@ public:
 	}
 	
 private:
-	
-	float selected_delay_in_milliseconds{ 0.0 };
 
 	int padding_pix{ 5 };
 

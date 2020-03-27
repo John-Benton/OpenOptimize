@@ -42,11 +42,13 @@ public:
 	double ref_peak_input_level_linear = 0.0;
 	double current_ref_rms_input_level_dBFS = -96.0;
 	double current_ref_peak_input_level_dBFS = -96.0;
+	String display_ref_input_level_str;
 
 	double system_rms_input_level_linear = 0.0;
 	double system_peak_input_level_linear = 0.0;
 	double current_system_rms_input_level_dBFS = -96.0;
 	double current_system_peak_input_level_dBFS = -96.0;
+	String display_system_input_level_str;
 
 	bool peak_bar_enabled = false;
 
@@ -73,16 +75,18 @@ public:
 
 		g.drawFittedText("System Input Level", system_meter_text_region, Justification::centred, 1);
 
-		std::string display_ref_input_level_str = std::to_string(current_ref_rms_input_level_dBFS);
+		//std::string display_ref_input_level_str = std::to_string(current_ref_rms_input_level_dBFS);
 
-		std::string display_system_input_level_str = std::to_string(current_system_rms_input_level_dBFS);
+		//std::string display_system_input_level_str = std::to_string(current_system_rms_input_level_dBFS);
 
-		display_ref_input_level_str = display_ref_input_level_str.substr(0, 5);
+		//display_ref_input_level_str = display_ref_input_level_str.substr(0, 5);
 
-		display_system_input_level_str = display_system_input_level_str.substr(0, 5);
+		//display_system_input_level_str = display_system_input_level_str.substr(0, 5);
+
+		display_ref_input_level_str = String(current_ref_rms_input_level_dBFS, 1, false);
+		display_system_input_level_str = String(current_system_rms_input_level_dBFS, 1, false);
 
 		g.drawFittedText(display_ref_input_level_str, ref_numeric_display_region, Justification::centred, 1);
-
 		g.drawFittedText(display_system_input_level_str, system_numeric_display_region, Justification::centred, 1);
 
 		g.setColour(Colour(38, 50, 56));

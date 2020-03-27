@@ -461,8 +461,6 @@ public:
 
 				replace(fixed_system_curve_file_path.begin(), fixed_system_curve_file_path.end(), bad_char, good_char);
 
-				//repaint();
-
 			}
 
 			sendActionMessage("cmd_update_supervisor");

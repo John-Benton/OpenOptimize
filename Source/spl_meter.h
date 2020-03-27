@@ -71,7 +71,7 @@ public:
 
 		addAndMakeVisible(spl_meter_label);
 
-		addAndMakeVisible(spl_meter_reading_text);
+		addAndMakeVisible(spl_meter_reading_label);
 
 		addAndMakeVisible(spl_uncal_label);
 
@@ -92,14 +92,14 @@ public:
 
 		spl_weight_z_label.setText("dB(Z)", dontSendNotification);
 
-		spl_meter_reading_text.setJustificationType(Justification::centred);
+		spl_meter_reading_label.setJustificationType(Justification::centred);
 		spl_meter_label.setJustificationType(Justification::centred);
 
 		spl_uncal_label.setJustificationType(Justification::centred);
 
 		spl_weight_z_label.setJustificationType(Justification::centred);
 
-		spl_meter_reading_text.setColour(Label::backgroundColourId, Colours::black);
+		spl_meter_reading_label.setColour(Label::backgroundColourId, Colours::black);
 
 		spl_uncal_label.setColour(Label::textColourId, Colours::red);
 				
@@ -160,21 +160,9 @@ public:
 		
 		update_display_spl();
 
-		spl_display_value_string = String(display_spl_dB);
+		spl_display_value_string = String(display_spl_dB, 1, false);
 
-		if (display_spl_dB < 0.0) {
-			spl_display_value_string = spl_display_value_string.substring(0, 5);
-		}
-		
-		if (display_spl_dB < 100.0 && display_spl_dB >= 0.0) {
-			spl_display_value_string = spl_display_value_string.substring(0, 4);
-		}
-
-		if (display_spl_dB >= 100.0) {
-			spl_display_value_string = spl_display_value_string.substring(0, 3);
-		}
-
-		spl_meter_reading_text.setText(spl_display_value_string, dontSendNotification);
+		spl_meter_reading_label.setText(spl_display_value_string, dontSendNotification);
 		
 		if (spl_calibration_offset != 0.0) {
 
@@ -216,7 +204,7 @@ public:
 		right_column_row_3_active = right_column_row_3.reduced(horizontal_padding_pixels, vertical_padding_pixels);
 		right_column_row_4_active = right_column_row_4.reduced(horizontal_padding_pixels, vertical_padding_pixels);
 
-		spl_meter_reading_text.setBounds(left_column_row_1_active);
+		spl_meter_reading_label.setBounds(left_column_row_1_active);
 
 		spl_uncal_label.setBounds(
 			left_column_row_1_active.getX(),
@@ -236,9 +224,8 @@ public:
 		slow_time_button.setBounds(right_column_row_3_active);
 		fast_time_button.setBounds(right_column_row_4_active);
 
-		spl_meter_reading_text.setFont(spl_meter_reading_text.getHeight()*0.75);
+		spl_meter_reading_label.setFont(spl_meter_reading_label.getHeight()*0.65);
 		spl_meter_label.setFont(spl_meter_label.getHeight());
-
 		spl_uncal_label.setFont(spl_uncal_label.getHeight()*0.75);
 		spl_weight_z_label.setFont(spl_weight_z_label.getHeight()*0.75);
 		
@@ -361,7 +348,7 @@ private:
 	TextButton fast_time_button;
 	DialogWindow::LaunchOptions spl_calibration_window;
 	spl_cal spl_calibration_component;
-	Label spl_meter_reading_text;
+	Label spl_meter_reading_label;
 	Label spl_meter_label;
 	Label spl_uncal_label;
 	Label spl_weight_z_label;

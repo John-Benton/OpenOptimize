@@ -46,7 +46,6 @@ void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sam
 
 void MainContentComponent::getNextAudioBlock(const AudioSourceChannelInfo& audio_device_buffer)
 {
-	sample_rate_correct = true;
 	
 	const float* ref_in_device_buffer = audio_device_buffer.buffer->getReadPointer(0);
 	const float* system_in_device_buffer = audio_device_buffer.buffer->getReadPointer(1);
@@ -137,8 +136,6 @@ void MainContentComponent::update_current_plot_data() {
 	supervisor1->plot_data_mtx_supervisor.unlock();
 
 	ir_window.update_ir_plot_data(supervisor1->impulse_response_time_samples);
-
-	main_plot.sample_rate_incorrect_warning = !sample_rate_correct;
 
 }
 

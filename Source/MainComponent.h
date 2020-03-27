@@ -28,7 +28,7 @@ public:
 
 	int num_samples_stored = 0;
 
-	int update_rate = 30; //In Hz
+	int update_rate = 30; //UI redraw rate, in Hz
 
 	MainContentComponent();
 
@@ -92,9 +92,7 @@ private:
 
 	DialogWindow::LaunchOptions ir_window_config;
 
-	bool data_update_active{ false }, sample_rate_correct{ true };
-
-	OpenGLContext gl_renderer;
+	bool data_update_active{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainContentComponent)
 
