@@ -112,7 +112,7 @@ public:
 
 	int smoothing_average_size{ 3 }, smoothing_passes{ 0 };
 
-	float spectrum_offset_db{ 0.0 };
+	float spectrum_offset_db{10.0};
 
 	bool curves_only{ false };
 
