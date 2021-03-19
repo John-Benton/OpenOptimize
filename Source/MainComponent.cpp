@@ -193,15 +193,13 @@ void MainContentComponent::update_meters() {
 }
 
 void MainContentComponent::open_audio_io_window() {
-		
-	OptionalScopedPointer<Component> audio_io_config_window_content_ptr{ &audio_device_selector_component, 0 };
+
+	audio_io_config_window.content.set(&audio_device_selector_component, 0);
 
 	audio_io_config_window.dialogTitle = "Audio Input Setup";
 
 	audio_io_config_window.dialogBackgroundColour = Colours::darkgrey;
-
-	audio_io_config_window.content = audio_io_config_window_content_ptr;
-
+	
 	audio_io_config_window.componentToCentreAround = NULL;
 
 	audio_io_config_window.escapeKeyTriggersCloseButton = true;
@@ -219,11 +217,9 @@ void MainContentComponent::open_audio_io_window() {
 void MainContentComponent::open_ir_window()
 {
 
-	OptionalScopedPointer<Component> ir_window_content_ptr{ & ir_window, 0 };
+	ir_window_config.content.set(&ir_window, 0);
 
 	ir_window_config.dialogTitle = "System Impulse Response";
-
-	ir_window_config.content = ir_window_content_ptr;
 
 	ir_window_config.componentToCentreAround = NULL;
 

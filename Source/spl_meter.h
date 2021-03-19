@@ -316,13 +316,11 @@ public:
 
 		spl_calibration_component.set_offset_locations(&spl_calibration_offset, &raw_spl_dB);
 
-		OptionalScopedPointer<Component> spl_calibration_component_ptr{ &spl_calibration_component, 0 };
+		spl_calibration_window.content.set(&spl_calibration_component, 0);
 
 		spl_calibration_window.dialogTitle = "SPL Calibration";
 
-		spl_calibration_window.dialogBackgroundColour = Colours::darkgrey;
-
-		spl_calibration_window.content = spl_calibration_component_ptr;
+		spl_calibration_window.dialogBackgroundColour = Colours::darkgrey;	
 
 		spl_calibration_window.componentToCentreAround = NULL;
 
